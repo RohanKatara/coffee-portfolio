@@ -27,9 +27,9 @@ export default function MachineScene() {
 
   return (
     <group ref={groupRef} visible={isVisible}>
-      <EspressoMachine visible />
+      <EspressoMachine visible={isVisible} />
       <ProjectButtons visible={showButtons} />
-      <CoffeePour visible />
+      <CoffeePour visible={isVisible} />
     </group>
   )
 }

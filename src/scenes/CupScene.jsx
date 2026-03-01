@@ -23,7 +23,7 @@ export default function CupScene() {
 
   return (
     <group ref={groupRef} visible={isVisible}>
-      <CoffeeCup visible />
+      <CoffeeCup visible={isVisible} />
     </group>
   )
 }

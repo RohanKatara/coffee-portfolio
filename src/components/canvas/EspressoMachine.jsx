@@ -1,17 +1,16 @@
-import { Suspense } from 'react'
-import { useGLTF } from '@react-three/drei'
-import ModelErrorBoundary from './ModelErrorBoundary'
-
-useGLTF.preload('/models/espresso-machine.glb')
-
-function EspressoMachineModel({ visible }) {
-  const gltf = useGLTF('/models/espresso-machine.glb')
-  return (
-    <group position={[0, -1.5, 0]} visible={visible}>
-      <primitive object={gltf.scene} />
-    </group>
-  )
-}
+// TODO: uncomment when espresso-machine.glb is added to public/models/
+// import { Suspense } from 'react'
+// import { useGLTF } from '@react-three/drei'
+// import ModelErrorBoundary from './ModelErrorBoundary'
+// useGLTF.preload('/models/espresso-machine.glb')
+// function EspressoMachineModel({ visible }) {
+//   const gltf = useGLTF('/models/espresso-machine.glb')
+//   return (
+//     <group position={[0, -1.5, 0]} visible={visible}>
+//       <primitive object={gltf.scene} />
+//     </group>
+//   )
+// }
 
 function EspressoMachinePlaceholder({ visible }) {
   return (
@@ -44,12 +43,7 @@ function EspressoMachinePlaceholder({ visible }) {
   )
 }
 
+// Render placeholder directly until espresso-machine.glb is available
 export default function EspressoMachine({ visible = true }) {
-  return (
-    <ModelErrorBoundary fallback={<EspressoMachinePlaceholder visible={visible} />}>
-      <Suspense fallback={<EspressoMachinePlaceholder visible={visible} />}>
-        <EspressoMachineModel visible={visible} />
-      </Suspense>
-    </ModelErrorBoundary>
-  )
+  return <EspressoMachinePlaceholder visible={visible} />
 }

@@ -1,11 +1,26 @@
-import { useRef, Suspense } from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import useSceneStore from '../../store/useSceneStore'
-import ModelErrorBoundary from './ModelErrorBoundary'
 
-useGLTF.preload('/models/coffee-cup.glb')
+// TODO: uncomment when coffee-cup.glb is added to public/models/
+// import { Suspense } from 'react'
+// import { useGLTF } from '@react-three/drei'
+// import ModelErrorBoundary from './ModelErrorBoundary'
+// useGLTF.preload('/models/coffee-cup.glb')
+// function CoffeeCupModel({ visible }) {
+//   const gltf = useGLTF('/models/coffee-cup.glb')
+//   const fillRef = useFillRef()
+//   return (
+//     <group position={[0, -1.5, 0]} visible={visible}>
+//       <primitive object={gltf.scene} />
+//       <mesh ref={fillRef} position={[0, -0.065, 0]} scale={[1, 0, 1]} visible={false}>
+//         <cylinderGeometry args={[0.082, 0.065, 0.13, 32]} />
+//         <meshStandardMaterial color="#3d1a00" roughness={0.4} metalness={0.05} />
+//       </mesh>
+//     </group>
+//   )
+// }
 
 function useFillRef() {
   const fillRef = useRef(null)
@@ -16,20 +31,6 @@ function useFillRef() {
     fillRef.current.visible = amount > 0.01
   })
   return fillRef
-}
-
-function CoffeeCupModel({ visible }) {
-  const gltf = useGLTF('/models/coffee-cup.glb')
-  const fillRef = useFillRef()
-  return (
-    <group position={[0, -1.5, 0]} visible={visible}>
-      <primitive object={gltf.scene} />
-      <mesh ref={fillRef} position={[0, -0.065, 0]} scale={[1, 0, 1]} visible={false}>
-        <cylinderGeometry args={[0.082, 0.065, 0.13, 32]} />
-        <meshStandardMaterial color="#3d1a00" roughness={0.4} metalness={0.05} />
-      </mesh>
-    </group>
-  )
 }
 
 function CoffeeCupPlaceholder({ visible }) {
@@ -61,12 +62,7 @@ function CoffeeCupPlaceholder({ visible }) {
   )
 }
 
+// Render placeholder directly until coffee-cup.glb is available
 export default function CoffeeCup({ visible = true }) {
-  return (
-    <ModelErrorBoundary fallback={<CoffeeCupPlaceholder visible={visible} />}>
-      <Suspense fallback={<CoffeeCupPlaceholder visible={visible} />}>
-        <CoffeeCupModel visible={visible} />
-      </Suspense>
-    </ModelErrorBoundary>
-  )
+  return <CoffeeCupPlaceholder visible={visible} />
 }

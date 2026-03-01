@@ -12,12 +12,24 @@ function CharacterModel({ visible }) {
   const gltf = useGLTF('/models/barista.glb')
   const { actions } = useAnimations(gltf.animations, groupRef)
 
-  // Enable shadows on every mesh inside the loaded model
+  // Enable shadows and strip export artifacts from the GLB
   useEffect(() => {
+    // Keywords that identify non-character meshes baked in by export tools
+    const ARTIFACT_KEYWORDS = [
+      'stage', 'ground', 'floor', 'base', 'platform', 'cube', 'box',
+      'background', 'backdrop', 'bound', 'collision', 'hitbox', 'pedestal',
+      'counter', 'prop', 'scenery', 'plane', 'grid',
+    ]
+
     gltf.scene.traverse((node) => {
-      if (node.isMesh) {
-        node.castShadow = true
-        node.receiveShadow = true
+      if (!node.isMesh) return
+      node.castShadow = true
+      node.receiveShadow = true
+
+      const nameLower = node.name.toLowerCase()
+      const isArtifact = ARTIFACT_KEYWORDS.some((k) => nameLower.includes(k))
+      if (isArtifact) {
+        node.visible = false
       }
     })
   }, [gltf.scene])
