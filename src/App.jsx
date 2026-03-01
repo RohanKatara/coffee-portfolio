@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
+import { PCFSoftShadowMap } from 'three'
+import { EffectComposer, SMAA, N8AO, Bloom } from '@react-three/postprocessing'
 
 // Draco decoder path for compressed GLB models
 useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
@@ -23,6 +25,15 @@ import BackButton from './components/ui/BackButton'
  *   - Single <Canvas> persists across all scenes (no WebGL context destruction)
  *   - All scene groups stay mounted; visibility toggled via GSAP opacity tweens
  *   - HTML UI overlays sit above the canvas via z-index, driven by Zustand scene state
+ *
+ * Post-processing stack (EffectComposer):
+ *   - N8AO  : ambient occlusion — grounds objects, fills creases with shadow
+ *   - SMAA  : anti-aliasing — replaces native AA, works correctly post-processing
+ *   - Bloom : subtle warm glow on bright/emissive regions
+ *
+ * Shadow config:
+ *   - PCFSoftShadowMap via onCreated — softer shadow edges than default PCF
+ *   - Native antialias disabled (gl.antialias=false) because SMAA handles it
  */
 export default function App() {
   return (
@@ -32,12 +43,15 @@ export default function App() {
         dpr={[1, 2]}
         camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0.5, 5] }}
         shadows
-        gl={{ antialias: true, alpha: false }}
-        style={{ background: '#fdf6ee' }}
+        gl={{ antialias: false, alpha: false }}
+        style={{ background: '#1a0e08' }}
+        onCreated={({ gl }) => {
+          gl.shadowMap.type = PCFSoftShadowMap
+        }}
       >
         <Suspense fallback={null}>
-          {/* Scene background colour */}
-          <color attach="background" args={['#fdf6ee']} />
+          {/* Scene background — deep espresso */}
+          <color attach="background" args={['#1a0e08']} />
 
           {/* Camera — GSAP-driven transitions */}
           <SceneCamera />
@@ -50,6 +64,16 @@ export default function App() {
           <MachineScene />
           <CupScene />
         </Suspense>
+
+        {/* Post-processing — runs after all scenes render */}
+        <EffectComposer multisampling={0}>
+          {/* AO: soft occlusion in creases and where objects meet the floor */}
+          <N8AO aoRadius={0.3} intensity={1.2} distanceFalloff={0.5} quality="medium" />
+          {/* AA: SMAA is better than FXAA and works correctly in post-processed scenes */}
+          <SMAA />
+          {/* Bloom: very subtle — warm glow bleeds from bright key-lit surfaces */}
+          <Bloom intensity={0.35} luminanceThreshold={0.75} luminanceSmoothing={0.05} mipmapBlur />
+        </EffectComposer>
       </Canvas>
 
       {/* ── HTML Overlays (above canvas) ─────────────────────── */}

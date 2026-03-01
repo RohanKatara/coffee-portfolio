@@ -1,8 +1,13 @@
 import { useEffect, useRef } from 'react'
+import { LoopRepeat } from 'three'
 
 /**
- * Manages Mixamo animation sequencing for the greeting character.
- * Expected clip names in the GLB: 'Idle', 'Wave', 'WalkAway'
+ * Manages animation sequencing for the barista character.
+ *
+ * Clip name resolution (in priority order):
+ *   1. Exact match for 'Idle' / 'Wave' / 'WalkAway'
+ *   2. Case-insensitive substring match (e.g. 'idle', 'Idle_Stand')
+ *   3. First available clip as a last-resort idle fallback
  *
  * @param {object} actions  – from useAnimations({ actions })
  * @param {string} scene    – current scene string from useSceneStore
@@ -10,16 +15,36 @@ import { useEffect, useRef } from 'react'
 export function useCharacterAnimation(actions, scene) {
   const hasStarted = useRef(false)
   const timeoutRefs = useRef([])
+  // Cache resolved clip names so lookups stay stable
+  const clipNames = useRef({ idle: null, wave: null, walkAway: null })
 
   const clearTimeouts = () => {
     timeoutRefs.current.forEach(clearTimeout)
     timeoutRefs.current = []
   }
 
-  const crossFade = (from, to, duration = 0.3) => {
-    if (!actions[from] || !actions[to]) return
-    actions[from].fadeOut(duration)
-    actions[to].reset().setEffectiveWeight(1).fadeIn(duration).play()
+  // Find the best-matching action key for a desired semantic name
+  const resolve = (keys, semantic) => {
+    // 1. Exact match
+    if (keys.includes(semantic)) return semantic
+    // 2. Case-insensitive substring
+    const lower = semantic.toLowerCase()
+    const found = keys.find((k) => k.toLowerCase().includes(lower))
+    if (found) return found
+    return null
+  }
+
+  const crossFade = (fromKey, toKey, duration = 0.3) => {
+    const from = fromKey && actions[fromKey]
+    const to = toKey && actions[toKey]
+    if (!to) return
+    if (from) from.fadeOut(duration)
+    to.reset().setEffectiveWeight(1).fadeIn(duration).play()
+  }
+
+  const playLooped = (key) => {
+    if (!key || !actions[key]) return
+    actions[key].setLoop(LoopRepeat, Infinity).reset().setEffectiveWeight(1).play()
   }
 
   useEffect(() => {
@@ -27,34 +52,44 @@ export function useCharacterAnimation(actions, scene) {
     if (hasStarted.current) return
     hasStarted.current = true
 
-    // Play Idle immediately on mount
-    if (actions['Idle']) {
-      actions['Idle'].reset().setEffectiveWeight(1).play()
+    const keys = Object.keys(actions)
+
+    // Resolve semantic names once
+    clipNames.current.idle = resolve(keys, 'Idle') ?? keys[0] ?? null
+    clipNames.current.wave = resolve(keys, 'Wave')
+    clipNames.current.walkAway = resolve(keys, 'WalkAway')
+
+    const { idle, wave } = clipNames.current
+
+    // Play idle immediately, looped
+    playLooped(idle)
+
+    // If a Wave clip exists, sequence it after 2 s then return to idle
+    if (wave) {
+      const t1 = setTimeout(() => {
+        crossFade(idle, wave)
+
+        const t2 = setTimeout(() => {
+          crossFade(wave, idle)
+          if (idle) playLooped(idle)
+        }, 2500)
+        timeoutRefs.current.push(t2)
+      }, 2000)
+      timeoutRefs.current.push(t1)
     }
-
-    // 2 s delay → wave
-    const t1 = setTimeout(() => {
-      crossFade('Idle', 'Wave')
-
-      // Wave lasts ~2.5 s then return to Idle
-      const t2 = setTimeout(() => {
-        crossFade('Wave', 'Idle')
-      }, 2500)
-      timeoutRefs.current.push(t2)
-    }, 2000)
-    timeoutRefs.current.push(t1)
 
     return clearTimeouts
   }, [actions]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When scene changes away from LANDING, trigger WalkAway
+  // When scene leaves LANDING, trigger WalkAway (or just fade out)
   useEffect(() => {
     if (scene !== 'LANDING' && scene !== 'LOADING') {
       clearTimeouts()
-      if (actions['WalkAway']) {
-        actions['Idle']?.fadeOut(0.3)
-        actions['Wave']?.fadeOut(0.3)
-        actions['WalkAway'].reset().setEffectiveWeight(1).fadeIn(0.3).play()
+      const { idle, wave, walkAway } = clipNames.current
+      actions[idle]?.fadeOut(0.3)
+      actions[wave]?.fadeOut(0.3)
+      if (walkAway) {
+        actions[walkAway].reset().setEffectiveWeight(1).fadeIn(0.3).play()
       }
     }
   }, [scene]) // eslint-disable-line react-hooks/exhaustive-deps
