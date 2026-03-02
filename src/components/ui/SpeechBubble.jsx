@@ -43,22 +43,11 @@ export default function SpeechBubble() {
       <div className="float-ui">
 
         {/* Main heading */}
-        <p
-          style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
-            fontWeight: 800,
-            color: '#fff',
-            textShadow: '0 2px 28px rgba(0,0,0,0.65), 0 1px 4px rgba(0,0,0,0.5)',
-            lineHeight: 1.2,
-            marginBottom: '1.6rem',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          ☕ Welcome! Can I get you
-          <br />
-          <span style={{ color: '#d4915a' }}>a coffee?</span>
-        </p>
+        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+          <span style={{ color: '#c87f4c', fontWeight: 800, fontSize: '1.8rem', textShadow: '0px 4px 10px rgba(0,0,0,0.6)' }}>
+            Welcome! Can I get you a coffee?
+          </span>
+        </div>
 
         {/* CTA — styles live in index.css (.cta-button) */}
         <button className="cta-button" onClick={() => setScene('CINEMATIC_EXIT')}>

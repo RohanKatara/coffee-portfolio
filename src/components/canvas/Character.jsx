@@ -39,9 +39,10 @@ function CharacterModel({ visible }) {
   useMouseLook(groupRef, scene === 'LANDING')
 
   return (
-    // position y=-1.5 sits the model on the floor plane; scale may need
-    // tuning depending on the GLB's native unit (try 0.01 for cm exports)
-    <group ref={groupRef} position={[0, -1.5, 0]} scale={[1, 1, 1]} visible={visible}>
+    // z=-1.0 places the character behind the counter back face (z=-0.7).
+    // y=-1.5 sits their feet exactly on the floor plane behind the bar.
+    // scale may need tuning depending on the GLB's native unit (try 0.01 for cm exports)
+    <group ref={groupRef} position={[0, -1.5, -1.0]} scale={[1, 1, 1]} visible={visible}>
       <primitive object={gltf.scene} />
     </group>
   )
@@ -49,7 +50,7 @@ function CharacterModel({ visible }) {
 
 function CharacterPlaceholder({ visible }) {
   return (
-    <group position={[0, -0.5, 0]} visible={visible}>
+    <group position={[0, -0.5, -1.0]} visible={visible}>
       <mesh position={[0, 0.6, 0]} castShadow>
         <capsuleGeometry args={[0.18, 0.7, 8, 16]} />
         <meshStandardMaterial color="#d4a574" roughness={0.7} />

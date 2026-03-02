@@ -7,29 +7,33 @@
 
 export const CAMERA_POSITIONS = {
   LOADING: {
-    position: { x: 0, y: 0.3, z: 4.5 },
-    target:   { x: 0, y: 0.0, z: 0   },
+    // Camera raised to y=0.9 so the sight-line clears the counter top (y=-0.53).
+    // Target z=-0.8 looks toward the character standing behind the bar (z=-1.0).
+    position: { x: 0, y: 0.9, z: 4.5 },
+    target:   { x: 0, y: 0.2, z: -0.8 },
     duration: 0,
     ease: 'none',
   },
   // Start position for the cinematic pull-back on first load.
-  // Close to character's face, slightly off to the right.
+  // Camera is close in front of the counter, angled up slightly to frame
+  // the barista's face / upper chest behind the bar.
   LANDING_INTRO: {
-    position: { x: 0.4, y: 1.5, z: 1.0 },
-    target:   { x: 0,   y: 1.4, z: 0   },
+    position: { x: 0.4, y: 0.4, z: 1.0 },
+    target:   { x: 0,   y: 0.15, z: -1.0 },
   },
   LANDING: {
-    position: { x: 0, y: 0.3, z: 4.5 },
-    target:   { x: 0, y: 0.0, z: 0   },
+    // Matches LOADING so the initial placement is seamless.
+    position: { x: 0, y: 0.9, z: 4.5 },
+    target:   { x: 0, y: 0.2, z: -0.8 },
     duration: 0,
     ease: 'power2.out',
   },
   // Cinematic pan-past played between LANDING and MACHINE.
-  // Camera sweeps left while pushing forward, as if tracking the
-  // character walking away.  onComplete triggers the next scene.
+  // Camera sweeps left while pushing forward, tracking the character
+  // walking away behind the bar.  onComplete triggers the next scene.
   CINEMATIC_EXIT: {
     position: { x: -1.2, y: 0.5, z: 2.5 },
-    target:   { x: -0.3, y: 0.1, z: 0.0 },
+    target:   { x: -0.3, y: 0.1, z: -0.8 },
     duration: 2.2,
     ease: 'power2.inOut',
     onComplete: 'MACHINE',

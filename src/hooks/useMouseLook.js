@@ -2,25 +2,37 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MathUtils } from 'three'
 
-// How far (radians) the full bone chain can rotate in total
-const MAX_YAW         =  0.65   // ±~37° left / right
-const MAX_PITCH_UP    =  0.35   //  ~20° up
-const MAX_PITCH_DOWN  =  0.50   //  ~28° down
+// Maximum look angles in the smooth target space
+const MAX_YAW        = 0.40   // ±~23° left / right  (gentler than before)
+const MAX_PITCH_UP   = 0.22   //  ~13° up
+const MAX_PITCH_DOWN = 0.30   //  ~17° down
+
+// Hard clamp limits applied to the FINAL bone rotation after += so a bad
+// animation frame can never push a bone into an unnatural pose.
+const CLAMP_HEAD_YAW     =  0.50   // ±~29°
+const CLAMP_HEAD_PITCH_U = -0.38   // up   (negative x = look up in Mixamo rig)
+const CLAMP_HEAD_PITCH_D =  0.32   // down
+const CLAMP_NECK_YAW     =  0.40   // ±~23°
+const CLAMP_NECK_PITCH_U = -0.28
+const CLAMP_NECK_PITCH_D =  0.24
+const CLAMP_SPINE_YAW    =  0.14   // ±~8°  — spine barely moves
 
 // How quickly the bones chase the cursor (0 = frozen, 1 = instant)
-const LERP_SPEED = 0.07
+const LERP_SPEED = 0.055
 
 /**
  * Makes the character's head (and supporting bones) follow the cursor.
  *
- * Rotation is distributed across the chain so the movement reads naturally:
- *   Spine  → 15 % of yaw           (subtle body lean)
- *   Neck   → 45 % of yaw + 40 % of pitch
- *   Head   → 40 % of yaw + 60 % of pitch
+ * Weight distribution (must sum to 100 %):
+ *   Spine  → 12 % of yaw only      (very subtle body lean)
+ *   Neck   → 28 % of yaw + 20 % of pitch
+ *   Head   → 60 % of yaw + 80 % of pitch
  *
- * useFrame is registered at priority 1 so it runs *after* the AnimationMixer
- * (priority 0) writes its keyframe values.  Our rotations are then applied
- * additively on top of whatever the current animation frame set.
+ * Rotation strategy:
+ *   1. AnimationMixer (priority 0) writes keyframe values to bone quaternions.
+ *   2. This hook (priority 1) reads bone.rotation (auto-converted from quat),
+ *      ADDS a clamped offset, then immediately clamps the total so the
+ *      quat→Euler→quat round-trip cannot produce an out-of-range value.
  *
  * @param {React.MutableRefObject} groupRef  – ref attached to the character group
  * @param {boolean}                active    – pause tracking when false
@@ -55,7 +67,7 @@ export function useMouseLook(groupRef, active = true) {
         if (!node.isBone) return
         const n = node.name.toLowerCase()
 
-        if (!bonesRef.current.head && n.includes('head')) {
+        if (!bonesRef.current.head && n.includes('head') && !n.includes('top') && !n.includes('end')) {
           bonesRef.current.head = node
         }
         if (!bonesRef.current.neck && n.includes('neck')) {
@@ -90,35 +102,51 @@ export function useMouseLook(groupRef, active = true) {
     const cur = currentRef.current
     const { x: mx, y: my } = mouseRef.current
 
-    // ── Smooth targets ────────────────────────────────────────────────────
-    // Negative mx so the head turns *toward* the cursor (right cursor → head turns right)
-    const targetYaw = MathUtils.clamp(
-      -mx * MAX_YAW,
-      -MAX_YAW,
-      MAX_YAW,
-    )
-    // Positive my = cursor is lower on screen → head pitches down
-    const targetPitch = MathUtils.clamp(
-      my * MAX_PITCH_DOWN,
-      -MAX_PITCH_UP,
-      MAX_PITCH_DOWN,
-    )
+    // ── Smooth look targets ───────────────────────────────────────────────
+    // -mx: right cursor → head turns right (negative Y rotation for +Z-facing rig)
+    const targetYaw = MathUtils.clamp(-mx * MAX_YAW, -MAX_YAW, MAX_YAW)
+    // +my: cursor lower → head pitches down (positive X rotation)
+    const targetPitch = MathUtils.clamp(my * MAX_PITCH_DOWN, -MAX_PITCH_UP, MAX_PITCH_DOWN)
 
     cur.yaw   = MathUtils.lerp(cur.yaw,   targetYaw,   LERP_SPEED)
     cur.pitch = MathUtils.lerp(cur.pitch, targetPitch, LERP_SPEED)
 
-    // ── Apply additively on top of the animation frame ───────────────────
-    // (AnimationMixer already wrote its values; we just nudge them further)
+    // ── Apply with final hard clamps ─────────────────────────────────────
+    // We add our smoothed offset to whatever the AnimationMixer set this frame,
+    // then clamp the total to strict anatomical limits.  This prevents the
+    // quat→Euler conversion that happens inside rotation.y = ... from ever
+    // producing an out-of-range value that the next += would amplify.
+
     if (spine) {
-      spine.rotation.y += cur.yaw * 0.15
+      spine.rotation.y = MathUtils.clamp(
+        spine.rotation.y + cur.yaw * 0.12,
+        -CLAMP_SPINE_YAW,
+        CLAMP_SPINE_YAW,
+      )
     }
     if (neck) {
-      neck.rotation.y += cur.yaw   * 0.45
-      neck.rotation.x += cur.pitch * 0.40
+      neck.rotation.y = MathUtils.clamp(
+        neck.rotation.y + cur.yaw   * 0.28,
+        -CLAMP_NECK_YAW,
+        CLAMP_NECK_YAW,
+      )
+      neck.rotation.x = MathUtils.clamp(
+        neck.rotation.x + cur.pitch * 0.20,
+        CLAMP_NECK_PITCH_U,
+        CLAMP_NECK_PITCH_D,
+      )
     }
     if (head) {
-      head.rotation.y += cur.yaw   * 0.40
-      head.rotation.x += cur.pitch * 0.60
+      head.rotation.y = MathUtils.clamp(
+        head.rotation.y + cur.yaw   * 0.60,
+        -CLAMP_HEAD_YAW,
+        CLAMP_HEAD_YAW,
+      )
+      head.rotation.x = MathUtils.clamp(
+        head.rotation.x + cur.pitch * 0.80,
+        CLAMP_HEAD_PITCH_U,
+        CLAMP_HEAD_PITCH_D,
+      )
     }
   }, 1)
 }
