@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { ContactShadows, Environment } from '@react-three/drei'
+import BarMugs from './BarMugs'
 
 /**
  * Full 3D café environment.
@@ -136,40 +137,6 @@ function BistroChair({ x, z, ry = 0 }) {
       <mesh position={[0, 0.72, -0.12]} rotation={[0, 0, Math.PI / 2]} castShadow>
         <cylinderGeometry args={[0.011, 0.011, 0.24, 6]} />
         {mat}
-      </mesh>
-    </group>
-  )
-}
-
-// ─── Ceramic espresso cup + saucer ───────────────────────────────────────────
-// cy = world-space Y of the surface it sits on
-function CeramicCup({ x, z, cy, ry = 0 }) {
-  return (
-    <group position={[x, cy, z]} rotation={[0, ry, 0]}>
-      {/* Saucer */}
-      <mesh position={[0, 0.0075, 0]} castShadow>
-        <cylinderGeometry args={[0.090, 0.082, 0.015, 22]} />
-        <meshStandardMaterial {...M.ceramic} />
-      </mesh>
-      {/* Saucer well — darker indent */}
-      <mesh position={[0, 0.015, 0]}>
-        <cylinderGeometry args={[0.052, 0.050, 0.004, 18]} />
-        <meshStandardMaterial color="#cec4ba" roughness={0.4} />
-      </mesh>
-      {/* Cup body — tapered */}
-      <mesh position={[0, 0.058, 0]} castShadow>
-        <cylinderGeometry args={[0.048, 0.038, 0.076, 22]} />
-        <meshStandardMaterial {...M.ceramic} />
-      </mesh>
-      {/* Coffee surface — dark crema disc */}
-      <mesh position={[0, 0.093, 0]}>
-        <cylinderGeometry args={[0.040, 0.040, 0.003, 18]} />
-        <meshStandardMaterial {...M.coffee} />
-      </mesh>
-      {/* Handle — half-torus */}
-      <mesh position={[0.062, 0.052, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.028, 0.007, 6, 10, Math.PI]} />
-        <meshStandardMaterial {...M.ceramic} />
       </mesh>
     </group>
   )
@@ -514,11 +481,9 @@ export default function CafeEnvironment() {
       <BistroTable x={-3.9} z={-2.05} />
       <BistroChair x={-3.9} z={-1.55} ry={Math.PI} />      {/* front chair */}
 
-      {/* ── CERAMIC COFFEE CUPS ON COUNTER ──────────────────────────────── */}
-      {/*   Counter top surface: y = -0.53                                  */}
-      {/*   Cups sit on that surface — a barista's ready-made espressos.    */}
-      <CeramicCup x={-1.10} z={-0.18} cy={-0.53} ry={0.3} />
-      <CeramicCup x={-0.55} z={-0.24} cy={-0.53} ry={-0.2} />
+      {/* ── REAL GLB MUGS ON COUNTER ─────────────────────────────────────── */}
+      {/*   Loaded from public/models/ — scale + y tunable in BarMugs.jsx   */}
+      <BarMugs />
 
       {/* ── LEATHER MENUS ON COUNTER ─────────────────────────────────────── */}
       {/*   Two menus lying flat near the right side of the counter.         */}
