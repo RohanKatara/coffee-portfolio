@@ -1,6 +1,10 @@
-import { useRef, useEffect } from 'react'
-import { ContactShadows, Environment } from '@react-three/drei'
+import { useRef, useEffect, useMemo } from 'react'
+import { ContactShadows, Environment, useGLTF } from '@react-three/drei'
+import { Box3 } from 'three'
 import BarMugs from './BarMugs'
+import ShelfProps from './ShelfProps'
+
+useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
 
 /**
  * Full 3D café environment.
@@ -37,13 +41,50 @@ const M = {
   leather:    { color: '#231008', roughness: 0.82, metalness: 0.01 },
 }
 
-// ─── Bracket ──────────────────────────────────────────────────────────────────
-function Bracket({ x, y }) {
+// ─── WoodenShelf (GLB) ────────────────────────────────────────────────────────
+// Scale tuning: 1.0 assumes the model is exported in metres (~1 m wide shelf).
+// Reduce toward 0.5 if too large; increase toward 2.0 if too small.
+const SHELF_SCALE = 1.0
+// Back wall inner face (wall centre z = -2.7, half thickness = 0.07)
+const WALL_FACE_Z = -2.63
+
+function applyShelfShadows(obj) {
+  obj.traverse(node => {
+    if (!node.isMesh) return
+    node.castShadow    = true
+    node.receiveShadow = true
+  })
+  return obj
+}
+
+// Clones the scene at `scale`, computes the world-space bounding box, then
+// returns [clone, liftY, nudgeZ] so callers can place the model with:
+//   position.y = shelfBottomY + liftY   → geometric bottom sits at shelfBottomY
+//   position.z = WALL_FACE_Z + nudgeZ   → back face flush with the wall
+function prepareShelf(scene, scale) {
+  const c = applyShelfShadows(scene.clone(true))
+  c.scale.setScalar(scale)
+  c.updateMatrixWorld(true)
+  const box    = new Box3().setFromObject(c)
+  const liftY  = -box.min.y  // raise bottom of bbox to y = 0
+  const nudgeZ = -box.min.z  // push back face of bbox to z = 0
+  c.scale.setScalar(1)       // reset — re-applied via <primitive> scale prop
+  return [c, liftY, nudgeZ]
+}
+
+function WoodenShelfInstance({ x = -2.1, y, ry = 0, scale = SHELF_SCALE }) {
+  const { scene } = useGLTF('/models/modern_floating_wooden_shelf.glb')
+  const [cloned, liftY, nudgeZ] = useMemo(
+    () => prepareShelf(scene, scale),
+    [scene, scale]
+  )
   return (
-    <mesh position={[x, y - 0.10, -2.63]}>
-      <boxGeometry args={[0.04, 0.18, 0.22]} />
-      <meshStandardMaterial {...M.bracket} />
-    </mesh>
+    <primitive
+      object={cloned}
+      position={[x, y + liftY, WALL_FACE_Z + nudgeZ]}
+      rotation={[0, ry, 0]}
+      scale={scale}
+    />
   )
 }
 
@@ -337,102 +378,23 @@ export default function CafeEnvironment() {
       {/* Third — hangs above the background seating area (left side) */}
       <PendantLamp x={-2.8} z={-1.7} />
 
-      {/* ── SHELVES — 3 staggered rows left of back wall ────────────────── */}
-      {/*   Shelf boards: 2.4 w × 0.05 h × 0.24 d                          */}
-      {/*   Shelf x center = -2.1  (x range -3.3 to -0.9)                  */}
+      {/* ── SHELVES — 3 floating wooden shelves left of back wall ────────── */}
+      {/*   GLB: /modern_floating_wooden_shelf.glb                          */}
+      {/*   x centre = -2.1, back face flush with wall (z = WALL_FACE_Z)   */}
+      {/*   Y values are the desired bottom-of-shelf world height;          */}
+      {/*   the bbox-snap in prepareShelf handles the exact offset.         */}
+      {/*   Tune SHELF_SCALE (top of file) if shelves appear too big/small. */}
 
-      {/* Shelf 1 — y = 0.22 */}
-      <mesh position={[-2.1, 0.22, -2.59]} castShadow receiveShadow>
-        <boxGeometry args={[2.4, 0.05, 0.24]} />
-        <meshStandardMaterial {...M.shelfWood} />
-      </mesh>
-      <Bracket x={-3.05} y={0.22} />
-      <Bracket x={-1.15} y={0.22} />
+      {/* Shelf 1 — bottom at y ≈ 0.18 → surface near y ≈ 0.22 */}
+      <WoodenShelfInstance x={-2.1} y={0.18} />
 
-      {/* Shelf 2 — y = 1.00 */}
-      <mesh position={[-2.1, 1.00, -2.59]} castShadow receiveShadow>
-        <boxGeometry args={[2.4, 0.05, 0.24]} />
-        <meshStandardMaterial {...M.shelfWood} />
-      </mesh>
-      <Bracket x={-3.05} y={1.00} />
-      <Bracket x={-1.15} y={1.00} />
+      {/* Shelf 2 — bottom at y ≈ 1.74 → surface near y ≈ 1.78 */}
+      <WoodenShelfInstance x={-2.1} y={1.74} />
 
-      {/* Shelf 3 — y = 1.78 */}
-      <mesh position={[-2.1, 1.78, -2.59]} castShadow receiveShadow>
-        <boxGeometry args={[2.4, 0.05, 0.24]} />
-        <meshStandardMaterial {...M.shelfWood} />
-      </mesh>
-      <Bracket x={-3.05} y={1.78} />
-      <Bracket x={-1.15} y={1.78} />
-
-      {/* ── SHELF ITEMS ─────────────────────────────────────────────────── */}
-
-      {/* — Shelf 1: coffee canisters + small storage box — */}
-      <mesh position={[-3.02, 0.41, -2.52]} castShadow>
-        <cylinderGeometry args={[0.055, 0.050, 0.22, 12]} />
-        <meshStandardMaterial color="#1e1e1e" roughness={0.55} metalness={0.30} />
-      </mesh>
-      <mesh position={[-2.74, 0.40, -2.52]} castShadow>
-        <cylinderGeometry args={[0.050, 0.046, 0.18, 12]} />
-        <meshStandardMaterial color="#3a1a08" roughness={0.60} />
-      </mesh>
-      <mesh position={[-2.46, 0.43, -2.52]} castShadow>
-        <cylinderGeometry args={[0.060, 0.055, 0.24, 12]} />
-        <meshStandardMaterial color="#1a2a1a" roughness={0.55} metalness={0.18} />
-      </mesh>
-      <mesh position={[-2.10, 0.37, -2.52]} castShadow>
-        <boxGeometry args={[0.13, 0.13, 0.09]} />
-        <meshStandardMaterial color="#2a180c" roughness={0.78} />
-      </mesh>
-      <mesh position={[-1.82, 0.37, -2.52]} castShadow>
-        <boxGeometry args={[0.15, 0.12, 0.07]} />
-        <meshStandardMaterial color="#0e1a1a" roughness={0.78} />
-      </mesh>
-
-      {/* — Shelf 2: mugs + leaning books — */}
-      <mesh position={[-3.00, 1.10, -2.52]} castShadow>
-        <cylinderGeometry args={[0.055, 0.050, 0.10, 12]} />
-        <meshStandardMaterial color="#1a0e0a" roughness={0.65} />
-      </mesh>
-      <mesh position={[-2.73, 1.10, -2.52]} castShadow>
-        <cylinderGeometry args={[0.055, 0.050, 0.10, 12]} />
-        <meshStandardMaterial color="#1e1e20" roughness={0.60} />
-      </mesh>
-      <mesh position={[-2.46, 1.10, -2.52]} castShadow>
-        <cylinderGeometry args={[0.055, 0.050, 0.10, 12]} />
-        <meshStandardMaterial color="#1c1208" roughness={0.65} />
-      </mesh>
-      {/* Leaning books */}
-      <mesh position={[-1.92, 1.09, -2.52]} rotation={[0, 0, 0.18]} castShadow>
-        <boxGeometry args={[0.04, 0.16, 0.09]} />
-        <meshStandardMaterial color="#3a2010" roughness={0.82} />
-      </mesh>
-      <mesh position={[-1.78, 1.09, -2.52]} rotation={[0, 0, 0.06]} castShadow>
-        <boxGeometry args={[0.04, 0.18, 0.09]} />
-        <meshStandardMaterial color="#1a2a18" roughness={0.82} />
-      </mesh>
-
-      {/* — Shelf 3: small plant + vase + decorative box — */}
-      {/* Terra-cotta pot */}
-      <mesh position={[-2.92, 1.89, -2.52]} castShadow>
-        <cylinderGeometry args={[0.055, 0.045, 0.10, 10]} />
-        <meshStandardMaterial color="#3d1c0c" roughness={0.85} />
-      </mesh>
-      {/* Plant foliage */}
-      <mesh position={[-2.92, 2.00, -2.52]} castShadow>
-        <sphereGeometry args={[0.11, 10, 10]} />
-        <meshStandardMaterial color="#1a2e12" roughness={0.88} />
-      </mesh>
-      {/* Dark vase */}
-      <mesh position={[-2.50, 1.91, -2.52]} castShadow>
-        <cylinderGeometry args={[0.038, 0.054, 0.15, 10]} />
-        <meshStandardMaterial color="#1e1a14" roughness={0.70} metalness={0.15} />
-      </mesh>
-      {/* Flat decor box */}
-      <mesh position={[-2.12, 1.88, -2.52]} castShadow>
-        <boxGeometry args={[0.15, 0.10, 0.08]} />
-        <meshStandardMaterial color="#2a1a08" roughness={0.78} />
-      </mesh>
+      {/* ── SHELF PROPS (GLB) ───────────────────────────────────────────── */}
+      {/*   coffee.glb · coffee_cupp.glb · coffee_cup.glb                  */}
+      {/*   Scale + position tunable in ShelfProps.jsx                     */}
+      <ShelfProps />
 
       {/* ── BAR COUNTER — MAIN SECTION ──────────────────────────────────── */}
       {/*   Runs left → right across the scene, sitting on the floor.       */}
@@ -490,8 +452,6 @@ export default function CafeEnvironment() {
       <LeatherMenu x={1.65} y={-0.517} z={-0.28} ry={0.18} />
       <LeatherMenu x={1.90} y={-0.517} z={-0.30} ry={-0.08} />
 
-      {/* ── MENU ON SHELF (shelf 2 — y=1.00) ───────────────────────────── */}
-      <LeatherMenu x={-1.60} y={1.040} z={-2.50} ry={0.05} />
 
       {/* ── CONTACT SHADOW + ENVIRONMENT ────────────────────────────────── */}
       <ContactShadows
