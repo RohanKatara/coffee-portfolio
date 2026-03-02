@@ -12,11 +12,27 @@ export const CAMERA_POSITIONS = {
     duration: 0,
     ease: 'none',
   },
+  // Start position for the cinematic pull-back on first load.
+  // Close to character's face, slightly off to the right.
+  LANDING_INTRO: {
+    position: { x: 0.4, y: 1.5, z: 1.0 },
+    target:   { x: 0,   y: 1.4, z: 0   },
+  },
   LANDING: {
     position: { x: 0, y: 0.3, z: 4.5 },
     target:   { x: 0, y: 0.0, z: 0   },
     duration: 0,
     ease: 'power2.out',
+  },
+  // Cinematic pan-past played between LANDING and MACHINE.
+  // Camera sweeps left while pushing forward, as if tracking the
+  // character walking away.  onComplete triggers the next scene.
+  CINEMATIC_EXIT: {
+    position: { x: -1.2, y: 0.5, z: 2.5 },
+    target:   { x: -0.3, y: 0.1, z: 0.0 },
+    duration: 2.2,
+    ease: 'power2.inOut',
+    onComplete: 'MACHINE',
   },
   MACHINE: {
     position: { x: 0,   y: 0.0,  z: 3.0 },

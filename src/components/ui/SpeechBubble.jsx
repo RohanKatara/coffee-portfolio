@@ -30,7 +30,8 @@ export default function SpeechBubble() {
     }
   }, [scene])
 
-  if (scene !== 'LANDING') return null
+  // Stay mounted during CINEMATIC_EXIT so the fade-out animation has time to finish
+  if (scene !== 'LANDING' && scene !== 'CINEMATIC_EXIT') return null
 
   return (
     <div
@@ -60,7 +61,7 @@ export default function SpeechBubble() {
         </p>
 
         {/* CTA — styles live in index.css (.cta-button) */}
-        <button className="cta-button" onClick={() => setScene('MACHINE')}>
+        <button className="cta-button" onClick={() => setScene('CINEMATIC_EXIT')}>
           Yes, please! ✨
         </button>
 

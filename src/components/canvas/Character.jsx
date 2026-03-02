@@ -1,6 +1,7 @@
 import { useRef, Suspense, useEffect } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import { useCharacterAnimation } from '../../hooks/useCharacterAnimation'
+import { useMouseLook } from '../../hooks/useMouseLook'
 import useSceneStore from '../../store/useSceneStore'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
@@ -35,6 +36,7 @@ function CharacterModel({ visible }) {
   }, [gltf.scene])
 
   useCharacterAnimation(actions, scene)
+  useMouseLook(groupRef, scene === 'LANDING')
 
   return (
     // position y=-1.5 sits the model on the floor plane; scale may need

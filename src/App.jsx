@@ -50,8 +50,7 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Scene background — deep espresso */}
-          <color attach="background" args={['#1a0e08']} />
+          {/* No flat background colour — the café walls fill the frame */}
 
           {/* Camera — GSAP-driven transitions */}
           <SceneCamera />
