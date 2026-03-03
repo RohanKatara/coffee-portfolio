@@ -1,10 +1,10 @@
-import EspressoMachine from '../components/canvas/EspressoMachine'
 import ProjectButtons from '../components/canvas/ProjectButtons'
 import CoffeePour from '../components/canvas/CoffeePour'
 import useSceneStore from '../store/useSceneStore'
 
 /**
- * Espresso machine with project buttons and the pour particle effect.
+ * Project buttons and the pour particle effect.
+ * EspressoMachine placeholder removed — CoffeeStation carries the real GLB models.
  * Visible during MACHINE, POURING, and CUP scenes.
  */
 export default function MachineScene() {
@@ -14,7 +14,6 @@ export default function MachineScene() {
 
   return (
     <group visible={isVisible}>
-      <EspressoMachine visible={isVisible} />
       <ProjectButtons visible={showButtons} />
       <CoffeePour visible={isVisible} />
     </group>

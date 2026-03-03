@@ -1,10 +1,11 @@
-import { useRef, useEffect, useMemo } from 'react'
-import { ContactShadows, Environment, useGLTF } from '@react-three/drei'
-import { Box3 } from 'three'
-import BarMugs from './BarMugs'
+import { useRef, useEffect, useMemo, Suspense } from 'react'
+import { ContactShadows, Environment, useGLTF, Center } from '@react-three/drei'
+import { Box3, MeshStandardMaterial } from 'three'
 import ShelfProps from './ShelfProps'
 
 useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
+useGLTF.preload('/models/industrial_diamond_pendant_light.glb')
+useGLTF.preload('/models/plant.glb')
 
 /**
  * Full 3D café environment.
@@ -88,26 +89,53 @@ function WoodenShelfInstance({ x = -2.1, y, ry = 0, scale = SHELF_SCALE }) {
   )
 }
 
-// ─── Industrial pendant lamp (geometry only — lights added separately) ─────────
-function PendantLamp({ x, z }) {
+// ─── Industrial diamond pendant light (GLB) ────────────────────────────────────
+// No per-instance lights — avoids hitting Three.js's 8-light-per-object limit.
+// Visual "on" state is achieved purely via emissive materials on every mesh.
+function DiamondPendantLight({ position }) {
+  const { scene } = useGLTF('/models/industrial_diamond_pendant_light.glb')
+  const cloned = useMemo(() => {
+    const c = scene.clone(true)
+    c.traverse(node => {
+      if (!node.isMesh) return
+      node.castShadow    = true
+      node.receiveShadow = true
+    })
+    return c
+  }, [scene])
   return (
-    <>
-      {/* cord */}
-      <mesh position={[x, 2.25, z]}>
-        <cylinderGeometry args={[0.007, 0.007, 1.35, 6]} />
-        <meshStandardMaterial {...M.pendant} />
-      </mesh>
-      {/* Edison-bulb cage ring */}
-      <mesh position={[x, 1.70, z]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.075, 0.008, 6, 16]} />
-        <meshStandardMaterial color="#222" roughness={0.6} metalness={0.6} />
-      </mesh>
-      {/* Shade — open cone, opening faces down */}
-      <mesh position={[x, 1.55, z]} rotation={[Math.PI, 0, 0]}>
-        <coneGeometry args={[0.19, 0.28, 14, 1]} />
-        <meshStandardMaterial {...M.pendant} />
-      </mesh>
-    </>
+    <group position={position}>
+      <Center>
+        <primitive object={cloned} scale={1} />
+      </Center>
+    </group>
+  )
+}
+
+// ─── Hanging plant (GLB) ──────────────────────────────────────────────────────
+function HangingPlant({ position, scale = [0.5, 0.5, 0.5] }) {
+  const { scene } = useGLTF('/models/plant.glb')
+
+  useEffect(() => {
+    scene.traverse(child => {
+      if (!child.isMesh) return
+      // Hide any structural pole/support mesh
+      if (/pole|post|support/i.test(child.name)) {
+        child.visible = false
+        return
+      }
+      child.castShadow    = true
+      child.receiveShadow = true
+      child.material = new MeshStandardMaterial({ color: '#4f7942', roughness: 0.8 })
+    })
+  }, [scene])
+
+  return (
+    <group position={position}>
+      <Center>
+        <primitive object={scene} scale={scale} />
+      </Center>
+    </group>
   )
 }
 
@@ -297,18 +325,17 @@ export default function CafeEnvironment() {
           units further from these lights than their rated distance, so it
           receives essentially nothing from them.                            */}
 
-      {/* Left counter pendant */}
+      {/* Counter fill lights — reduced now that GLB pendants carry their own bulbs */}
       <pointLight
         position={[-1.0, 1.45, -1.2]}
-        intensity={5.5}
+        intensity={2.5}
         color="#ffccaa"
         distance={3.8}
         decay={2}
       />
-      {/* Right counter pendant */}
       <pointLight
         position={[1.8, 1.45, -1.2]}
-        intensity={5.0}
+        intensity={2.5}
         color="#ffccaa"
         distance={3.8}
         decay={2}
@@ -371,12 +398,21 @@ export default function CafeEnvironment() {
         <meshStandardMaterial {...M.wall} />
       </mesh>
 
-      {/* ── PENDANT LAMPS ───────────────────────────────────────────────── */}
-      {/* Two above the bar counter */}
-      <PendantLamp x={-1.0} z={-1.2} />
-      <PendantLamp x={ 1.8} z={-1.2} />
-      {/* Third — hangs above the background seating area (left side) */}
-      <PendantLamp x={-2.8} z={-1.7} />
+      {/* ── PENDANT LAMPS (GLB) ─────────────────────────────────────────── */}
+      {/* Spaced over the open counter — clear of the left shelves (x≈-2.1) */}
+      <Suspense fallback={null}>
+        <DiamondPendantLight position={[0.8, 2, -1.2]} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <DiamondPendantLight position={[2.5, 2, -1.2]} />
+      </Suspense>
+
+      {/* ── SHARED PENDANT FILL LIGHTS ──────────────────────────────────── */}
+      {/* 3 point lights spread across the lamp row instead of one per lamp. */}
+      {/* y=1.7 sits just below the fixtures so light spills downward.      */}
+      <pointLight position={[0.8,  1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
+      <pointLight position={[1.65, 1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
+      <pointLight position={[2.5,  1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
 
       {/* ── SHELVES — 3 floating wooden shelves left of back wall ────────── */}
       {/*   GLB: /modern_floating_wooden_shelf.glb                          */}
@@ -395,6 +431,14 @@ export default function CafeEnvironment() {
       {/*   coffee.glb · coffee_cupp.glb · coffee_cup.glb                  */}
       {/*   Scale + position tunable in ShelfProps.jsx                     */}
       <ShelfProps />
+
+      {/* ── HANGING PLANT ───────────────────────────────────────────────── */}
+      {/*   position[1]=2.5 sits above the top shelf surface (y≈1.78).      */}
+      {/*   Lower y toward 1.78 once the model is visually confirmed.       */}
+      {/*   If the GLB is missing textures, replace with a new model file.  */}
+      <Suspense fallback={null}>
+        <HangingPlant position={[0, 2.8, -1.4]} scale={[0.5, 0.5, 0.5]} />
+      </Suspense>
 
       {/* ── BAR COUNTER — MAIN SECTION ──────────────────────────────────── */}
       {/*   Runs left → right across the scene, sitting on the floor.       */}
@@ -442,10 +486,6 @@ export default function CafeEnvironment() {
       {/* Table 2 — further back and left, mostly out of main frame */}
       <BistroTable x={-3.9} z={-2.05} />
       <BistroChair x={-3.9} z={-1.55} ry={Math.PI} />      {/* front chair */}
-
-      {/* ── REAL GLB MUGS ON COUNTER ─────────────────────────────────────── */}
-      {/*   Loaded from public/models/ — scale + y tunable in BarMugs.jsx   */}
-      <BarMugs />
 
       {/* ── LEATHER MENUS ON COUNTER ─────────────────────────────────────── */}
       {/*   Two menus lying flat near the right side of the counter.         */}

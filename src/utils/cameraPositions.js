@@ -28,7 +28,7 @@ export const CAMERA_POSITIONS = {
     duration: 0,
     ease: 'power2.out',
   },
-  // Cinematic pan-past played between LANDING and MACHINE.
+  // Cinematic pan-past played between LANDING and STATION.
   // Camera sweeps left while pushing forward, tracking the character
   // walking away behind the bar.  onComplete triggers the next scene.
   CINEMATIC_EXIT: {
@@ -36,7 +36,14 @@ export const CAMERA_POSITIONS = {
     target:   { x: -0.3, y: 0.1, z: -0.8 },
     duration: 2.2,
     ease: 'power2.inOut',
-    onComplete: 'MACHINE',
+    onComplete: 'STATION',
+  },
+  // Camera flies to face the CoffeeStation on the right side of the counter.
+  STATION: {
+    position: { x: 2.5, y: 1.5, z: 3.0 },
+    target:   { x: 2.5, y: 1.0, z: 0   },
+    duration: 1.8,
+    ease: 'power2.inOut',
   },
   MACHINE: {
     position: { x: 0,   y: 0.0,  z: 3.0 },

@@ -12,6 +12,7 @@ import CafeEnvironment from './components/canvas/CafeEnvironment'
 import LandingScene from './scenes/LandingScene'
 import MachineScene from './scenes/MachineScene'
 import CupScene from './scenes/CupScene'
+import { CoffeeStation } from './components/canvas/CoffeeStation'
 
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
@@ -62,6 +63,11 @@ export default function App() {
           <LandingScene />
           <MachineScene />
           <CupScene />
+
+          {/* Coffee station — always mounted, lives off-screen to the right.
+              y=-0.53 = counter top surface so <Center bottom> lands flush.
+              Camera flies here on 'Yes, please!' — no pop-in on arrival. */}
+          <CoffeeStation position={[2.5, 0, 0]} />
         </Suspense>
 
         {/* Post-processing — runs after all scenes render */}
