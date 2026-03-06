@@ -28,26 +28,50 @@ export const CAMERA_POSITIONS = {
     duration: 0,
     ease: 'power2.out',
   },
-  // Cinematic pan-past played between LANDING and STATION.
-  // Camera sweeps left while pushing forward, tracking the character
-  // walking away behind the bar.  onComplete triggers the next scene.
+  // "Walk to the machine" — two-segment cinematic walk:
+  // Segment 1: camera gaze leads (target sweeps right, body barely moves).
+  // Segment 2: body follows with a subtle Y-arc "head bob" as it settles.
+  // Fires MACHINE on arrival.
   CINEMATIC_EXIT: {
-    position: { x: -1.2, y: 0.5, z: 2.5 },
-    target:   { x: -0.3, y: 0.1, z: -0.8 },
-    duration: 2.2,
-    ease: 'power2.inOut',
-    onComplete: 'STATION',
+    waypoints: [
+      // Segment 1 — look-ahead: target sweeps to machine, camera barely moves (0.9s)
+      {
+        position: { x: 0.6, y: 1.0, z: 4.2 },
+        target:   { x: 2.5, y: 0.3, z: -0.5 },
+        duration: 0.9,
+        ease: 'power2.out',
+      },
+      // Segment 2 — body follows with a subtle Y-arc "head bob" (1.9s)
+      {
+        position: { x: 3.2, y: 1.0, z: 3.5 },
+        target:   { x: 2.5, y: 0.0, z: -0.3 },
+        duration: 1.9,
+        ease: 'power2.inOut',
+        yBias: 0.18,
+      },
+    ],
+    onComplete: 'CAFE_INTERIOR',
   },
-  // Camera flies to face the CoffeeStation on the right side of the counter.
+  // Wide eye-level view of the full counter — machine + grinder visible.
+  // Lands here after the cinematic walk; user reads the café intro UI then proceeds.
+  CAFE_INTERIOR: {
+    position: { x: 0.6, y: 0.35, z: 4.2 },
+    target:   { x: 2.5, y: -0.2, z: 0.0 },
+    duration: 1.2,
+    ease: 'power2.out',
+  },
+  // Short push-in settle after the travel — camera eases a bit closer and
+  // drops to counter-level to face the machine front for interaction.
+  MACHINE: {
+    position: { x: 2.4, y: 0.5, z: 2.8 },
+    target:   { x: 2.4, y: 0.0, z: 0   },
+    duration: 1.2,
+    ease: 'power2.out',
+  },
+  // Kept for optional use — not part of the current auto-advance path.
   STATION: {
     position: { x: 2.5, y: 1.5, z: 3.0 },
     target:   { x: 2.5, y: 1.0, z: 0   },
-    duration: 1.8,
-    ease: 'power2.inOut',
-  },
-  MACHINE: {
-    position: { x: 0,   y: 0.0,  z: 3.0 },
-    target:   { x: 0,   y: -0.2, z: 0   },
     duration: 1.8,
     ease: 'power2.inOut',
   },

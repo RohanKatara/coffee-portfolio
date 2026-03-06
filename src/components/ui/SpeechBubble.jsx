@@ -30,8 +30,8 @@ export default function SpeechBubble() {
     }
   }, [scene])
 
-  // Stay mounted during CINEMATIC_EXIT so the fade-out animation has time to finish
-  if (scene !== 'LANDING' && scene !== 'CINEMATIC_EXIT') return null
+  // Stay mounted during CINEMATIC_EXIT/STATION so the fade-out animation finishes
+  if (scene !== 'LANDING' && scene !== 'CINEMATIC_EXIT' && scene !== 'STATION') return null
 
   return (
     <div

@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
 // Scene state machine:
-// LOADING → LANDING → MACHINE → POURING → CUP
-//                         ↑__________________|  (back button)
+// LOADING → LANDING → CINEMATIC_EXIT → CAFE_INTERIOR → MACHINE → POURING → CUP
+//                                                            ↑__________________|  (back button)
 
 const useSceneStore = create((set, get) => ({
   scene: 'LOADING',
@@ -10,8 +10,11 @@ const useSceneStore = create((set, get) => ({
   hoveredProjectIndex: null,
   isPouring: false,
   cupFillAmount: 0.0,
+  isTransitioning: false,
 
   setScene: (scene) => set({ scene }),
+
+  setTransitioning: (val) => set({ isTransitioning: val }),
 
   setActiveProject: (index) => set({ activeProjectIndex: index }),
 
@@ -35,6 +38,10 @@ const useSceneStore = create((set, get) => ({
     scene: 'MACHINE',
     cupFillAmount: 0.0,
     isPouring: false,
+  }),
+
+  goBackToCafeInterior: () => set({
+    scene: 'CAFE_INTERIOR',
   }),
 }))
 
