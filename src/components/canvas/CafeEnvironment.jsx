@@ -39,7 +39,6 @@ const M = {
   darkMetal:  { color: '#1c1c1e', roughness: 0.52, metalness: 0.48 },
   ceramic:    { color: '#e4dcd2', roughness: 0.30, metalness: 0.03 },
   coffee:     { color: '#180a02', roughness: 0.05, metalness: 0.08 },
-  leather:    { color: '#231008', roughness: 0.82, metalness: 0.01 },
 }
 
 // ─── WoodenShelf (GLB) ────────────────────────────────────────────────────────
@@ -211,34 +210,13 @@ function BistroChair({ x, z, ry = 0 }) {
   )
 }
 
-// ─── Leather-bound menu ───────────────────────────────────────────────────────
-function LeatherMenu({ x, y, z, ry = 0 }) {
-  return (
-    <group position={[x, y, z]} rotation={[0, ry, 0]}>
-      {/* Cover */}
-      <mesh castShadow>
-        <boxGeometry args={[0.20, 0.026, 0.28]} />
-        <meshStandardMaterial {...M.leather} />
-      </mesh>
-      {/* Spine highlight strip */}
-      <mesh position={[-0.098, 0, 0]}>
-        <boxGeometry args={[0.006, 0.028, 0.28]} />
-        <meshStandardMaterial color="#3a1c0a" roughness={0.75} />
-      </mesh>
-      {/* Pages — cream inset */}
-      <mesh position={[0.005, 0.014, 0]}>
-        <boxGeometry args={[0.185, 0.003, 0.265]} />
-        <meshStandardMaterial color="#d8cfc4" roughness={0.88} />
-      </mesh>
-    </group>
-  )
-}
-
 export default function CafeEnvironment() {
   // Three focused spotlights — each needs its own ref so we can aim its target
-  const spotKeyRef     = useRef() // main barista key — upper-right-front
-  const spotCounterRef = useRef() // counter/cup fill — upper-left-front
-  const spotMachineRef = useRef() // espresso machine accent — right side
+  const spotKeyRef      = useRef() // main barista key — upper-right-front
+  const spotCounterRef  = useRef() // counter/cup fill — upper-left-front
+  const spotMachineRef  = useRef() // Zone A machine accent — right side
+  const spotZoneBKeyRef = useRef() // Zone B machine key — upper right
+  const spotZoneBFillRef = useRef() // Zone B grinder fill
 
   useEffect(() => {
     if (spotKeyRef.current) {
@@ -252,6 +230,14 @@ export default function CafeEnvironment() {
     if (spotMachineRef.current) {
       spotMachineRef.current.target.position.set(1.5, -0.8, -0.3)
       spotMachineRef.current.target.updateMatrixWorld()
+    }
+    if (spotZoneBKeyRef.current) {
+      spotZoneBKeyRef.current.target.position.set(12, -0.3, -0.2)
+      spotZoneBKeyRef.current.target.updateMatrixWorld()
+    }
+    if (spotZoneBFillRef.current) {
+      spotZoneBFillRef.current.target.position.set(10, -0.3, -0.2)
+      spotZoneBFillRef.current.target.updateMatrixWorld()
     }
   }, [])
 
@@ -350,6 +336,35 @@ export default function CafeEnvironment() {
         decay={2}
       />
 
+      {/* ── ZONE B LIGHTING (espresso machine + grinder at x≈10–12) ────── */}
+
+      {/* Machine key — warm cone from upper-right, main drama source for Zone B */}
+      <spotLight
+        ref={spotZoneBKeyRef}
+        position={[14, 4.5, 2.0]}
+        angle={0.38}
+        penumbra={0.65}
+        intensity={5.0}
+        color="#ffccaa"
+        distance={12}
+        decay={1.3}
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.0003}
+      />
+
+      {/* Grinder fill — softer cone lifts the grinder from the shadow side */}
+      <spotLight
+        ref={spotZoneBFillRef}
+        position={[8.5, 3.0, 1.5]}
+        angle={0.32}
+        penumbra={0.85}
+        intensity={2.5}
+        color="#ffd4a0"
+        distance={8}
+        decay={1.6}
+      />
+
       {/* ── COOL SHADOW FILL ────────────────────────────────────────────── */}
       {/* Very faint blue-purple from the camera side.  Keeps deep shadows
           from going pure black (0,0,0) while maintaining depth contrast.  */}
@@ -373,22 +388,23 @@ export default function CafeEnvironment() {
         <meshStandardMaterial {...M.ceiling} />
       </mesh>
 
-      {/* ── BACK WALL — dark teal plaster ───────────────────────────────── */}
-      {/*   y range: -1.5 (floor) → 3.6 (ceiling) = 5.1 h, center = 1.05  */}
-      <mesh position={[0, 1.05, -2.7]} receiveShadow>
-        <boxGeometry args={[16, 5.1, 0.14]} />
+      {/* ── BACK WALL — dark teal plaster (extends across Zone A + Zone B) ── */}
+      {/*   Centred at x=7 to cover x=-8 → x=22 (30 units wide).            */}
+      {/*   y range: -1.5 (floor) → 3.6 (ceiling) = 5.1 h, center = 1.05   */}
+      <mesh position={[7, 1.05, -2.7]} receiveShadow>
+        <boxGeometry args={[30, 5.1, 0.14]} />
         <meshStandardMaterial {...M.wall} />
       </mesh>
 
       {/* Dado rail — horizontal accent strip at mid-wall */}
-      <mesh position={[0, -0.42, -2.64]}>
-        <boxGeometry args={[16, 0.07, 0.08]} />
+      <mesh position={[7, -0.42, -2.64]}>
+        <boxGeometry args={[30, 0.07, 0.08]} />
         <meshStandardMaterial {...M.wallTrim} />
       </mesh>
 
       {/* Baseboard — dark strip at floor line */}
-      <mesh position={[0, -1.42, -2.64]}>
-        <boxGeometry args={[16, 0.16, 0.08]} />
+      <mesh position={[7, -1.42, -2.64]}>
+        <boxGeometry args={[30, 0.16, 0.08]} />
         <meshStandardMaterial {...M.baseboard} />
       </mesh>
 
@@ -473,6 +489,21 @@ export default function CafeEnvironment() {
         <meshStandardMaterial {...M.woodTop} />
       </mesh>
 
+      {/* ── BAR COUNTER — ZONE B EXTENSION ─────────────────────────────── */}
+      {/*   Continuous with Zone A; runs from x=4.0 → x=15.0 (11 units).   */}
+      {/*   Same z-depth and y-height as Zone A counter.                    */}
+
+      {/* Stone base */}
+      <mesh position={[9.5, -1.05, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[11.0, 0.9, 1.0]} />
+        <meshStandardMaterial {...M.stoneBlack} />
+      </mesh>
+      {/* Polished dark wood top */}
+      <mesh position={[9.5, -0.565, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[11.14, 0.07, 1.12]} />
+        <meshStandardMaterial {...M.woodTop} />
+      </mesh>
+
       {/* ── BISTRO TABLES + CHAIRS ──────────────────────────────────────── */}
       {/*   Placed left-of-centre in the background so they sit at the      */}
       {/*   edge of the camera's FOV — atmospheric depth, not focal point.  */}
@@ -486,12 +517,6 @@ export default function CafeEnvironment() {
       {/* Table 2 — further back and left, mostly out of main frame */}
       <BistroTable x={-3.9} z={-2.05} />
       <BistroChair x={-3.9} z={-1.55} ry={Math.PI} />      {/* front chair */}
-
-      {/* ── LEATHER MENUS ON COUNTER ─────────────────────────────────────── */}
-      {/*   Two menus lying flat near the right side of the counter.         */}
-      <LeatherMenu x={1.65} y={-0.517} z={-0.28} ry={0.18} />
-      <LeatherMenu x={1.90} y={-0.517} z={-0.30} ry={-0.08} />
-
 
       {/* ── CONTACT SHADOW + ENVIRONMENT ────────────────────────────────── */}
       <ContactShadows

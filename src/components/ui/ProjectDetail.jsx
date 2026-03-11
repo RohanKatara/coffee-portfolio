@@ -1,28 +1,32 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import projects from '../../data/projects'
 import useSceneStore from '../../store/useSceneStore'
+import projects from '../../data/projects'
 
 /**
- * Full-screen project detail overlay shown in the CUP scene.
- * Revealed inside the coffee cup (metaphorically) after the pour completes.
+ * Full project detail overlay shown during the CUP scene.
+ * Fades in 0.8 s after the CUP state is entered.
+ * The close (✕) button calls goBackToMachine() which snaps camera back
+ * and re-shows the Coffee Menu.
  */
 export default function ProjectDetail() {
-  const scene = useSceneStore((s) => s.scene)
+  const scene              = useSceneStore((s) => s.scene)
   const activeProjectIndex = useSceneStore((s) => s.activeProjectIndex)
-  const panelRef = useRef(null)
+  const goBackToMachine    = useSceneStore((s) => s.goBackToMachine)
+  const panelRef           = useRef(null)
 
-  const project = activeProjectIndex !== null ? projects[activeProjectIndex] : null
+  const project = activeProjectIndex != null ? projects[activeProjectIndex] : null
 
   useEffect(() => {
-    if (scene === 'CUP' && panelRef.current) {
+    if (!panelRef.current) return
+    if (scene === 'CUP') {
       gsap.fromTo(
         panelRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, delay: 1.0, ease: 'power2.out' },
+        { opacity: 0, y: 28 },
+        { opacity: 1, y: 0, duration: 0.75, delay: 0.8, ease: 'power3.out' },
       )
-    } else if (panelRef.current) {
-      gsap.to(panelRef.current, { opacity: 0, y: 15, duration: 0.35, ease: 'power2.in' })
+    } else {
+      gsap.to(panelRef.current, { opacity: 0, y: -18, duration: 0.35, ease: 'power2.in' })
     }
   }, [scene])
 
@@ -30,76 +34,136 @@ export default function ProjectDetail() {
 
   return (
     <div
+      className="absolute inset-0 z-40 flex items-center justify-center opacity-0"
       ref={panelRef}
-      className="absolute inset-0 z-30 flex items-end justify-center pb-10 opacity-0"
       style={{ pointerEvents: 'none' }}
     >
-      <div
-        className="project-detail-scroll bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl mx-4 p-6 max-w-sm w-full overflow-y-auto max-h-[60vh]"
-        style={{
-          border: '1.5px solid #e8d5b7',
-          boxShadow: '0 12px 48px rgba(61,43,31,0.18)',
-          pointerEvents: 'auto',
-        }}
-      >
-        {/* Colour accent bar */}
-        <div
-          className="w-10 h-1 rounded-full mb-4"
-          style={{ background: project.color }}
-        />
+      <div style={{
+        pointerEvents: 'auto',
+        position: 'relative',
+        width: 'min(520px, 90vw)',
+        background: 'rgba(14, 9, 4, 0.93)',
+        border: `1px solid ${project.color}44`,
+        borderRadius: '8px',
+        padding: '32px 40px 28px',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: [
+          `0 0 60px ${project.color}1a`,
+          '0 8px 48px rgba(0,0,0,0.75)',
+          'inset 0 1px 0 rgba(240,160,80,0.14)',
+          'inset 0 -1px 0 rgba(0,0,0,0.4)',
+        ].join(', '),
+      }}>
 
-        <h2 className="font-serif text-[#3d2b1f] text-2xl font-bold mb-1">
+        {/* Top accent line */}
+        <div style={{
+          position: 'absolute', top: 0, left: '20%', right: '20%', height: '1px',
+          background: `linear-gradient(90deg, transparent, ${project.color}99, transparent)`,
+        }} />
+
+        {/* Close button */}
+        <button
+          onClick={goBackToMachine}
+          style={{
+            position: 'absolute', top: '14px', right: '16px',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            color: 'rgba(200,127,76,0.55)', fontSize: '1rem', lineHeight: 1,
+            padding: '4px 8px', borderRadius: '4px', transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#c87f4c' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(200,127,76,0.55)' }}
+        >
+          ✕
+        </button>
+
+        {/* Project name */}
+        <h2 style={{
+          color: '#f5e6c8', fontSize: '1.7rem', fontWeight: 700, marginBottom: '4px',
+          fontFamily: 'Noto Serif, Georgia, "Times New Roman", serif',
+          textShadow: `0 2px 12px ${project.color}55`,
+        }}>
           {project.name}
         </h2>
-        <p className="text-[#8b6952] text-sm font-serif italic mb-4">
+
+        {/* Tagline */}
+        <p style={{
+          color: project.color, fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.88,
+          fontFamily: 'Noto Serif, Georgia, serif', marginBottom: '18px',
+        }}>
           {project.tagline}
         </p>
 
-        <p className="text-[#4a3728] text-sm leading-relaxed mb-5">
+        {/* Divider */}
+        <div style={{
+          height: '1px', marginBottom: '16px',
+          background: `linear-gradient(90deg, transparent, ${project.color}44, transparent)`,
+        }} />
+
+        {/* Description */}
+        <p style={{
+          color: 'rgba(245,230,200,0.80)', fontSize: '0.875rem', lineHeight: 1.7,
+          fontFamily: 'Georgia, serif', marginBottom: '20px',
+        }}>
           {project.description}
         </p>
 
-        {/* Tech pills */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        {/* Tech stack tags */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '24px' }}>
           {project.tech.map((t) => (
-            <span
-              key={t}
-              className="text-xs px-3 py-1 rounded-full font-mono"
-              style={{
-                background: `${project.color}22`,
-                color: project.color,
-                border: `1px solid ${project.color}55`,
-              }}
-            >
+            <span key={t} style={{
+              background: 'rgba(200,127,76,0.10)',
+              border: `1px solid ${project.color}44`,
+              color: project.color,
+              borderRadius: '100px', padding: '3px 10px',
+              fontSize: '0.72rem', fontFamily: 'monospace', letterSpacing: '0.04em',
+            }}>
               {t}
             </span>
           ))}
         </div>
 
-        {/* Links */}
-        <div className="flex gap-3">
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: '12px' }}>
           <a
             href={project.liveUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 text-center py-2 rounded-full text-sm font-serif text-white transition-opacity hover:opacity-90"
-            style={{ background: project.color }}
+            style={{
+              flex: 1, display: 'block', textAlign: 'center', padding: '10px 0',
+              background: `${project.color}22`, border: `1.5px solid ${project.color}`,
+              color: '#f5e6c8', borderRadius: '4px', fontSize: '0.88rem',
+              fontWeight: 600, letterSpacing: '0.06em', textDecoration: 'none',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = `${project.color}44` }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = `${project.color}22` }}
           >
-            Live Demo ↗
+            Live Demo
           </a>
           <a
             href={project.repoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 text-center py-2 rounded-full text-sm font-serif transition-colors"
             style={{
-              border: `1.5px solid ${project.color}`,
-              color: project.color,
+              flex: 1, display: 'block', textAlign: 'center', padding: '10px 0',
+              background: 'transparent', border: '1.5px solid rgba(200,127,76,0.35)',
+              color: 'rgba(245,230,200,0.70)', borderRadius: '4px', fontSize: '0.88rem',
+              fontWeight: 600, letterSpacing: '0.06em', textDecoration: 'none',
+              transition: 'background 0.2s',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(200,127,76,0.08)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
           >
-            GitHub ↗
+            Source Code
           </a>
         </div>
+
+        {/* Bottom accent line */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: '30%', right: '30%', height: '1px',
+          background: `linear-gradient(90deg, transparent, ${project.color}44, transparent)`,
+        }} />
       </div>
     </div>
   )

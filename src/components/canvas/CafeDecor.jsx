@@ -5,7 +5,8 @@ import useSceneStore from '../../store/useSceneStore'
 
 const STEAM_COUNT = 36
 // World position of the machine nozzle (machine is at x=2.5 in App.jsx)
-const NOZZLE = [2.5, 0.12, 0.0]
+// Steam nozzle: wand tip on the espresso machine at Zone B (machine is at x=12)
+const NOZZLE = [12.25, 0.28, -0.28]
 
 /**
  * Procedural cafe atmosphere props:
@@ -16,7 +17,7 @@ const NOZZLE = [2.5, 0.12, 0.0]
  */
 export default function CafeDecor({ visible = true }) {
   const scene = useSceneStore((s) => s.scene)
-  const showSteam = visible && scene === 'CAFE_INTERIOR'
+  const showSteam = visible && scene === 'MACHINE'
 
   // ── Steam particle state ────────────────────────────────────────────────
   const steamRef  = useRef(null)

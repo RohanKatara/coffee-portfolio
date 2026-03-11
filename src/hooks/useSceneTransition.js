@@ -13,34 +13,37 @@ const EASES = {
   'none':         (t) => t,
 }
 
-/**
- * Drives the camera to the position/target defined in CAMERA_POSITIONS
- * whenever the global scene state changes.
- *
- * Supports two modes:
- *   - Single-segment: cfg has position/target/duration/ease (all existing scenes)
- *   - Waypoint chain: cfg has waypoints[] array (CINEMATIC_EXIT)
- *     Each waypoint can have an optional yBias for a sin-arc Y lift mid-segment.
- *
- * Uses useFrame (not GSAP) so every interpolation step runs in the same
- * tick as the renderer — CameraControls can never overwrite it mid-frame.
- *
- * Must be called from inside the R3F Canvas.
- */
-export function useSceneTransition(cameraControlsRef) {
-  const scene = useSceneStore((s) => s.scene)
-  const { camera } = useThree()
-  const hasPlayedIntro = useRef(false)
+const _lookTarget = new Vector3()
 
-  // Active tween lives in a ref — no React state, no re-renders, no stale closures.
-  const tweenRef = useRef(null)
-  const _tmpTarget = useRef(new Vector3())
+/**
+ * Drives the camera directly via camera.position + camera.lookAt() in useFrame.
+ * No CameraControls — this avoids any competing update loop that could
+ * overwrite our interpolated positions mid-frame.
+ *
+ * Supports:
+ *   - Cinematic intro pull-back on first LANDING visit
+ *   - Instant snaps for zero-duration entries (LOADING, LANDING revisit)
+ *   - Multi-waypoint arc with optional sin-curve Y bias (MACHINE_TRANSITION)
+ *   - Single-segment tweens (MACHINE, POURING, CUP)
+ */
+export function useSceneTransition() {
+  const scene  = useSceneStore((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+
+  const hasPlayedIntro = useRef(false)
+  const tweenRef       = useRef(null)
+
+  // ── Snap the camera immediately (no animation) ────────────────────────────
+  const snapCamera = (pos, tgt) => {
+    camera.position.set(pos.x, pos.y, pos.z)
+    _lookTarget.set(tgt.x, tgt.y, tgt.z)
+    camera.lookAt(_lookTarget)
+  }
 
   // ── Start a new tween on every scene change ───────────────────────────────
   useEffect(() => {
-    const cc = cameraControlsRef.current
     const cfg = CAMERA_POSITIONS[scene]
-    if (!cc || !cfg) return
+    if (!cfg) return
 
     // Cancel any in-flight tween immediately
     tweenRef.current = null
@@ -50,49 +53,35 @@ export function useSceneTransition(cameraControlsRef) {
       hasPlayedIntro.current = true
       const intro = CAMERA_POSITIONS.LANDING_INTRO
 
-      cc.setLookAt(
-        intro.position.x, intro.position.y, intro.position.z,
-        intro.target.x,   intro.target.y,   intro.target.z,
-        false,
-      )
+      // Snap to intro position, then tween to LANDING resting position
+      snapCamera(intro.position, intro.target)
 
       tweenRef.current = {
-        from:     { px: intro.position.x, py: intro.position.y, pz: intro.position.z,
-                    tx: intro.target.x,   ty: intro.target.y,   tz: intro.target.z },
-        to:       { px: cfg.position.x,   py: cfg.position.y,   pz: cfg.position.z,
-                    tx: cfg.target.x,     ty: cfg.target.y,     tz: cfg.target.z },
-        duration:   2.5,
-        elapsed:    0,
-        ease:       EASES['power2.inOut'],
-        yBias:      0,
+        from: { px: intro.position.x, py: intro.position.y, pz: intro.position.z,
+                tx: intro.target.x,   ty: intro.target.y,   tz: intro.target.z },
+        to:   { px: cfg.position.x,   py: cfg.position.y,   pz: cfg.position.z,
+                tx: cfg.target.x,     ty: cfg.target.y,     tz: cfg.target.z },
+        duration:  2.5,
+        elapsed:   0,
+        ease:      EASES['power2.inOut'],
+        yBias:     0,
         onComplete: null,
         waypoints:  null,
       }
       return
     }
 
-    // ── Instant snap (LOADING / LANDING revisit) ──────────────────────────
-    if (cfg.duration === 0) {
-      cc.setLookAt(
-        cfg.position.x, cfg.position.y, cfg.position.z,
-        cfg.target.x,   cfg.target.y,   cfg.target.z,
-        false,
-      )
-      return
-    }
-
-    // ── Waypoint chain (e.g. CINEMATIC_EXIT) ─────────────────────────────
+    // ── Waypoint chain (MACHINE_TRANSITION) ───────────────────────────────
     if (cfg.waypoints) {
       const wp0 = cfg.waypoints[0]
-      cc.getTarget(_tmpTarget.current)
 
       tweenRef.current = {
-        waypoints:      cfg.waypoints,
-        waypointIndex:  0,
+        waypoints:       cfg.waypoints,
+        waypointIndex:   0,
         finalOnComplete: cfg.onComplete,
         from: {
           px: camera.position.x, py: camera.position.y, pz: camera.position.z,
-          tx: _tmpTarget.current.x, ty: _tmpTarget.current.y, tz: _tmpTarget.current.z,
+          tx: camera.position.x, ty: camera.position.y - 0.1, tz: camera.position.z - 5,
         },
         to: {
           px: wp0.position.x, py: wp0.position.y, pz: wp0.position.z,
@@ -108,13 +97,17 @@ export function useSceneTransition(cameraControlsRef) {
       return
     }
 
-    // ── Single-segment animated transition ────────────────────────────────
-    cc.getTarget(_tmpTarget.current)
+    // ── Instant snap (LOADING / LANDING revisit) ──────────────────────────
+    if (!cfg.duration || cfg.duration === 0) {
+      snapCamera(cfg.position, cfg.target)
+      return
+    }
 
+    // ── Single-segment animated transition ────────────────────────────────
     tweenRef.current = {
       from: {
         px: camera.position.x, py: camera.position.y, pz: camera.position.z,
-        tx: _tmpTarget.current.x, ty: _tmpTarget.current.y, tz: _tmpTarget.current.z,
+        tx: camera.position.x, ty: camera.position.y - 0.1, tz: camera.position.z - 5,
       },
       to: {
         px: cfg.position.x, py: cfg.position.y, pz: cfg.position.z,
@@ -132,28 +125,24 @@ export function useSceneTransition(cameraControlsRef) {
   // ── Drive the active tween every frame ───────────────────────────────────
   useFrame((_, delta) => {
     const tween = tweenRef.current
-    const cc    = cameraControlsRef.current
-    if (!tween || !cc) return
+    if (!tween) return
 
     tween.elapsed = Math.min(tween.elapsed + delta, tween.duration)
     const rawAlpha = tween.elapsed / tween.duration
     const alpha    = tween.ease(rawAlpha)
+    const lerp     = (a, b) => a + (b - a) * alpha
 
-    const lerp = (a, b) => a + (b - a) * alpha
-
-    // Y position adds optional sin-arc lift (peaks at rawAlpha=0.5, zero at 0 and 1)
+    const posX = lerp(tween.from.px, tween.to.px)
     const posY = lerp(tween.from.py, tween.to.py) +
                  (tween.yBias || 0) * Math.sin(Math.PI * rawAlpha)
+    const posZ = lerp(tween.from.pz, tween.to.pz)
+    const tgtX = lerp(tween.from.tx, tween.to.tx)
+    const tgtY = lerp(tween.from.ty, tween.to.ty)
+    const tgtZ = lerp(tween.from.tz, tween.to.tz)
 
-    cc.setLookAt(
-      lerp(tween.from.px, tween.to.px),
-      posY,
-      lerp(tween.from.pz, tween.to.pz),
-      lerp(tween.from.tx, tween.to.tx),
-      lerp(tween.from.ty, tween.to.ty),
-      lerp(tween.from.tz, tween.to.tz),
-      false,
-    )
+    camera.position.set(posX, posY, posZ)
+    _lookTarget.set(tgtX, tgtY, tgtZ)
+    camera.lookAt(_lookTarget)
 
     if (tween.elapsed >= tween.duration) {
       // ── Waypoint chain: advance to next segment ───────────────────────
@@ -161,11 +150,9 @@ export function useSceneTransition(cameraControlsRef) {
         const nextIndex = tween.waypointIndex + 1
         const nextWp    = tween.waypoints[nextIndex]
 
-        // Read actual camera state to avoid drift accumulation
-        cc.getTarget(_tmpTarget.current)
         tween.from = {
           px: camera.position.x, py: camera.position.y, pz: camera.position.z,
-          tx: _tmpTarget.current.x, ty: _tmpTarget.current.y, tz: _tmpTarget.current.z,
+          tx: tgtX, ty: tgtY, tz: tgtZ,
         }
         tween.to = {
           px: nextWp.position.x, py: nextWp.position.y, pz: nextWp.position.z,
@@ -183,7 +170,6 @@ export function useSceneTransition(cameraControlsRef) {
       tweenRef.current = null
 
       if (tween.waypoints) {
-        // Waypoint chain finished
         useSceneStore.getState().setTransitioning(false)
         useSceneStore.getState().setScene(tween.finalOnComplete)
       } else if (tween.onComplete) {

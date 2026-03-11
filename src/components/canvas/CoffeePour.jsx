@@ -1,124 +1,105 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
 import useSceneStore from '../../store/useSceneStore'
 
-const MAX_PARTICLES = 200
-const EMIT_RATE = 8          // particles per frame
-const POUR_DURATION = 2.5    // seconds until scene advances
-const GRAVITY = -0.008
+const PARTICLE_COUNT = 200
+const POUR_DURATION  = 2.5
 
-// Group head origin (world-space, relative to this group's parent)
-const ORIGIN = [0, 0.05, 0.28]
+// Pour spout: above the cup (cup is at x=12, counter top y=-0.53)
+const SPOUT_X = 12.0
+const SPOUT_Y = 0.30
+const SPOUT_Z = -0.25
 
 /**
- * Points-based particle stream that simulates coffee flowing from the
- * group head into the cup below.
+ * Espresso-stream particle system.
  *
- * All particle state lives in Float32Arrays mutated in useFrame —
- * no React re-renders are triggered during the effect.
+ * Mutates Float32Array buffers inside useFrame — zero React re-renders.
+ * Reads isPouring via the imperative getter to avoid stale closures.
+ * Calls finishPour() after POUR_DURATION seconds.
  */
-export default function CoffeePour({ visible = true }) {
-  // isPouring is safe as a hook subscription — we only read it to gate useFrame + JSX
-  const isPouring = useSceneStore((s) => s.isPouring)
+export default function CoffeePour() {
+  const positions  = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), [])
+  const velocities = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), [])
+  const ages       = useMemo(() => new Float32Array(PARTICLE_COUNT),     [])
+  const geomRef    = useRef(null)
+  const elapsedRef = useRef(0)
+  const firedRef   = useRef(false)
 
-  const pointsRef = useRef(null)
-  const pourTimer = useRef(0)
-  const emitAccum = useRef(0)
-
-  // Flat arrays: positions (x,y,z) and velocities (x,y,z) per particle
-  const positions = useMemo(() => new Float32Array(MAX_PARTICLES * 3), [])
-  const velocities = useMemo(() => new Float32Array(MAX_PARTICLES * 3), [])
-  const alive = useMemo(() => new Uint8Array(MAX_PARTICLES), [])
-
-  const geomRef = useRef(null)
+  // Initialise all particles off-screen
+  useMemo(() => {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const b = i * 3
+      positions[b] = positions[b + 1] = positions[b + 2] = -999
+      ages[i] = 9999 // force immediate respawn when active
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useFrame((_, delta) => {
-    if (!isPouring || !pointsRef.current) return
-
-    pourTimer.current += delta
-
-    const progress = Math.min(pourTimer.current / POUR_DURATION, 1)
-    useSceneStore.getState().setCupFill(progress)
-
-    if (progress >= 1) {
-      useSceneStore.getState().finishPour()
-      pourTimer.current = 0
-      // Kill all particles
-      alive.fill(0)
-      positions.fill(0)
-      if (geomRef.current) geomRef.current.attributes.position.needsUpdate = true
+    const state = useSceneStore.getState()
+    if (!state.isPouring) {
+      // Reset so the next pour starts fresh
+      firedRef.current  = false
+      elapsedRef.current = 0
       return
     }
 
-    // Emit new particles
-    emitAccum.current += EMIT_RATE
-    while (emitAccum.current >= 1) {
-      emitAccum.current -= 1
-      // Find a dead slot
-      for (let i = 0; i < MAX_PARTICLES; i++) {
-        if (!alive[i]) {
-          const base = i * 3
-          positions[base]     = ORIGIN[0] + (Math.random() - 0.5) * 0.015
-          positions[base + 1] = ORIGIN[1]
-          positions[base + 2] = ORIGIN[2] + (Math.random() - 0.5) * 0.015
-          velocities[base]     = (Math.random() - 0.5) * 0.002
-          velocities[base + 1] = -0.02 - Math.random() * 0.01
-          velocities[base + 2] = (Math.random() - 0.5) * 0.002
-          alive[i] = 1
-          break
-        }
+    if (!geomRef.current) return
+
+    elapsedRef.current += delta
+
+    // Advance to CUP once the pour duration elapses
+    if (!firedRef.current && elapsedRef.current >= POUR_DURATION) {
+      firedRef.current = true
+      state.finishPour()
+      return
+    }
+
+    // Update fill amount
+    state.setCupFill(Math.min(elapsedRef.current / POUR_DURATION, 1.0))
+
+    // Update particles
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      ages[i] += delta
+      const lifetime = 0.35 + Math.random() * 0.20
+
+      if (ages[i] > lifetime) {
+        // Respawn at the spout
+        ages[i] = 0
+        const b = i * 3
+        positions[b]     = SPOUT_X + (Math.random() - 0.5) * 0.03
+        positions[b + 1] = SPOUT_Y
+        positions[b + 2] = SPOUT_Z + (Math.random() - 0.5) * 0.03
+        velocities[b]     = (Math.random() - 0.5) * 0.008
+        velocities[b + 1] = -0.70 - Math.random() * 0.25
+        velocities[b + 2] = (Math.random() - 0.5) * 0.008
+      } else {
+        const b = i * 3
+        positions[b]     += velocities[b]     * delta
+        positions[b + 1] += velocities[b + 1] * delta
+        positions[b + 2] += velocities[b + 2] * delta
+        velocities[b + 1] -= 1.8 * delta  // gravity
       }
     }
 
-    // Update live particles
-    for (let i = 0; i < MAX_PARTICLES; i++) {
-      if (!alive[i]) continue
-      const base = i * 3
-      velocities[base + 1] += GRAVITY
-      positions[base]     += velocities[base]
-      positions[base + 1] += velocities[base + 1]
-      positions[base + 2] += velocities[base + 2]
-
-      // Kill if below cup level
-      if (positions[base + 1] < -0.55) {
-        alive[i] = 0
-        positions[base] = 0
-        positions[base + 1] = 0
-        positions[base + 2] = 0
-      }
-    }
-
-    if (geomRef.current) {
-      geomRef.current.attributes.position.needsUpdate = true
-    }
+    geomRef.current.attributes.position.needsUpdate = true
   })
 
-  // Reset timer when pour starts
-  // (isPouring flipping to true → re-run effect)
-  if (!isPouring) {
-    pourTimer.current = 0
-    emitAccum.current = 0
-    alive.fill(0)
-    positions.fill(0)
-  }
-
   return (
-    <points ref={pointsRef} visible={visible && isPouring}>
+    <points>
       <bufferGeometry ref={geomRef}>
         <bufferAttribute
           attach="attributes-position"
           array={positions}
-          count={MAX_PARTICLES}
+          count={PARTICLE_COUNT}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        color="#4a2c0a"
-        size={0.012}
+        color="#2a1005"
+        size={0.016}
         sizeAttenuation
         transparent
-        opacity={0.85}
+        opacity={0.88}
         depthWrite={false}
       />
     </points>

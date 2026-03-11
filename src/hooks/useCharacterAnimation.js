@@ -81,16 +81,18 @@ export function useCharacterAnimation(actions, scene) {
     return clearTimeouts
   }, [actions]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When scene leaves LANDING, trigger WalkAway (or just fade out)
+  // When scene leaves LANDING, trigger WalkAway if the clip exists.
+  // If no WalkAway clip, leave idle playing — never allow T-pose.
   useEffect(() => {
     if (scene !== 'LANDING' && scene !== 'LOADING') {
       clearTimeouts()
       const { idle, wave, walkAway } = clipNames.current
-      actions[idle]?.fadeOut(0.3)
       actions[wave]?.fadeOut(0.3)
       if (walkAway) {
+        actions[idle]?.fadeOut(0.3)
         actions[walkAway].reset().setEffectiveWeight(1).fadeIn(0.3).play()
       }
+      // No walkAway clip → idle keeps playing; Three.js won't snap to T-pose
     }
   }, [scene]) // eslint-disable-line react-hooks/exhaustive-deps
 }
