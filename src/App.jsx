@@ -2,7 +2,7 @@ import { Suspense, useRef, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import { PCFSoftShadowMap } from 'three'
-import { EffectComposer, SMAA, N8AO, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, SMAA, N8AO, Bloom, Vignette, BrightnessContrast } from '@react-three/postprocessing'
 import gsap from 'gsap'
 
 // Draco decoder path for compressed GLB models
@@ -15,26 +15,28 @@ import MachineScene from './scenes/MachineScene'
 import PouringScene from './scenes/PouringScene'
 import CupScene from './scenes/CupScene'
 
+import ProjectButtons3D from './components/canvas/ProjectButtons3D'
+
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
-import CoffeeMenuUI from './components/ui/CoffeeMenuUI'
 import ProjectDetail from './components/ui/ProjectDetail'
 
 import useSceneStore from './store/useSceneStore'
 
-// ── Bloom ramp during cinematic transition ────────────────────────────────────
-// Intensity tweens 0.35 → 0.65 when isTransitioning, back when done.
-// Uses useFrame + GSAP proxy object so the update is per-frame, not per React render.
+// ── Cinematic post-processing pipeline ───────────────────────────────────────
+// Bloom intensity tweens 1.5 → 1.8 during the cinematic transition, back to
+// 1.5 at rest.  All other effects are static — no React re-renders needed.
+// disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
-  const [bloomIntensity, setBloomIntensity] = useState(0.35)
-  const obj  = useRef({ val: 0.35 })
-  const prev = useRef(0.35)
+  const [bloomIntensity, setBloomIntensity] = useState(1.5)
+  const obj  = useRef({ val: 1.5 })
+  const prev = useRef(1.5)
 
   useEffect(() => {
     gsap.killTweensOf(obj.current)
     gsap.to(obj.current, {
-      val:      isTransitioning ? 0.65 : 0.35,
+      val:      isTransitioning ? 1.8  : 1.5,
       duration: isTransitioning ? 0.6  : 0.8,
       ease:     isTransitioning ? 'power2.out' : 'power2.inOut',
     })
@@ -49,10 +51,28 @@ function AnimatedEffects() {
   })
 
   return (
-    <EffectComposer multisampling={0}>
+    <EffectComposer multisampling={0} disableNormalPass>
+      {/* Ambient occlusion — contact shadows in crevices */}
       <N8AO aoRadius={0.3} intensity={1.2} distanceFalloff={0.5} quality="medium" />
+
+      {/* Anti-aliasing */}
       <SMAA />
-      <Bloom intensity={bloomIntensity} luminanceThreshold={0.75} luminanceSmoothing={0.05} mipmapBlur />
+
+      {/* Halation / glowing UI — threshold raised so only the brightest
+          emissive surfaces (machine lights, HTML UI) actually bloom       */}
+      <Bloom
+        intensity={bloomIntensity}
+        luminanceThreshold={0.9}
+        luminanceSmoothing={0.025}
+        mipmapBlur
+      />
+
+      {/* Vignette — darkens periphery, draws the eye to centre stage */}
+      <Vignette offset={0.5} darkness={0.5} />
+
+      {/* Colour grade — crush blacks slightly, lift contrast for a moody
+          premium look without blowing out the warm amber lighting         */}
+      <BrightnessContrast brightness={-0.05} contrast={0.1} />
     </EffectComposer>
   )
 }
@@ -72,7 +92,7 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Camera — useFrame-driven transitions */}
+          {/* Camera — useFrame-driven state transitions */}
           <SceneCamera />
 
           {/* Persistent lighting + floor + walls + counter */}
@@ -82,6 +102,9 @@ export default function App() {
           <LandingScene />
           <MachineScene />
           <CupScene />
+
+          {/* 3D project buttons — reveal themselves on MACHINE state entry */}
+          <ProjectButtons3D />
         </Suspense>
 
         {/* Particle pour — conditionally mounted, no WebGL context risk */}
@@ -94,7 +117,6 @@ export default function App() {
       {/* ── HTML Overlays (above canvas) ─────────────────────── */}
       <LoadingScreen />
       <SpeechBubble />
-      <CoffeeMenuUI />
       <ProjectDetail />
     </div>
   )

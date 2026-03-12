@@ -31,10 +31,11 @@ export const CAMERA_POSITIONS = {
     onComplete: 'MACHINE',
   },
 
-  // Zone B resting view — used after transition arrives and when returning from CUP.
+  // Zone B resting view — scroll endpoint (offset = 1.0) and CUP return target.
+  // Z pushed in tightly so the machine fills the frame at full scroll.
   MACHINE: {
-    position: { x: 8.8,  y: 0.38, z: 4.2  },
-    target:   { x: 12.0, y: -0.12, z: 0.0 },
+    position: { x: 10.0, y: 0.2,  z: 3.0  },
+    target:   { x: 12.2, y: -0.1, z: -0.2 },
     duration: 0.5,
     ease: 'power2.out',
   },

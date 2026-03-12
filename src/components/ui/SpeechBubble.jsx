@@ -30,8 +30,8 @@ export default function SpeechBubble() {
     }
   }, [scene])
 
-  // Keep mounted during MACHINE_TRANSITION so the exit fade-out can finish
-  if (scene !== 'LANDING' && scene !== 'MACHINE_TRANSITION') return null
+  // Unmount once scene leaves LANDING — GSAP fade-out runs first (300 ms delay)
+  if (scene !== 'LANDING') return null
 
   return (
     <div
