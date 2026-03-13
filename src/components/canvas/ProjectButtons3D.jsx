@@ -9,17 +9,21 @@ import projects from '../../data/projects'
 // ── 4 projects ────────────────────────────────────────────────────────────────
 const BUTTON_PROJECTS = projects.slice(0, 4)
 
-// ── Group world anchor — center of the button cluster, directly above the machine
-const GROUP_POSITION = [12.25, 1.10, -0.30]
+// ── Tunable config — edit these to reposition/resize without touching logic ──
+const BUTTON_ACTIVE_SCALE = 0.02   // world-scale when visible (very small diegetic dials)
+const BUTTON_SPACING      = 14     // local X gap — 4 buttons span ~0.84 world units across machine face
+const GROUP_X_POSITION    = 11.89  // world X — centre of machine button panel
+const GROUP_Y_POSITION    = 0.15   // world Y — slightly above machine top
+const GROUP_Z_POSITION    = 0.05   // world Z — just in front of machine face (avoids z-fighting)
 
-// ── Local offsets relative to GROUP_POSITION (X-axis spread only)
-// Small values mean scaling 0→1 animates the buttons appearing in-place
-// rather than flying in from world origin.
+// ── Derived ───────────────────────────────────────────────────────────────────
+const GROUP_POSITION = [GROUP_X_POSITION, GROUP_Y_POSITION, GROUP_Z_POSITION]
+
 const FLOAT_POSITIONS = [
-  [-0.30, 0, 0],
-  [-0.10, 0, 0],
-  [ 0.10, 0, 0],
-  [ 0.30, 0, 0],
+  [-BUTTON_SPACING * 1.5, 0, 0],
+  [-BUTTON_SPACING * 0.5, 0, 0],
+  [ BUTTON_SPACING * 0.5, 0, 0],
+  [ BUTTON_SPACING * 1.5, 0, 0],
 ]
 
 // λ = 5 → smooth pop-in (~0.92 s to 99 %)
@@ -40,6 +44,18 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
         perspective: '1000px',
       }}
     >
+      {/* Project name label */}
+      <span style={{
+        color: isHovered ? '#ffccaa' : '#a07850',
+        fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
+        fontSize: '7px', fontWeight: '600',
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        whiteSpace: 'nowrap', transition: 'color 0.25s',
+        userSelect: 'none', pointerEvents: 'none',
+      }}>
+        {label}
+      </span>
+
       <button
         onClick={onClick}
         onMouseEnter={() => setIsHovered(true)}
@@ -155,18 +171,6 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
           }} />
         </div>
       </button>
-
-      {/* Project name label */}
-      <span style={{
-        color: isHovered ? '#ffccaa' : '#a07850',
-        fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-        fontSize: '10px', fontWeight: '600',
-        letterSpacing: '0.08em', textTransform: 'uppercase',
-        whiteSpace: 'nowrap', transition: 'color 0.25s',
-        userSelect: 'none', pointerEvents: 'none',
-      }}>
-        {label}
-      </span>
     </div>
   )
 }
@@ -186,9 +190,9 @@ export default function ProjectButtons3D() {
     const scene   = useSceneStore.getState().scene
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
 
-    // damp3 the group's scale between [1,1,1] and [0,0,0]
+    // damp3 the group's scale between BUTTON_ACTIVE_SCALE and 0
     // Group is anchored at GROUP_POSITION so scaling happens in-place
-    const t = isZoneB ? 1 : 0
+    const t = isZoneB ? BUTTON_ACTIVE_SCALE : 0
     damp3(buttonsGroupRef.current.scale, [t, t, t], SCALE_LAMBDA, delta)
 
     // Hide HTML portals while invisible so they don't pollute the DOM
@@ -201,16 +205,16 @@ export default function ProjectButtons3D() {
         <Html
           key={project.id}
           center
-          distanceFactor={7}
-          position={FLOAT_POSITIONS[i]}
+          distanceFactor={8}
+          position={[FLOAT_POSITIONS[i][0], FLOAT_POSITIONS[i][1] - 0.4, FLOAT_POSITIONS[i][2]]}
           zIndexRange={[100, 0]}
           style={{ pointerEvents: 'none' }}
         >
-          <div style={{ pointerEvents: 'all' }}>
+          <div style={{ pointerEvents: 'all', fontSize: '10px', whiteSpace: 'nowrap' }}>
             <EspressoDialButton
               label={project.name}
               onClick={() => startPour(project.id)}
-              size={68}
+              size={20}
             />
           </div>
         </Html>

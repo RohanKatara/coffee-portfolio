@@ -1,9 +1,16 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { Box3 } from 'three'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
-useGLTF.preload('/models/coffee_machine.glb')
+useGLTF.preload('/models/espresso_machine.glb')
+
+
+// ── Transform config — tweak these to fit the scene ────────────────────────────
+// Model internal units are ~100× (Sketchfab cm). Scale 0.005 ≈ 0.45 m wide.
+// Rotation: model faces -Z in Blender, rotate π to face camera (+Z).
+const MACHINE_SCALE    = 0.013
+const MACHINE_POSITION = [0, 0, 0]
+const MACHINE_ROTATION = [0, 0, 0]
 
 function EspressoMachinePlaceholder({ position }) {
   return (
@@ -32,44 +39,76 @@ function EspressoMachinePlaceholder({ position }) {
   )
 }
 
-function EspressoMachineModel({ position, scale, rotation }) {
-  const { scene } = useGLTF('/models/coffee_machine.glb')
-  const [sx, sy, sz] = scale
-  const [rx, ry, rz] = rotation
+// ── Material classification by name fragment ──────────────────────────────────
+// Applied once on load via scene.traverse — no per-frame cost.
+// IMPORTANT: never override .color — the baked albedo textures carry all the
+// surface detail. We only adjust metalness, roughness, and envMapIntensity.
+function applyPBR(scene) {
+  scene.traverse((child) => {
+    if (!child.isMesh || !child.material) return
+    const n = (child.material.name || '').toLowerCase()
 
-  const [clone, liftY] = useMemo(() => {
-    const c = scene.clone(true)
-    // Apply scale and rotation before bbox so liftY is correct for this size
-    c.scale.set(sx, sy, sz)
-    c.rotation.set(rx, ry, rz)
-    c.traverse(node => {
-      if (!node.isMesh) return
-      node.castShadow    = true
-      node.receiveShadow = true
-    })
-    c.updateMatrixWorld(true)
-    const box = new Box3().setFromObject(c)
-    return [c, -box.min.y]
-  }, [scene, sx, sy, sz, rx, ry, rz])
+    // Leave emissive / decorative surfaces completely untouched
+    if (
+      n.includes('glass') || n.includes('screen') || n.includes('ekran') ||
+      n.includes('emision') || n.includes('icon') || n.includes('number') ||
+      n.includes('ren_l') // indicator light
+    ) return
+
+    if (
+      n.includes('nikelaj') ||   // nickel-plated group heads, drip tray, portafilter
+      n.includes('renksiz') ||   // colourless chrome ring
+      n.includes('aleminyum') || // aluminium warming rack
+      n.includes('logo')         // Sanremo badge
+    ) {
+      // Mirror chrome — maximum reflectivity, environment map cranked up
+      child.material.metalness      = 0.98
+      child.material.roughness      = 0.05
+      child.material.envMapIntensity = 4.0
+    } else if (n.includes('metal')) {
+      // Brushed stainless — still very metallic but with visible grain
+      child.material.metalness      = 0.9
+      child.material.roughness      = 0.2
+      child.material.envMapIntensity = 2.5
+    } else if (n.includes('parlak')) {
+      // Shiny black plastic (button surrounds, screen bezel)
+      child.material.metalness      = 0.2
+      child.material.roughness      = 0.15
+      child.material.envMapIntensity = 1.5
+    } else if (n.includes('plastik') || n.includes('siyah')) {
+      // Matte black housing panels
+      child.material.metalness      = 0.1
+      child.material.roughness      = 0.75
+      child.material.envMapIntensity = 0.8
+    }
+
+    child.material.needsUpdate = true
+  })
+}
+
+function EspressoMachineModel() {
+  const { scene } = useGLTF('/models/espresso_machine.glb')
+
+  useEffect(() => { applyPBR(scene) }, [scene])
 
   return (
-    // position[1] + liftY seats the model flush on whatever surface Y is passed in
-    <group position={[position[0], position[1] + liftY, position[2]]}>
-      <primitive object={clone} />
-    </group>
+    <primitive
+      object={scene}
+      position={[0, -12 * MACHINE_SCALE, 0]}
+      scale={MACHINE_SCALE}
+      rotation={MACHINE_ROTATION}
+    />
   )
 }
 
-export default function EspressoMachine({
-  position = [12, -0.53, -0.5],
-  scale    = [1, 1, 1],
-  rotation = [0, 0, 0],
-}) {
+export default function EspressoMachine(props) {
   return (
-    <ModelErrorBoundary fallback={<EspressoMachinePlaceholder position={position} />}>
-      <Suspense fallback={<EspressoMachinePlaceholder position={position} />}>
-        <EspressoMachineModel position={position} scale={scale} rotation={rotation} />
-      </Suspense>
-    </ModelErrorBoundary>
+    <group {...props}>
+      <ModelErrorBoundary fallback={<EspressoMachinePlaceholder position={MACHINE_POSITION} />}>
+        <Suspense fallback={<EspressoMachinePlaceholder position={MACHINE_POSITION} />}>
+          <EspressoMachineModel />
+        </Suspense>
+      </ModelErrorBoundary>
+    </group>
   )
 }

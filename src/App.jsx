@@ -92,6 +92,10 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
+          {/* Restore base illumination — low enough to keep shadows, high
+              enough to stop the walls going dark from the environment map */}
+          <ambientLight intensity={0.5} color="#ffffff" />
+
           {/* Camera — useFrame-driven state transitions */}
           <SceneCamera />
 

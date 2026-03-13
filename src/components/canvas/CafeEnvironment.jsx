@@ -365,6 +365,17 @@ export default function CafeEnvironment() {
         decay={1.6}
       />
 
+      {/* Zone B right-area fill — warms the décor section beyond the machine.
+          Low-hanging point light so it pools on the counter and shelves without
+          blowing out the background wall. Amber hue matches the room palette.  */}
+      <pointLight
+        position={[16.5, 2.4, 0.2]}
+        intensity={3.8}
+        color="#ffb060"
+        distance={9}
+        decay={1.5}
+      />
+
       {/* ── COOL SHADOW FILL ────────────────────────────────────────────── */}
       {/* Very faint blue-purple from the camera side.  Keeps deep shadows
           from going pure black (0,0,0) while maintaining depth contrast.  */}
@@ -377,34 +388,55 @@ export default function CafeEnvironment() {
       />
 
       {/* ── FLOOR — dark polished hardwood ──────────────────────────────── */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
-        <planeGeometry args={[30, 30]} />
+      {/* Centre x=6.5 → covers x=−8 → x=21 (29 units); z=30 depth fine   */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[6.5, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[29, 30]} />
         <meshStandardMaterial {...M.floor} />
       </mesh>
 
       {/* ── CEILING ─────────────────────────────────────────────────────── */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 3.6, 0]}>
-        <planeGeometry args={[30, 30]} />
+      {/* Raised to y=12.5 to sit flush on top of the extended walls.      */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[6.5, 12.5, 0]}>
+        <planeGeometry args={[29, 30]} />
         <meshStandardMaterial {...M.ceiling} />
       </mesh>
 
       {/* ── BACK WALL — dark teal plaster (extends across Zone A + Zone B) ── */}
-      {/*   Centred at x=7 to cover x=-8 → x=22 (30 units wide).            */}
-      {/*   y range: -1.5 (floor) → 3.6 (ceiling) = 5.1 h, center = 1.05   */}
-      <mesh position={[7, 1.05, -2.7]} receiveShadow>
-        <boxGeometry args={[30, 5.1, 0.14]} />
+      {/*   Centre x=6.5 → covers x=−8 → x=21 (29 units wide).             */}
+      {/*   y: −1.5 (floor) → 12.5 (ceiling) = 14 h, centre y = 5.5       */}
+      <mesh position={[6.5, 5.5, -2.7]} receiveShadow>
+        <boxGeometry args={[29, 14, 0.14]} />
         <meshStandardMaterial {...M.wall} />
       </mesh>
 
       {/* Dado rail — horizontal accent strip at mid-wall */}
-      <mesh position={[7, -0.42, -2.64]}>
-        <boxGeometry args={[30, 0.07, 0.08]} />
+      <mesh position={[6.5, -0.42, -2.64]}>
+        <boxGeometry args={[29, 0.07, 0.08]} />
         <meshStandardMaterial {...M.wallTrim} />
       </mesh>
 
       {/* Baseboard — dark strip at floor line */}
-      <mesh position={[7, -1.42, -2.64]}>
-        <boxGeometry args={[30, 0.16, 0.08]} />
+      <mesh position={[6.5, -1.42, -2.64]}>
+        <boxGeometry args={[29, 0.16, 0.08]} />
+        <meshStandardMaterial {...M.baseboard} />
+      </mesh>
+
+      {/* ── RIGHT SIDE WALL — closes the room at x=21 ──────────────────── */}
+      {/*   Height 14 matches back wall (y=−1.5 → 12.5, centre 5.5).       */}
+      {/*   Depth 14, centre z=2 → covers z=−5 → z=9, well past the        */}
+      {/*   camera's max z=4.5 so the front edge is never exposed.          */}
+      <mesh position={[21, 5.5, 2]} receiveShadow>
+        <boxGeometry args={[0.14, 14, 14]} />
+        <meshStandardMaterial {...M.wall} />
+      </mesh>
+      {/* Dado rail on right side wall */}
+      <mesh position={[20.93, -0.42, 2]}>
+        <boxGeometry args={[0.08, 0.07, 14]} />
+        <meshStandardMaterial {...M.wallTrim} />
+      </mesh>
+      {/* Baseboard on right side wall */}
+      <mesh position={[20.93, -1.42, 2]}>
+        <boxGeometry args={[0.08, 0.16, 14]} />
         <meshStandardMaterial {...M.baseboard} />
       </mesh>
 
@@ -490,17 +522,33 @@ export default function CafeEnvironment() {
       </mesh>
 
       {/* ── BAR COUNTER — ZONE B EXTENSION ─────────────────────────────── */}
-      {/*   Continuous with Zone A; runs from x=4.0 → x=15.0 (11 units).   */}
-      {/*   Same z-depth and y-height as Zone A counter.                    */}
+      {/*   Runs from x=4.0 → x=21.0 (17 units); centre x=12.5.           */}
+      {/*   Terminates at the right side wall (x=21).                      */}
 
       {/* Stone base */}
-      <mesh position={[9.5, -1.05, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[11.0, 0.9, 1.0]} />
+      <mesh position={[12.5, -1.05, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[17.0, 0.9, 1.0]} />
         <meshStandardMaterial {...M.stoneBlack} />
       </mesh>
       {/* Polished dark wood top */}
-      <mesh position={[9.5, -0.565, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[11.14, 0.07, 1.12]} />
+      <mesh position={[12.5, -0.565, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[17.14, 0.07, 1.12]} />
+        <meshStandardMaterial {...M.woodTop} />
+      </mesh>
+
+      {/* ── BAR COUNTER — RIGHT L-RETURN ─────────────────────────────────── */}
+      {/*   Caps the Zone B counter corner, mirroring the Zone A L-return.  */}
+      {/*   x: 20.0 → 21.0 (centre 20.5, width 1.0)                        */}
+      {/*   z: −0.7 → 2.5  (centre 0.9,  depth 3.2) — steps toward camera  */}
+
+      {/* Stone base */}
+      <mesh position={[20.5, -1.05, 0.9]} castShadow receiveShadow>
+        <boxGeometry args={[1.0, 0.9, 3.2]} />
+        <meshStandardMaterial {...M.stoneBlack} />
+      </mesh>
+      {/* Polished dark wood top */}
+      <mesh position={[20.5, -0.565, 0.9]} castShadow receiveShadow>
+        <boxGeometry args={[1.12, 0.07, 3.34]} />
         <meshStandardMaterial {...M.woodTop} />
       </mesh>
 
@@ -528,7 +576,7 @@ export default function CafeEnvironment() {
         frames={1}
         color="#0a0402"
       />
-      <Environment preset="city" background={false} />
+      <Environment preset="city" background={false} environmentIntensity={1.5} />
     </>
   )
 }
