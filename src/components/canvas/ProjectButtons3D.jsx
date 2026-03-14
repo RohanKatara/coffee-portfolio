@@ -188,15 +188,17 @@ export default function ProjectButtons3D() {
           <group key={project.id} position={[FLOAT_POSITIONS[i][0], 0, 0]}>
 
             {/* ── Invisible hit sphere — Three.js raycasting for hover ──────── */}
-            {/* Sphere radius 9 in local units → ~0.081 world units at scale    */}
-            {/* 0.009 (inner 0.02 × outer 0.45), large enough to cover the      */}
-            {/* ~46 px button at the MACHINE camera distance.                    */}
+            {/* Positioned at [0,-0.4,0] to match the Html anchor exactly.      */}
+            {/* The Html 'center' prop centres the whole flex column (label +    */}
+            {/* gap + button) on its anchor, putting the button circle below it. */}
+            {/* Matching positions ensures the sphere covers the full button.    */}
             <mesh
+              position={[0, -0.4, 0]}
               onPointerOver={(e) => { e.stopPropagation(); setHover(i, true);  document.body.style.cursor = 'pointer' }}
               onPointerOut={()   => {                      setHover(i, false); document.body.style.cursor = 'auto'    }}
               onClick={(e)       => { e.stopPropagation(); startPour(project.id) }}
             >
-              <sphereGeometry args={[9, 10, 10]} />
+              <sphereGeometry args={[12, 10, 10]} />
               <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
 
