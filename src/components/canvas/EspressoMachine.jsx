@@ -17,20 +17,18 @@ const INTERACTIVE_PROJECTS = projects.slice(0, 4)
 function labelStyle(hovered) {
   return {
     fontFamily: '"Inter", system-ui, sans-serif',
-    fontSize: '7px',
-    fontWeight: '700',
-    letterSpacing: '0.13em',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    letterSpacing: '0.08em',
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
     userSelect: 'none',
     pointerEvents: 'none',
-    padding: '2px 6px',
-    borderRadius: '3px',
-    color: hovered ? '#ffd080' : '#c8a06a',
-    background: hovered ? 'rgba(0,0,0,0.80)' : 'rgba(0,0,0,0.50)',
-    border: `1px solid ${hovered ? 'rgba(255,170,68,0.55)' : 'rgba(255,200,100,0.18)'}`,
-    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-    transition: 'color 0.2s, background 0.2s, border-color 0.2s',
+    color: hovered ? '#ffe080' : '#d4af37',
+    textShadow: hovered
+      ? '0 2px 12px rgba(0,0,0,0.95), 0 0 24px rgba(255,180,60,0.6)'
+      : '0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(212,175,55,0.35)',
+    transition: 'color 0.2s, text-shadow 0.2s',
   }
 }
 
@@ -115,11 +113,16 @@ function InteractiveDial({ position, project }) {
         <meshStandardMaterial color="#aaaaaa" roughness={0.08} metalness={0.95} />
       </mesh>
 
-      {/* Label — floats just above the dial */}
+      {/* Label — floats above the machine body, forward of the front face.
+           No distanceFactor: renders at natural CSS px size regardless of
+           camera distance, so font-size is the only size control needed.
+           position is in the dial group's local space (inside placeholder
+           local space, which has scale=1.4 applied by EspressoMachine).
+           y=+0.38 → local placeholder y≈0.54, clears body top at 0.48.
+           z=+0.20 → well in front of the front face at z≈0.18.          */}
       <Html
         center
-        distanceFactor={2}
-        position={[0, 0.075, 0]}
+        position={[0, 0.38, 0.20]}
         zIndexRange={[100, 0]}
         style={{ pointerEvents: 'none' }}
       >
@@ -249,14 +252,16 @@ function EspressoMachineModel() {
     startPour(INTERACTIVE_PROJECTS[idx].id)
   }
 
-  // Label anchor positions in the EspressoMachine group's local space.
-  // Scale=0.013, so these are in world metres.
-  // TODO: tune x/y/z after inspecting the loaded GLB in-browser.
+  // Label anchor positions in the EspressoMachine group's local space (metres).
+  // x: spread across the machine face width (~0.42 m)
+  // y: 0.55 → well above the machine body top (~0.48 local)
+  // z: 0.30 → clearly in front of the front face (~0.18 local)
+  // TODO: tune x once the real GLB group-head positions are known.
   const LABEL_ANCHORS = [
-    [-0.14, 0.10, 0.18],
-    [-0.05, 0.10, 0.18],
-    [ 0.05, 0.10, 0.18],
-    [ 0.14, 0.10, 0.18],
+    [-0.14, 0.55, 0.30],
+    [-0.05, 0.55, 0.30],
+    [ 0.05, 0.55, 0.30],
+    [ 0.14, 0.55, 0.30],
   ]
 
   return (
@@ -271,12 +276,11 @@ function EspressoMachineModel() {
         onClick={click}
       />
 
-      {/* Project name labels anchored above estimated group-head positions */}
+      {/* Project name labels — no distanceFactor, font-size is the size control */}
       {INTERACTIVE_PROJECTS.map((project, i) => (
         <Html
           key={project.id}
           center
-          distanceFactor={2}
           position={LABEL_ANCHORS[i]}
           zIndexRange={[100, 0]}
           style={{ pointerEvents: 'none' }}
