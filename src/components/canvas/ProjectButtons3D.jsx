@@ -37,17 +37,18 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
 
       {/* Project name label */}
       <span style={{
-        color: isHovered ? '#ffe080' : '#d4af37',
+        color: '#ffe080',
         fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
         fontSize: '8px',
         fontWeight: 'bold',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
         whiteSpace: 'nowrap',
-        transition: 'color 0.25s',
         userSelect: 'none',
         pointerEvents: 'none',
         textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+        opacity: isHovered ? 1 : 0,
+        transition: 'opacity 0.2s',
       }}>
         {label}
       </span>
