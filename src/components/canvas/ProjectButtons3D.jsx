@@ -14,7 +14,7 @@ const BUTTON_ACTIVE_SCALE = 0.02
 const BUTTON_SPACING      = 28
 const GROUP_X_POSITION    = 11.82
 const GROUP_Y_POSITION    =  0.05
-const GROUP_Z_POSITION    =  0.08
+const GROUP_Z_POSITION    =  0.22
 
 const GROUP_POSITION = [GROUP_X_POSITION, GROUP_Y_POSITION, GROUP_Z_POSITION]
 
@@ -182,7 +182,7 @@ export default function ProjectButtons3D() {
   })
 
   return (
-    <group position={GROUP_POSITION} rotation={[-0.4, 0, 0]} scale={0.45}>
+    <group position={GROUP_POSITION} rotation={[-0.25, 0, 0]} scale={0.45}>
       <group ref={buttonsGroupRef} scale={[0, 0, 0]}>
         {BUTTON_PROJECTS.map((project, i) => (
           <group key={project.id} position={[FLOAT_POSITIONS[i][0], 0, 0]}>
