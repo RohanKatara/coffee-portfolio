@@ -12,7 +12,7 @@ const BUTTON_PROJECTS = projects.slice(0, 4)
 // ── Tunable config ────────────────────────────────────────────────────────────
 const BUTTON_ACTIVE_SCALE = 0.02   // world-scale when visible
 const BUTTON_SPACING      = 28     // local X gap — 4 buttons span ~0.50 world units at effective scale 0.009
-const GROUP_X_POSITION    = 12.0   // world X — true centre of machine (was 11.89, off by ~0.1)
+const GROUP_X_POSITION    = 11.82  // world X — shifted slightly left for visual symmetry
 const GROUP_Y_POSITION    =  0.05  // world Y — upper slanted control panel
 const GROUP_Z_POSITION    =  0.08  // world Z — flush against panel face
 
