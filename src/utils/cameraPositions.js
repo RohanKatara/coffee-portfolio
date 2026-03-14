@@ -41,12 +41,18 @@ export const CAMERA_POSITIONS = {
   },
 
   // Zoom into the machine front face for the pour interaction.
-  POURING: {
-    position: { x: 10.5, y: 0.5, z: 2.8 },
-    target:   { x: 12.0, y: 0.0, z: 0.0 },
-    duration: 1.2,
-    ease: 'power2.out',
-  },
+  // Array of 4 tight macro positions — one per button/spout.
+  // Camera glides to the specific spout the user clicked.
+  POURING: [
+    // Button 0 — spout leftmost
+    { position: { x: 11.1, y: -0.10, z: 1.6 }, target: { x: 11.44, y: -0.40, z: 0.0 } },
+    // Button 1
+    { position: { x: 11.4, y: -0.10, z: 1.6 }, target: { x: 11.69, y: -0.40, z: 0.0 } },
+    // Button 2
+    { position: { x: 11.7, y: -0.10, z: 1.6 }, target: { x: 11.95, y: -0.40, z: 0.0 } },
+    // Button 3 — spout rightmost
+    { position: { x: 11.9, y: -0.10, z: 1.6 }, target: { x: 12.20, y: -0.40, z: 0.0 } },
+  ],
 
   // Close-up on the cup for the project detail reveal.
   CUP: {

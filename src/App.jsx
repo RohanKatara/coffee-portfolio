@@ -29,18 +29,19 @@ import useSceneStore from './store/useSceneStore'
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
+  const isPouring       = useSceneStore((s) => s.isPouring)
   const [bloomIntensity, setBloomIntensity] = useState(1.5)
   const obj  = useRef({ val: 1.5 })
   const prev = useRef(1.5)
 
   useEffect(() => {
     gsap.killTweensOf(obj.current)
-    gsap.to(obj.current, {
-      val:      isTransitioning ? 1.8  : 1.5,
-      duration: isTransitioning ? 0.6  : 0.8,
-      ease:     isTransitioning ? 'power2.out' : 'power2.inOut',
-    })
-  }, [isTransitioning])
+    // isPouring wins: the wet espresso stream should glow brightest
+    const target   = isPouring ? 2.2 : isTransitioning ? 1.8 : 1.5
+    const duration = isPouring ? 0.4 : isTransitioning ? 0.6 : 0.8
+    const ease     = isPouring ? 'power2.out' : isTransitioning ? 'power2.out' : 'power2.inOut'
+    gsap.to(obj.current, { val: target, duration, ease })
+  }, [isTransitioning, isPouring])
 
   useFrame(() => {
     const v = obj.current.val

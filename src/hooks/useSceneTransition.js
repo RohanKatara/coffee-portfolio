@@ -45,14 +45,15 @@ export function useSceneTransition() {
     const scene   = useSceneStore.getState().scene
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
 
-    // Choose the target position and lookAt for the current scene
     let pos, tgt
     if (scene === 'CUP') {
       pos = CAMERA_POSITIONS.CUP.position
       tgt = CAMERA_POSITIONS.CUP.target
     } else if (scene === 'POURING') {
-      pos = CAMERA_POSITIONS.POURING.position
-      tgt = CAMERA_POSITIONS.POURING.target
+      const idx = useSceneStore.getState().activeProjectIndex ?? 0
+      const pouringCam = CAMERA_POSITIONS.POURING[idx] || CAMERA_POSITIONS.POURING[0]
+      pos = pouringCam.position
+      tgt = pouringCam.target
     } else if (isZoneB) {
       pos = CAMERA_POSITIONS.MACHINE.position
       tgt = CAMERA_POSITIONS.MACHINE.target
@@ -61,7 +62,6 @@ export function useSceneTransition() {
       tgt = CAMERA_POSITIONS.LANDING.target
     }
 
-    // damp3 modifies the Vector3 / camera.position in-place — no React state
     damp3(camera.position, [pos.x, pos.y, pos.z], CAM_LAMBDA, delta)
     damp3(_lookAt,         [tgt.x, tgt.y, tgt.z], CAM_LAMBDA, delta)
     camera.lookAt(_lookAt)
