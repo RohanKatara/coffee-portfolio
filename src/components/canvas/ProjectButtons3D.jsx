@@ -10,11 +10,11 @@ import projects from '../../data/projects'
 const BUTTON_PROJECTS = projects.slice(0, 4)
 
 // ── Tunable config ────────────────────────────────────────────────────────────
-const BUTTON_ACTIVE_SCALE = 0.02   // world-scale when visible
-const BUTTON_SPACING      = 28     // local X gap — 4 buttons span ~0.50 world units at effective scale 0.009
-const GROUP_X_POSITION    = 11.82  // world X — shifted slightly left for visual symmetry
-const GROUP_Y_POSITION    =  0.05  // world Y — upper slanted control panel
-const GROUP_Z_POSITION    =  0.08  // world Z — flush against panel face
+const BUTTON_ACTIVE_SCALE = 0.02
+const BUTTON_SPACING      = 28
+const GROUP_X_POSITION    = 11.82
+const GROUP_Y_POSITION    =  0.05
+const GROUP_Z_POSITION    =  0.08
 
 const GROUP_POSITION = [GROUP_X_POSITION, GROUP_Y_POSITION, GROUP_Z_POSITION]
 
@@ -27,15 +27,17 @@ const FLOAT_POSITIONS = [
 
 const SCALE_LAMBDA = 5
 
-// ── EspressoDialButton ────────────────────────────────────────────────────────
-function EspressoDialButton({ label, onClick, size = 72 }) {
-  const [isHovered, setIsHovered] = useState(false)
+// ── Pure-visual button (hover state injected via prop) ────────────────────────
+// Hover detection is done by the Three.js raycaster on invisible meshes in
+// the scene graph — not by DOM onMouseEnter — so it works reliably at any
+// camera angle and scale depth.
+function EspressoDialButton({ label, isHovered, size = 72 }) {
   const [isPressed, setIsPressed] = useState(false)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
 
-      {/* Project name label */}
+      {/* Label — visible only on hover */}
       <span style={{
         color: '#ffe080',
         fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
@@ -53,12 +55,11 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
         {label}
       </span>
 
+      {/* Visual button — press feedback only, no hover logic here */}
       <button
-        onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => { setIsHovered(false); setIsPressed(false) }}
         onMouseDown={() => setIsPressed(true)}
         onMouseUp={() => setIsPressed(false)}
+        onMouseLeave={() => setIsPressed(false)}
         aria-label={label}
         style={{
           position: 'relative',
@@ -87,11 +88,11 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
           boxShadow: isPressed
             ? '0 2px 8px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4)'
             : isHovered
-            ? '0 12px 32px rgba(0,0,0,0.5), 0 6px 16px rgba(0,0,0,0.4), 0 0 24px rgba(217,119,6,0.3)'
-            : '0 8px 24px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.5)',
+            ? '0 12px 32px rgba(0,0,0,0.5), 0 0 24px rgba(217,119,6,0.3)'
+            : '0 8px 24px rgba(0,0,0,0.6)',
         }} />
 
-        {/* Amber glow ring on hover */}
+        {/* Amber glow on hover */}
         <div style={{
           position: 'absolute', inset: 0, borderRadius: '50%',
           background: 'radial-gradient(circle at 50% 50%, rgba(217,119,6,0.4) 0%, transparent 70%)',
@@ -108,31 +109,28 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
           boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -2px 4px rgba(0,0,0,0.6)',
         }} />
 
-        {/* Inner bevel — dark chrome */}
+        {/* Inner bevel */}
         <div style={{
           position: 'absolute', inset: '6px', borderRadius: '50%',
           background: 'linear-gradient(135deg, #2a2a2a 0%, #111111 50%, #222222 100%)',
-          boxShadow: 'inset 0 3px 6px rgba(0,0,0,0.7), inset 0 -1px 2px rgba(255,255,255,0.04)',
+          boxShadow: 'inset 0 3px 6px rgba(0,0,0,0.7)',
         }} />
 
         {/* Amber inner glow on hover */}
         <div style={{
           position: 'absolute', inset: '8px', borderRadius: '50%',
-          transition: 'background 0.5s, box-shadow 0.5s',
-          background: isHovered
-            ? 'radial-gradient(circle at 50% 50%, rgba(217,119,6,0.15) 0%, transparent 100%)'
-            : 'transparent',
+          transition: 'box-shadow 0.5s',
           boxShadow: isHovered ? 'inset 0 0 16px rgba(217,119,6,0.35)' : 'none',
         }} />
 
-        {/* Centre button face — dark polished */}
+        {/* Centre face */}
         <div style={{
           position: 'absolute', inset: '12px', borderRadius: '50%',
           transition: 'box-shadow 0.3s',
           background: 'linear-gradient(145deg, #2d2d2d 0%, #111111 50%, #1e1e1e 100%)',
           boxShadow: isPressed
-            ? 'inset 0 4px 8px rgba(0,0,0,0.9), inset 0 2px 4px rgba(0,0,0,0.7)'
-            : 'inset 0 1px 2px rgba(255,255,255,0.06), inset 0 -1px 2px rgba(0,0,0,0.5)',
+            ? 'inset 0 4px 8px rgba(0,0,0,0.9)'
+            : 'inset 0 1px 2px rgba(255,255,255,0.06)',
         }} />
 
         {/* Coffee icon */}
@@ -148,24 +146,10 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
               color: isHovered ? '#d97706' : '#555555',
               transition: 'color 0.5s, filter 0.5s',
               filter: isHovered
-                ? 'drop-shadow(0 0 8px rgba(217,119,6,0.7)) drop-shadow(0 0 4px rgba(217,119,6,0.5))'
+                ? 'drop-shadow(0 0 8px rgba(217,119,6,0.7))'
                 : 'none',
             }}
           />
-        </div>
-
-        {/* Shimmer sweep on hover */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: '50%',
-          pointerEvents: 'none', overflow: 'hidden',
-          opacity: isHovered ? 0.4 : 0, transition: 'opacity 0.5s',
-        }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(90deg, transparent 0%, rgba(217,119,6,0.2) 50%, transparent 100%)',
-            transition: 'transform 0.7s',
-            transform: isHovered ? 'translateX(100%)' : 'translateX(-100%)',
-          }} />
         </div>
       </button>
     </div>
@@ -173,48 +157,67 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
 }
 
 // ── Scene-level container ─────────────────────────────────────────────────────
-// Always mounted. Scale driven 0 → BUTTON_ACTIVE_SCALE via damp3 so there
-// is never a React remount pop when entering/leaving Zone B.
 export default function ProjectButtons3D() {
   const startPour       = useSceneStore((s) => s.startPour)
   const buttonsGroupRef = useRef()
 
+  // One hover state per button — managed here, fed to Three.js raycaster meshes.
+  // This avoids relying on DOM onMouseEnter/onMouseLeave inside Html portals,
+  // which breaks at oblique camera angles due to z-index and hit-test layering.
+  const [hovers, setHovers] = useState([false, false, false, false])
+
+  const setHover = (i, val) =>
+    setHovers((prev) => {
+      if (prev[i] === val) return prev
+      const next = [...prev]; next[i] = val; return next
+    })
+
   useFrame((_, delta) => {
     if (!buttonsGroupRef.current) return
-
     const scene   = useSceneStore.getState().scene
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
-
     const t = isZoneB ? BUTTON_ACTIVE_SCALE : 0
     damp3(buttonsGroupRef.current.scale, [t, t, t], SCALE_LAMBDA, delta)
-
-    // Hide Html portals while invisible so they don't pollute the DOM
     buttonsGroupRef.current.visible = buttonsGroupRef.current.scale.x > 0.002
   })
 
-  // Outer group: static placement — position, panel-tilt rotation, shrink scale.
-  // Inner group: damp3 animates scale 0 → BUTTON_ACTIVE_SCALE for the reveal.
-  // Keeping them separate prevents the animation from fighting the static scale.
   return (
     <group position={GROUP_POSITION} rotation={[-0.4, 0, 0]} scale={0.45}>
       <group ref={buttonsGroupRef} scale={[0, 0, 0]}>
         {BUTTON_PROJECTS.map((project, i) => (
-          <Html
-            key={project.id}
-            center
-            distanceFactor={8}
-            position={[FLOAT_POSITIONS[i][0], FLOAT_POSITIONS[i][1] - 0.4, FLOAT_POSITIONS[i][2]]}
-            zIndexRange={[100, 0]}
-            style={{ pointerEvents: 'none' }}
-          >
-            <div style={{ pointerEvents: 'all', whiteSpace: 'nowrap', padding: '0 6px' }}>
-              <EspressoDialButton
-                label={project.name}
-                onClick={() => startPour(project.id)}
-                size={20}
-              />
-            </div>
-          </Html>
+          <group key={project.id} position={[FLOAT_POSITIONS[i][0], 0, 0]}>
+
+            {/* ── Invisible hit sphere — Three.js raycasting for hover ──────── */}
+            {/* Sphere radius 9 in local units → ~0.081 world units at scale    */}
+            {/* 0.009 (inner 0.02 × outer 0.45), large enough to cover the      */}
+            {/* ~46 px button at the MACHINE camera distance.                    */}
+            <mesh
+              onPointerOver={(e) => { e.stopPropagation(); setHover(i, true);  document.body.style.cursor = 'pointer' }}
+              onPointerOut={()   => {                      setHover(i, false); document.body.style.cursor = 'auto'    }}
+              onClick={(e)       => { e.stopPropagation(); startPour(project.id) }}
+            >
+              <sphereGeometry args={[9, 10, 10]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+
+            {/* ── Html button visual ───────────────────────────────────────── */}
+            <Html
+              center
+              distanceFactor={8}
+              position={[0, -0.4, 0]}
+              zIndexRange={[200, 100]}
+              style={{ pointerEvents: 'none' }}
+            >
+              <div style={{ pointerEvents: 'none', whiteSpace: 'nowrap', padding: '0 6px' }}>
+                <EspressoDialButton
+                  label={project.name}
+                  isHovered={hovers[i]}
+                  size={20}
+                />
+              </div>
+            </Html>
+
+          </group>
         ))}
       </group>
     </group>
