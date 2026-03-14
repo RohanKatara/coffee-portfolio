@@ -15,6 +15,8 @@ import MachineScene from './scenes/MachineScene'
 import PouringScene from './scenes/PouringScene'
 import CupScene from './scenes/CupScene'
 
+import ProjectButtons3D from './components/canvas/ProjectButtons3D'
+
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
 import ProjectDetail from './components/ui/ProjectDetail'
@@ -105,6 +107,8 @@ export default function App() {
           <MachineScene />
           <CupScene />
 
+          {/* Diegetic dial buttons — reveal on MACHINE state entry */}
+          <ProjectButtons3D />
         </Suspense>
 
         {/* Particle pour — conditionally mounted, no WebGL context risk */}
