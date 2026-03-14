@@ -38,7 +38,11 @@ export default function CoffeeMenuUI() {
     if (!panelRef.current) return
     gsap.to(panelRef.current, {
       opacity: 0, y: -18, duration: 0.35, ease: 'power2.in',
-      onComplete: () => startPour(index),
+      onComplete: () => {
+        startPour(index)
+        // Show the project modal only after the pour animation finishes
+        setTimeout(() => useSceneStore.getState().finishPour(), 2500)
+      },
     })
   }
 

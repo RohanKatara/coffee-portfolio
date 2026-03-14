@@ -9,8 +9,8 @@ import useSceneStore from '../store/useSceneStore'
 export default function PouringScene() {
   const scene = useSceneStore((s) => s.scene)
 
-  // Keep mounted from POURING onward so the particles don't pop on scene change
-  if (scene !== 'POURING' && scene !== 'CUP') return null
+  // Only needed during POURING — stream hides itself once scene advances to CUP
+  if (scene !== 'POURING') return null
 
   return <CoffeePour />
 }

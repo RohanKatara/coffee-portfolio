@@ -203,7 +203,12 @@ export default function ProjectButtons3D() {
               position={[0, -0.4, 0]}
               onPointerOver={(e) => { e.stopPropagation(); setHover(i, true);  document.body.style.cursor = 'pointer' }}
               onPointerOut={()   => {                      setHover(i, false); document.body.style.cursor = 'auto'    }}
-              onClick={(e)       => { e.stopPropagation(); startPour(project.id) }}
+              onClick={(e) => {
+                e.stopPropagation()
+                startPour(project.id)
+                // Show the project modal only after the pour animation finishes
+                setTimeout(() => useSceneStore.getState().finishPour(), 2500)
+              }}
             >
               <sphereGeometry args={[12, 10, 10]} />
               <meshBasicMaterial transparent opacity={0} depthWrite={false} />

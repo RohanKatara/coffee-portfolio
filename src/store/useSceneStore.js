@@ -26,8 +26,11 @@ const useSceneStore = create((set) => ({
 
   setCupFill: (amount) => set({ cupFillAmount: amount }),
 
+  // Called by the setTimeout in the click handler after the pour animation
+  // completes. Does NOT reset isPouring — that only happens when the user
+  // closes the modal (goBackToMachine), so the buttons stay hidden and the
+  // cup stays visible throughout the detail view.
   finishPour: () => set({
-    isPouring: false,
     scene: 'CUP',
   }),
 
