@@ -69,128 +69,139 @@ function applyPBR(scene) {
   })
 }
 
-// ── InteractiveDial — one clickable dial per project (placeholder only) ───────
-function InteractiveDial({ position, project }) {
-  const [hovered, setHover] = useState(false)
+// ── Placeholder ───────────────────────────────────────────────────────────────
+// 4 independent hover states — one per dial, no shared state so only the
+// hovered dial glows.  Html tags are siblings of the meshes (not nested
+// inside them) and spread wide on X so their DOM rects never overlap and
+// cannot swallow canvas pointer events from adjacent dials.
+function EspressoMachinePlaceholder({ position }) {
+  const [hover1, setHover1] = useState(false)
+  const [hover2, setHover2] = useState(false)
+  const [hover3, setHover3] = useState(false)
+  const [hover4, setHover4] = useState(false)
   const startPour = useSceneStore((s) => s.startPour)
 
-  const over = (e) => {
-    e.stopPropagation()
-    setHover(true)
-    document.body.style.cursor = 'pointer'
-  }
-  const out = () => {
-    setHover(false)
-    document.body.style.cursor = 'auto'
-  }
-  const click = (e) => {
-    e.stopPropagation()
-    startPour(project.id)
-  }
-
   return (
     <group position={position}>
-      {/* Dial face — cylinder axis along Z (face towards camera) */}
-      <mesh
-        rotation={[Math.PI / 2, 0, 0]}
-        onPointerOver={over}
-        onPointerOut={out}
-        onClick={click}
-      >
-        <cylinderGeometry args={[0.040, 0.040, 0.014, 20]} />
-        <meshStandardMaterial
-          color="#1a1a1a"
-          roughness={0.18}
-          metalness={0.88}
-          emissive={hovered ? '#ff9933' : '#000000'}
-          emissiveIntensity={hovered ? 0.65 : 0}
-        />
-      </mesh>
 
-      {/* Chrome outer ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.048, 0.048, 0.008, 20]} />
-        <meshStandardMaterial color="#aaaaaa" roughness={0.08} metalness={0.95} />
-      </mesh>
-
-      {/* Label — floats above the machine body, forward of the front face.
-           No distanceFactor: renders at natural CSS px size regardless of
-           camera distance, so font-size is the only size control needed.
-           position is in the dial group's local space (inside placeholder
-           local space, which has scale=1.4 applied by EspressoMachine).
-           y=+0.38 → local placeholder y≈0.54, clears body top at 0.48.
-           z=+0.20 → well in front of the front face at z≈0.18.          */}
-      <Html
-        center
-        position={[0, 0.38, 0.20]}
-        zIndexRange={[100, 0]}
-        style={{ pointerEvents: 'none' }}
-      >
-        <span style={labelStyle(hovered)}>{project.name}</span>
-      </Html>
-    </group>
-  )
-}
-
-// ── Positions of 4 dials on the front control-panel face ─────────────────────
-// Origin = placeholder group centre (MACHINE_POSITION = [0,0,0])
-// Machine body: 0.42w × 0.46h centred at y=0.25, body front face at z≈+0.18
-const DIAL_POSITIONS = [
-  [-0.14, 0.16, 0.19],
-  [-0.05, 0.16, 0.19],
-  [ 0.05, 0.16, 0.19],
-  [ 0.14, 0.16, 0.19],
-]
-
-// ── Placeholder (shown while GLB is absent / loading) ────────────────────────
-function EspressoMachinePlaceholder({ position }) {
-  return (
-    <group position={position}>
-      {/* Main body */}
+      {/* ── Static machine body ────────────────────────────────────────────── */}
       <mesh position={[0, 0.25, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.42, 0.46, 0.36]} />
         <meshStandardMaterial color="#2a2a2a" roughness={0.25} metalness={0.75} />
       </mesh>
+
       {/* Group head / portafilter area */}
       <mesh position={[0, 0.04, 0.20]} castShadow>
         <cylinderGeometry args={[0.07, 0.07, 0.09, 14]} />
         <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.85} />
       </mesh>
+
       {/* Steam wand */}
       <mesh position={[0.22, 0.12, 0.10]} rotation={[0, 0, -0.5]} castShadow>
         <cylinderGeometry args={[0.012, 0.012, 0.24, 8]} />
         <meshStandardMaterial color="#3a3a3a" roughness={0.3} metalness={0.7} />
       </mesh>
+
       {/* Water tank top */}
       <mesh position={[0, 0.52, 0]} castShadow>
         <boxGeometry args={[0.38, 0.06, 0.32]} />
         <meshStandardMaterial color="#1e1e1e" roughness={0.4} metalness={0.6} />
       </mesh>
 
-      {/* ── Interactive project dials ──────────────────────────── */}
-      {INTERACTIVE_PROJECTS.map((project, i) => (
-        <InteractiveDial
-          key={project.id}
-          position={DIAL_POSITIONS[i]}
-          project={project}
+      {/* ── Interactive dial 1 ─────────────────────────────────────────────── */}
+      <mesh
+        position={[-0.14, 0.16, 0.20]}
+        rotation={[Math.PI / 2, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHover1(true);  document.body.style.cursor = 'pointer' }}
+        onPointerOut={()   => {                      setHover1(false); document.body.style.cursor = 'auto'    }}
+        onClick={(e)       => { e.stopPropagation(); startPour(INTERACTIVE_PROJECTS[0].id) }}
+      >
+        <cylinderGeometry args={[0.040, 0.040, 0.014, 20]} />
+        <meshStandardMaterial
+          color="#1a1a1a" roughness={0.18} metalness={0.88}
+          emissive={hover1 ? '#ffffff' : '#000000'}
+          emissiveIntensity={hover1 ? 2 : 0}
         />
-      ))}
+      </mesh>
+
+      {/* ── Interactive dial 2 ─────────────────────────────────────────────── */}
+      <mesh
+        position={[-0.05, 0.16, 0.20]}
+        rotation={[Math.PI / 2, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHover2(true);  document.body.style.cursor = 'pointer' }}
+        onPointerOut={()   => {                      setHover2(false); document.body.style.cursor = 'auto'    }}
+        onClick={(e)       => { e.stopPropagation(); startPour(INTERACTIVE_PROJECTS[1].id) }}
+      >
+        <cylinderGeometry args={[0.040, 0.040, 0.014, 20]} />
+        <meshStandardMaterial
+          color="#1a1a1a" roughness={0.18} metalness={0.88}
+          emissive={hover2 ? '#ffffff' : '#000000'}
+          emissiveIntensity={hover2 ? 2 : 0}
+        />
+      </mesh>
+
+      {/* ── Interactive dial 3 ─────────────────────────────────────────────── */}
+      <mesh
+        position={[0.05, 0.16, 0.20]}
+        rotation={[Math.PI / 2, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHover3(true);  document.body.style.cursor = 'pointer' }}
+        onPointerOut={()   => {                      setHover3(false); document.body.style.cursor = 'auto'    }}
+        onClick={(e)       => { e.stopPropagation(); startPour(INTERACTIVE_PROJECTS[2].id) }}
+      >
+        <cylinderGeometry args={[0.040, 0.040, 0.014, 20]} />
+        <meshStandardMaterial
+          color="#1a1a1a" roughness={0.18} metalness={0.88}
+          emissive={hover3 ? '#ffffff' : '#000000'}
+          emissiveIntensity={hover3 ? 2 : 0}
+        />
+      </mesh>
+
+      {/* ── Interactive dial 4 ─────────────────────────────────────────────── */}
+      <mesh
+        position={[0.14, 0.16, 0.20]}
+        rotation={[Math.PI / 2, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHover4(true);  document.body.style.cursor = 'pointer' }}
+        onPointerOut={()   => {                      setHover4(false); document.body.style.cursor = 'auto'    }}
+        onClick={(e)       => { e.stopPropagation(); startPour(INTERACTIVE_PROJECTS[3].id) }}
+      >
+        <cylinderGeometry args={[0.040, 0.040, 0.014, 20]} />
+        <meshStandardMaterial
+          color="#1a1a1a" roughness={0.18} metalness={0.88}
+          emissive={hover4 ? '#ffffff' : '#000000'}
+          emissiveIntensity={hover4 ? 2 : 0}
+        />
+      </mesh>
+
+      {/* ── Labels ─────────────────────────────────────────────────────────── */}
+      {/* Spread wide on X so DOM rects don't overlap and can't eat canvas     */}
+      {/* pointer events. pointerEvents:'none' on every Html wrapper is also   */}
+      {/* required so the overlay div passes clicks through to the canvas.     */}
+      <Html center position={[-1.5, 0.60, 0.40]} zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
+        <span style={labelStyle(hover1)}>{INTERACTIVE_PROJECTS[0].name}</span>
+      </Html>
+
+      <Html center position={[-0.5, 0.60, 0.40]} zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
+        <span style={labelStyle(hover2)}>{INTERACTIVE_PROJECTS[1].name}</span>
+      </Html>
+
+      <Html center position={[0.5, 0.60, 0.40]} zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
+        <span style={labelStyle(hover3)}>{INTERACTIVE_PROJECTS[2].name}</span>
+      </Html>
+
+      <Html center position={[1.5, 0.60, 0.40]} zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
+        <span style={labelStyle(hover4)}>{INTERACTIVE_PROJECTS[3].name}</span>
+      </Html>
+
     </group>
   )
 }
 
 // ── GLB model with native mesh interaction ────────────────────────────────────
-// Events bubble up from child meshes inside <primitive>.
-// We identify clickable group-head meshes by their material name ('nikelaj' =
-// nickel-plated chrome heads) and mutate emissive imperatively — no re-render.
-// Html labels are siblings in the group, positioned at estimated group-head
-// locations (tune these once the actual GLB is inspected in-engine).
 function EspressoMachineModel() {
   const { scene }   = useGLTF('/models/espresso_machine.glb')
   const startPour   = useSceneStore((s) => s.startPour)
   const [hoveredIdx, setHoveredIdx] = useState(null)
 
-  // Collected group-head mesh refs — populated once on load
   const headMeshes = useRef([])
   const lastObj    = useRef(null)
 
@@ -203,7 +214,6 @@ function EspressoMachineModel() {
       const n = (child.material.name || '').toLowerCase()
       if (n.includes('nikelaj')) heads.push(child)
     })
-    // Limit to 4 so each maps to one project
     headMeshes.current = heads.slice(0, 4)
   }, [scene])
 
@@ -217,14 +227,12 @@ function EspressoMachineModel() {
     const idx = projectForObj(e.object)
     if (idx < 0) return
 
-    // Clear previous
     if (lastObj.current && lastObj.current !== e.object) {
       const m = lastObj.current.material
       if (m?.emissive) { m.emissive.set('#000000'); m.emissiveIntensity = 0 }
     }
-    // Glow new
     const m = e.object.material
-    if (m?.emissive) { m.emissive.set('#ff9933'); m.emissiveIntensity = 0.5 }
+    if (m?.emissive) { m.emissive.set('#ffffff'); m.emissiveIntensity = 2 }
     m.needsUpdate = true
 
     lastObj.current = e.object
@@ -252,16 +260,12 @@ function EspressoMachineModel() {
     startPour(INTERACTIVE_PROJECTS[idx].id)
   }
 
-  // Label anchor positions in the EspressoMachine group's local space (metres).
-  // x: spread across the machine face width (~0.42 m)
-  // y: 0.55 → well above the machine body top (~0.48 local)
-  // z: 0.30 → clearly in front of the front face (~0.18 local)
-  // TODO: tune x once the real GLB group-head positions are known.
+  // Spread wide on X — same reasoning as the placeholder labels above
   const LABEL_ANCHORS = [
-    [-0.14, 0.55, 0.30],
-    [-0.05, 0.55, 0.30],
-    [ 0.05, 0.55, 0.30],
-    [ 0.14, 0.55, 0.30],
+    [-1.5, 0.60, 0.40],
+    [-0.5, 0.60, 0.40],
+    [ 0.5, 0.60, 0.40],
+    [ 1.5, 0.60, 0.40],
   ]
 
   return (
@@ -276,7 +280,6 @@ function EspressoMachineModel() {
         onClick={click}
       />
 
-      {/* Project name labels — no distanceFactor, font-size is the size control */}
       {INTERACTIVE_PROJECTS.map((project, i) => (
         <Html
           key={project.id}
