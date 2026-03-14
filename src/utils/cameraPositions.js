@@ -40,18 +40,19 @@ export const CAMERA_POSITIONS = {
     ease: 'power2.out',
   },
 
-  // Zoom into the machine front face for the pour interaction.
-  // Array of 4 tight macro positions — one per button/spout.
-  // Camera glides to the specific spout the user clicked.
+  // Push low and tight: camera looks down at the drip-tray / group-head area.
+  // z=2.2 keeps the cup + stream in frame without clipping machine geometry.
+  // target.y=-0.48 aims just above counter level so the pour stream is centred.
+  // X shifts gently with each button so the camera tracks the chosen spout.
   POURING: [
-    // Button 0 — spout leftmost
-    { position: { x: 11.1, y: -0.10, z: 1.6 }, target: { x: 11.44, y: -0.40, z: 0.0 } },
+    // Button 0 — leftmost spout
+    { position: { x: 10.5, y: 0.15, z: 2.2 }, target: { x: 11.7, y: -0.48, z: -0.15 } },
     // Button 1
-    { position: { x: 11.4, y: -0.10, z: 1.6 }, target: { x: 11.69, y: -0.40, z: 0.0 } },
+    { position: { x: 11.0, y: 0.15, z: 2.2 }, target: { x: 11.9, y: -0.48, z: -0.15 } },
     // Button 2
-    { position: { x: 11.7, y: -0.10, z: 1.6 }, target: { x: 11.95, y: -0.40, z: 0.0 } },
-    // Button 3 — spout rightmost
-    { position: { x: 11.9, y: -0.10, z: 1.6 }, target: { x: 12.20, y: -0.40, z: 0.0 } },
+    { position: { x: 11.4, y: 0.15, z: 2.2 }, target: { x: 12.0, y: -0.48, z: -0.15 } },
+    // Button 3 — rightmost spout
+    { position: { x: 11.7, y: 0.15, z: 2.2 }, target: { x: 12.2, y: -0.48, z: -0.15 } },
   ],
 
   // Close-up on the cup for the project detail reveal.

@@ -174,10 +174,17 @@ export default function ProjectButtons3D() {
 
   useFrame((_, delta) => {
     if (!buttonsGroupRef.current) return
-    const scene   = useSceneStore.getState().scene
-    const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
-    const t = isZoneB ? BUTTON_ACTIVE_SCALE : 0
-    damp3(buttonsGroupRef.current.scale, [t, t, t], SCALE_LAMBDA, delta)
+    const { scene, isPouring } = useSceneStore.getState()
+
+    // Snap to invisible the instant a pour starts so the camera never clips
+    // through the Html buttons — damp3 is too slow for this requirement.
+    if (isPouring || scene !== 'MACHINE') {
+      buttonsGroupRef.current.scale.set(0, 0, 0)
+      buttonsGroupRef.current.visible = false
+      return
+    }
+
+    damp3(buttonsGroupRef.current.scale, [BUTTON_ACTIVE_SCALE, BUTTON_ACTIVE_SCALE, BUTTON_ACTIVE_SCALE], SCALE_LAMBDA, delta)
     buttonsGroupRef.current.visible = buttonsGroupRef.current.scale.x > 0.002
   })
 

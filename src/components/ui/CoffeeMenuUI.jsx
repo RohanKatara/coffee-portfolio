@@ -13,6 +13,7 @@ import projects from '../../data/projects'
  */
 export default function CoffeeMenuUI() {
   const scene     = useSceneStore((s) => s.scene)
+  const isPouring = useSceneStore((s) => s.isPouring)
   const startPour = useSceneStore((s) => s.startPour)
   const panelRef  = useRef(null)
   const enteredRef = useRef(false)
@@ -41,8 +42,10 @@ export default function CoffeeMenuUI() {
     })
   }
 
-  // Stay mounted during POURING so the exit animation finishes
-  if (scene !== 'MACHINE' && scene !== 'POURING') return null
+  // Unmount as soon as a pour is triggered — the GSAP exit from handleProjectClick
+  // already ran (onComplete calls startPour), so opacity is already 0 at this point.
+  // For direct 3D-button clicks that bypass the menu, unmounting instantly is fine.
+  if (isPouring || scene !== 'MACHINE') return null
 
   return (
     <div
