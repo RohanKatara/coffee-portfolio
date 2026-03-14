@@ -13,8 +13,8 @@ const BUTTON_PROJECTS = projects.slice(0, 4)
 const BUTTON_ACTIVE_SCALE = 0.02   // world-scale when visible
 const BUTTON_SPACING      = 14     // local X gap between buttons
 const GROUP_X_POSITION    = 11.89  // world X — centre of machine control panel
-const GROUP_Y_POSITION    = -0.30  // world Y — lowered onto the slanted control panel
-const GROUP_Z_POSITION    = 0.20   // world Z — forward of the machine front face
+const GROUP_Y_POSITION    =  0.05  // world Y — upper slanted control panel
+const GROUP_Z_POSITION    =  0.08  // world Z — flush against panel face
 
 const GROUP_POSITION = [GROUP_X_POSITION, GROUP_Y_POSITION, GROUP_Z_POSITION]
 
@@ -39,7 +39,7 @@ function EspressoDialButton({ label, onClick, size = 72 }) {
       <span style={{
         color: isHovered ? '#ffe080' : '#d4af37',
         fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-        fontSize: '10px',
+        fontSize: '8px',
         fontWeight: 'bold',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
@@ -191,26 +191,31 @@ export default function ProjectButtons3D() {
     buttonsGroupRef.current.visible = buttonsGroupRef.current.scale.x > 0.002
   })
 
+  // Outer group: static placement — position, panel-tilt rotation, shrink scale.
+  // Inner group: damp3 animates scale 0 → BUTTON_ACTIVE_SCALE for the reveal.
+  // Keeping them separate prevents the animation from fighting the static scale.
   return (
-    <group ref={buttonsGroupRef} position={GROUP_POSITION} scale={[0, 0, 0]}>
-      {BUTTON_PROJECTS.map((project, i) => (
-        <Html
-          key={project.id}
-          center
-          distanceFactor={8}
-          position={[FLOAT_POSITIONS[i][0], FLOAT_POSITIONS[i][1] - 0.4, FLOAT_POSITIONS[i][2]]}
-          zIndexRange={[100, 0]}
-          style={{ pointerEvents: 'none' }}
-        >
-          <div style={{ pointerEvents: 'all', whiteSpace: 'nowrap' }}>
-            <EspressoDialButton
-              label={project.name}
-              onClick={() => startPour(project.id)}
-              size={20}
-            />
-          </div>
-        </Html>
-      ))}
+    <group position={GROUP_POSITION} rotation={[-0.4, 0, 0]} scale={0.45}>
+      <group ref={buttonsGroupRef} scale={[0, 0, 0]}>
+        {BUTTON_PROJECTS.map((project, i) => (
+          <Html
+            key={project.id}
+            center
+            distanceFactor={8}
+            position={[FLOAT_POSITIONS[i][0], FLOAT_POSITIONS[i][1] - 0.4, FLOAT_POSITIONS[i][2]]}
+            zIndexRange={[100, 0]}
+            style={{ pointerEvents: 'none' }}
+          >
+            <div style={{ pointerEvents: 'all', whiteSpace: 'nowrap', padding: '0 6px' }}>
+              <EspressoDialButton
+                label={project.name}
+                onClick={() => startPour(project.id)}
+                size={20}
+              />
+            </div>
+          </Html>
+        ))}
+      </group>
     </group>
   )
 }
