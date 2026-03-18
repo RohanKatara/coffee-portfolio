@@ -3,7 +3,8 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, Preload, BakeShadows, Center, ContactShadows, TransformControls } from '@react-three/drei'
 import { PCFSoftShadowMap } from 'three'
 import * as THREE from 'three'
-import { EffectComposer, SMAA, N8AO, Bloom, Vignette, BrightnessContrast } from '@react-three/postprocessing'
+import { EffectComposer, SMAA, Bloom, Vignette, BrightnessContrast } from '@react-three/postprocessing'
+import { ACESFilmicToneMapping } from 'three'
 import gsap from 'gsap'
 
 // Draco decoder path for compressed GLB models
@@ -20,12 +21,45 @@ import ProjectButtons3D from './components/canvas/ProjectButtons3D'
 import TreePot from './components/canvas/TreePot'
 import Books from './components/canvas/Books'
 import Draggable from './components/canvas/Draggable'
+import BusinessCardHolder from './components/canvas/BusinessCardHolder'
 
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
 import ProjectDetail from './components/ui/ProjectDetail'
+import MocktalkModal from './components/ui/MocktalkModal'
+import KrishnaModal from './components/ui/KrishnaModal'
+import CRMModal from './components/ui/CRMModal'
+import ContentEngineModal from './components/ui/ContentEngineModal'
 
 import useSceneStore from './store/useSceneStore'
+import { cameraLock } from './hooks/useSceneTransition'
+
+// ── HelperBox ─────────────────────────────────────────────────────────────────
+// Uses useState as a callback ref so TransformControls only mounts after the
+// mesh exists — avoids the null-ref timing bug with the object prop.
+function HelperBox({ color, startPos, label }) {
+  const [mesh, setMesh] = useState(null)
+  return (
+    <>
+      {mesh && (
+        <TransformControls
+          object={mesh}
+          mode="translate"
+          onMouseDown={() => { cameraLock.active = true }}
+          onMouseUp={() => { cameraLock.active = false }}
+          onObjectChange={() => {
+            const { x, y, z } = mesh.position
+            console.log(`${label}: [${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`)
+          }}
+        />
+      )}
+      <mesh ref={setMesh} position={startPos}>
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshBasicMaterial color={color} wireframe={true} />
+      </mesh>
+    </>
+  )
+}
 
 // ── TabletStand ───────────────────────────────────────────────────────────────
 function TabletStand(props) {
@@ -104,27 +138,85 @@ function BarStool(props) {
   return <primitive object={clone} {...props} />
 }
 
+// ── Bookcase ──────────────────────────────────────────────────────────────────
+function Bookcase(props) {
+  const { scene } = useGLTF('/models/bookcase.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  return <primitive object={scene} {...props} />
+}
+
+// ── BlackMug ──────────────────────────────────────────────────────────────────
+function BlackMug(props) {
+  const { scene } = useGLTF('/models/black_ceramic_mug.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  return <primitive object={scene} {...props} />
+}
+
+// ── CeramicMug ────────────────────────────────────────────────────────────────
+function CeramicMug(props) {
+  const { scene } = useGLTF('/models/ceramic_mug.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  return <primitive object={scene} {...props} />
+}
+
+// ── WelcomeSign ───────────────────────────────────────────────────────────────
+function WelcomeSign(props) {
+  const { scene } = useGLTF('/models/welcome_sign_restaurant.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  return <primitive object={scene} {...props} />
+}
+
+// ── CoffeeModel ───────────────────────────────────────────────────────────────
+function CoffeeModel(props) {
+  const { scene } = useGLTF('/models/coffee.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh && child.material) {
+        child.material.roughness = 0.85
+        child.material.metalness = 0.0
+        child.material.envMapIntensity = 0.2
+        child.material.needsUpdate = true
+      }
+    })
+  }, [scene])
+  return <primitive object={scene} {...props} />
+}
+
+// ── CoffeeMenu ────────────────────────────────────────────────────────────────
+function CoffeeMenu(props) {
+  const { scene } = useGLTF('/models/coffee_menu.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  return <primitive object={scene} {...props} />
+}
+
 // ── NeonSign ──────────────────────────────────────────────────────────────────
 function NeonSign(props) {
   const { scene } = useGLTF('/models/neon_sign.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (!child.isMesh || !child.material) return
+      // Make every mesh in the sign glow amber-orange like a real neon tube
+      child.material.emissive = new THREE.Color('#ff6520')
+      child.material.emissiveIntensity = 2.8
+      child.material.needsUpdate = true
+    })
+  }, [scene])
+
   return <primitive object={scene} {...props} />
 }
 
 // ── Cinematic post-processing pipeline ───────────────────────────────────────
-// Bloom intensity tweens 1.5 → 1.8 during the cinematic transition, back to
-// 1.5 at rest.  All other effects are static — no React re-renders needed.
+// Bloom intensity tweens 1.5 → 1.8 during the cinematic transition.
+// DoF focal point follows _lookAt every frame with zero React re-renders —
+// the same damp3-smoothed Vector3 that drives the camera lookAt.
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
   const isPouring       = useSceneStore((s) => s.isPouring)
-  const [bloomIntensity, setBloomIntensity] = useState(1.5)
-  const obj  = useRef({ val: 1.5 })
-  const prev = useRef(1.5)
+  const [bloomIntensity, setBloomIntensity] = useState(1.2)
+  const obj  = useRef({ val: 1.2 })
+  const prev = useRef(1.2)
 
   useEffect(() => {
     gsap.killTweensOf(obj.current)
     // isPouring wins: the wet espresso stream should glow brightest
-    const target   = isPouring ? 2.2 : isTransitioning ? 1.8 : 1.5
+    const target   = isPouring ? 1.8 : isTransitioning ? 1.5 : 1.2
     const duration = isPouring ? 0.4 : isTransitioning ? 0.6 : 0.8
     const ease     = isPouring ? 'power2.out' : isTransitioning ? 'power2.out' : 'power2.inOut'
     gsap.to(obj.current, { val: target, duration, ease })
@@ -140,32 +232,33 @@ function AnimatedEffects() {
 
   return (
     <EffectComposer multisampling={0} disableNormalPass>
-      {/* Ambient occlusion — contact shadows in crevices */}
-      <N8AO aoRadius={0.3} intensity={1.2} distanceFalloff={0.5} quality="medium" />
-
       {/* Anti-aliasing */}
       <SMAA />
 
-      {/* Halation / glowing UI — threshold raised so only the brightest
-          emissive surfaces (machine lights, HTML UI) actually bloom       */}
+      {/* Bloom — high threshold so only the neon sign and pendant emissives
+          glow; the rest of the scene is unaffected                          */}
       <Bloom
+        luminanceThreshold={0.85}
+        luminanceSmoothing={0.1}
         intensity={bloomIntensity}
-        luminanceThreshold={0.9}
-        luminanceSmoothing={0.025}
         mipmapBlur
       />
 
       {/* Vignette — darkens periphery, draws the eye to centre stage */}
       <Vignette offset={0.5} darkness={0.5} />
 
-      {/* Colour grade — crush blacks slightly, lift contrast for a moody
-          premium look without blowing out the warm amber lighting         */}
-      <BrightnessContrast brightness={-0.05} contrast={0.1} />
+      {/* Colour grade */}
+      <BrightnessContrast brightness={-0.05} contrast={0.12} />
     </EffectComposer>
   )
 }
 
 export default function App() {
+  const [mocktalkOpen, setMocktalkOpen] = useState(false)
+  const [krishnaOpen, setKrishnaOpen]   = useState(false)
+  const [crmOpen,     setCrmOpen]       = useState(false)
+  const [contentOpen, setContentOpen]   = useState(false)
+
   return (
     <div className="relative w-full h-full">
       {/* ── 3D Canvas ────────────────────────────────────────── */}
@@ -176,7 +269,11 @@ export default function App() {
         gl={{ antialias: false, alpha: false }}
         style={{ background: '#1a0e08' }}
         onCreated={({ gl }) => {
-          gl.shadowMap.type = PCFSoftShadowMap
+          gl.shadowMap.type    = PCFSoftShadowMap
+          // ACESFilmic compresses highlights so bright neon/lamps never
+          // blow out, and lifts the dark teal walls into a richer grade
+          gl.toneMapping         = ACESFilmicToneMapping
+          gl.toneMappingExposure = 1.05
         }}
       >
         <Suspense fallback={null}>
@@ -200,10 +297,15 @@ export default function App() {
           <CupScene />
 
           {/* Diegetic dial buttons — reveal on MACHINE state entry */}
-          <ProjectButtons3D />
+          <ProjectButtons3D
+            onMocktalkClick={() => setMocktalkOpen(true)}
+            onKrishnaClick={() => setKrishnaOpen(true)}
+            onCrmClick={() => setCrmOpen(true)}
+            onContentClick={() => setContentOpen(true)}
+          />
 
           {/* Books — high shelf */}
-          <Center position={[-1.06, 0.25, -2.63]}>
+          <Center position={[-1.06, 0.30, -2.63]}>
             <Books scale={0.08} rotation={[0, Math.PI * 1.5, 0]} />
           </Center>
 
@@ -218,10 +320,28 @@ export default function App() {
             <BonsaiTree scale={1} />
           </Center>
 
-          {/* NeonSign */}
+          {/* Welcome Sign (Zone A) */}
+          <group position={[-2.16, -1.48, 0.26]}>
+            <Center>
+              <WelcomeSign scale={1.3} rotation={[0, Math.PI / 2, 0]} />
+            </Center>
+          </group>
+
+
+          {/* NeonSign + warm spill light — the point light mimics the
+               orange glow that a real neon tube casts onto nearby surfaces.
+               Placed 0.4 units in front of the sign face (z=0.4) so the
+               light hits the counter top and character, not the wall.      */}
           <Center position={[1.32, 0.84, 0.00]}>
             <NeonSign scale={0.55} />
           </Center>
+          <pointLight
+            position={[1.32, 0.84, 0.40]}
+            intensity={2.2}
+            color="#ff6520"
+            distance={3.5}
+            decay={2}
+          />
 
           {/* BarStool — Zone B */}
           <group position={[14.04, -1.0, 0.69]}>
@@ -237,30 +357,51 @@ export default function App() {
             </Center>
           </group>
 
+          {/* Bookcase — Zone B */}
+          <group position={[17.95, -0.7, -1.1]}>
+            <Center>
+              <Bookcase scale={1} rotation={[0, (20 * Math.PI) / 180, 0]} />
+            </Center>
+          </group>
+
+          {/* BlackMug — Zone B */}
+          <group position={[13.01, -0.40, -0.10]}>
+            <Center>
+              <BlackMug scale={1} />
+            </Center>
+          </group>
+
+          {/* Second Mug */}
+          <group position={[12.98, -0.35, 0.29]}>
+            <Center>
+              <CeramicMug scale={0.1} rotation={[0, 0.6, 0]} />
+            </Center>
+          </group>
+
+
+          {/* Coffee Item */}
+          <group position={[12.55, -0.55, -0.05]}>
+            <Center>
+              <CoffeeModel scale={0.003} />
+            </Center>
+          </group>
+
+          {/* Coffee Menu */}
+          <group position={[12.04, 0.94, -0.48]}>
+            <Center>
+              <CoffeeMenu scale={1} />
+            </Center>
+          </group>
+
           {/* TreePot — cafe floor plant */}
           <Center position={[-4.50, -1.06, -1.36]}>
             <TreePot scale={1} />
           </Center>
         </Suspense>
 
-        {/* ── DRAG TEST BOX — remove when done positioning ──────────────
-             Drag this blue box around, then open the browser console
-             (F12 → Console) to read the "New Position: [x, y, z]" output. */}
-        <TransformControls
-          mode="translate"
-          position={[12.2, 0.6, -0.2]}
-          onChange={(e) => {
-            if (e?.target?.object) {
-              const { x, y, z } = e.target.object.position
-              console.log(`New Position: [${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`)
-            }
-          }}
-        >
-          <mesh>
-            <boxGeometry args={[0.5, 0.5, 0.5]} />
-            <meshBasicMaterial color="blue" />
-          </mesh>
-        </TransformControls>
+        {/* Drag Helpers */}
+        <HelperBox color="blue" startPos={[-3, 0.5, 0]} label="🟦 ZONE A" />
+        <HelperBox color="orange" startPos={[14, -0.5, 1]} label="🟧 ZONE B" />
 
         {/* Particle pour — conditionally mounted, no WebGL context risk */}
         <PouringScene />
@@ -277,6 +418,10 @@ export default function App() {
       <LoadingScreen />
       <SpeechBubble />
       <ProjectDetail />
+      {mocktalkOpen && <MocktalkModal onClose={() => setMocktalkOpen(false)} />}
+      {krishnaOpen  && <KrishnaModal  onClose={() => setKrishnaOpen(false)}  />}
+      {crmOpen      && <CRMModal           onClose={() => setCrmOpen(false)}      />}
+      {contentOpen  && <ContentEngineModal onClose={() => setContentOpen(false)} />}
     </div>
   )
 }

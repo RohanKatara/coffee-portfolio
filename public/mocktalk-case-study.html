@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MockTalk Case Study | The Digital Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#131313",
+                        "surface-tint": "#00dbe7",
+                        "on-secondary-fixed-variant": "#74009f",
+                        "secondary": "#ebb2ff",
+                        "inverse-surface": "#e5e2e1",
+                        "on-secondary-fixed": "#320047",
+                        "on-secondary-container": "#fff6fc",
+                        "surface-container-highest": "#353534",
+                        "inverse-on-surface": "#313030",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-fixed-variant": "#554500",
+                        "on-secondary": "#520072",
+                        "surface-variant": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-low": "#1c1b1b",
+                        "surface": "#131313",
+                        "on-surface": "#e5e2e1",
+                        "on-primary": "#00363a",
+                        "tertiary-container": "#fed83a",
+                        "tertiary-fixed-dim": "#e8c423",
+                        "on-tertiary-fixed": "#221b00",
+                        "primary-container": "#00f2ff",
+                        "on-tertiary-container": "#725e00",
+                        "outline-variant": "#3a494b",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#3b2f00",
+                        "primary": "#e1fdff",
+                        "tertiary-fixed": "#ffe173",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed-dim": "#00dbe7",
+                        "secondary-container": "#b600f8",
+                        "on-surface-variant": "#b9cacb",
+                        "error": "#ffb4ab",
+                        "surface-bright": "#3a3939",
+                        "primary-fixed": "#74f5ff",
+                        "on-primary-container": "#006a71",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#ebb2ff",
+                        "secondary-fixed": "#f8d8ff",
+                        "tertiary": "#fff6e4",
+                        "outline": "#849495",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-primary-fixed": "#002022",
+                        "on-background": "#e5e2e1",
+                        "inverse-primary": "#00696f",
+                        "on-error": "#690005"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "noto-serif": ["Noto Serif"],
+                        "plus-jakarta": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sonic-pulse-gradient {
+            background: linear-gradient(135deg, #00f2ff 0%, #b600f8 100%);
+        }
+        .glass-panel {
+            background: rgba(53, 53, 52, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 219, 231, 0.3);
+        }
+        .waveform-bar {
+            width: 2px;
+            background: #00dbe7;
+            margin: 0 1px;
+        }
+
+        /* ── Custom scrollbar — webkit ──────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00dbe7;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #74f5ff;
+            background-clip: padding-box;
+            box-shadow: 0 0 8px rgba(0, 219, 231, 0.6);
+        }
+
+        /* ── Firefox fallback ───────────────────────────────────────────── */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #00dbe7 transparent;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-[#fdf9f0]/80 dark:bg-[#1c1c17]/80 backdrop-blur-xl docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#8d4f11] dark:text-[#f4a460]" data-icon="arrow_back">arrow_back</span>
+<span class="font-noto-serif font-bold text-[#1c1c17] dark:text-[#fdf9f0]">The Digital Sanctuary</span>
+</div>
+<nav class="flex gap-8">
+<a class="font-noto-serif italic text-lg text-[#8d4f11] dark:text-[#f4a460] font-semibold border-b-2 border-[#8d4f11] hover:text-[#944925] transition-colors duration-300 scale-95 active:opacity-80 transition-transform" href="#" onclick="window.parent.postMessage('closeModal','*');return false;">Back to Cafe</a>
+</nav>
+</div>
+</header>
+<main class="relative overflow-hidden">
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 px-6 max-w-7xl mx-auto">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-primary-container/10 to-transparent blur-3xl pointer-events-none"></div>
+<div class="relative z-10 text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 mb-8 rounded-full border border-outline-variant/20 bg-surface-container-low">
+<span class="w-2 h-2 rounded-full sonic-pulse-gradient animate-pulse"></span>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Real-Time AI Voice Engineering</span>
+</div>
+<h1 class="font-headline text-7xl md:text-9xl font-bold tracking-tighter text-primary mb-6 text-glow">
+                    MockTalk
+                </h1>
+<p class="max-w-2xl mx-auto text-xl md:text-2xl text-on-surface-variant font-light leading-relaxed">
+                    A high-intensity behavioral interview simulator powered by low-latency neural processing.
+                </p>
+<!-- Hero Action/Waveform Decor -->
+<div class="mt-16 flex items-center justify-center gap-1 h-12">
+<div class="waveform-bar h-4"></div>
+<div class="waveform-bar h-8"></div>
+<div class="waveform-bar h-12"></div>
+<div class="waveform-bar h-6"></div>
+<div class="waveform-bar h-10"></div>
+<div class="waveform-bar h-3"></div>
+<div class="waveform-bar h-9"></div>
+<div class="waveform-bar h-12"></div>
+<div class="waveform-bar h-7"></div>
+<div class="waveform-bar h-5"></div>
+<div class="waveform-bar h-11"></div>
+<div class="waveform-bar h-8"></div>
+</div>
+</div>
+</section>
+<!-- About Section (Bento Style) -->
+<section class="px-6 py-24 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Main Narrative Card -->
+<div class="md:col-span-8 bg-surface-container-low p-10 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl" data-icon="terminal">terminal</span>
+</div>
+<h2 class="font-headline text-3xl font-bold text-primary mb-8">Technical Architecture</h2>
+<ul class="space-y-8">
+<li class="flex gap-6 items-start">
+<span class="flex-shrink-0 w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="architecture">architecture</span>
+</span>
+<p class="text-lg leading-relaxed text-on-surface">Architected and developed a low-latency, voice-to-voice web application using Next.js and the OpenAI Realtime API to simulate high-pressure behavioral interviews.</p>
+</li>
+<li class="flex gap-6 items-start">
+<span class="flex-shrink-0 w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="sync_alt">sync_alt</span>
+</span>
+<p class="text-lg leading-relaxed text-on-surface">Engineered secure, bidirectional WebSocket connections to process and stream audio in real-time, ensuring minimal jitter and sub-200ms response times.</p>
+</li>
+</ul>
+</div>
+<!-- Secondary Highlight Card -->
+<div class="md:col-span-4 bg-surface-container-high p-10 rounded-xl border-t border-primary-container/10">
+<span class="material-symbols-outlined text-secondary text-4xl mb-6" data-icon="psychology">psychology</span>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-4">Prompt Engineering</h3>
+<p class="text-on-surface-variant mb-6">Designed specialized LLM system prompts to roleplay as a strict hiring manager, providing dynamic, context-aware challenges to candidates.</p>
+<div class="p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/10 italic text-sm text-on-surface-variant font-mono">
+                        "Your persona is 'The Challenger'—a director-level executive who values brevity and technical precision over fluff..."
+                    </div>
+</div>
+<!-- Tools & Velocity Card -->
+<div class="md:col-span-12 lg:col-span-5 bg-surface-container-low p-10 rounded-xl border-l-4 border-secondary-container">
+<div class="flex items-center gap-4 mb-6">
+<span class="material-symbols-outlined text-secondary-fixed" data-icon="speed">speed</span>
+<h3 class="font-headline text-2xl font-bold">Development Velocity</h3>
+</div>
+<p class="text-on-surface leading-relaxed">Streamlined development by utilizing Claude Code CLI, integrating AI-assisted refactoring and rapid prototyping into the core CI/CD workflow.</p>
+</div>
+<!-- Meta Data Bento -->
+<div class="md:col-span-12 lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-4">
+<div class="bg-surface-container p-6 rounded-xl flex flex-col justify-between">
+<span class="text-xs font-label text-on-surface-variant uppercase tracking-widest">Latency</span>
+<span class="text-3xl font-headline font-bold text-primary-container">&lt;200ms</span>
+</div>
+<div class="bg-surface-container p-6 rounded-xl flex flex-col justify-between">
+<span class="text-xs font-label text-on-surface-variant uppercase tracking-widest">Stack</span>
+<span class="text-xl font-headline font-bold text-on-surface">Next.js 15</span>
+</div>
+<div class="bg-surface-container p-6 rounded-xl flex flex-col justify-between col-span-2 md:col-span-1">
+<span class="text-xs font-label text-on-surface-variant uppercase tracking-widest">API</span>
+<span class="text-xl font-headline font-bold text-secondary">OpenAI Realtime</span>
+</div>
+</div>
+</div>
+</section>
+<!-- App UI Preview (Browser Mockup) -->
+<section class="py-24 px-6 overflow-hidden">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-headline text-4xl font-bold mb-4">The Interface</h2>
+<p class="text-on-surface-variant">A minimal, focus-oriented environment designed to heighten focus and intensity.</p>
+</div>
+<!-- Browser Mockup -->
+<div class="relative rounded-xl border border-outline-variant/30 bg-surface-container-lowest shadow-2xl overflow-hidden">
+<!-- Browser Header -->
+<div class="bg-surface-container-highest px-4 py-3 flex items-center justify-between">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error/40"></div>
+<div class="w-3 h-3 rounded-full bg-tertiary-container/40"></div>
+<div class="w-3 h-3 rounded-full bg-primary-container/40"></div>
+</div>
+<div class="bg-surface-container-low px-12 py-1 rounded text-[10px] text-on-surface-variant font-mono">
+                            mocktalk.ai/session/xh-8291
+                        </div>
+<div class="w-12"></div>
+</div>
+<!-- Content Area (Scrollable Mockup) -->
+<div class="h-[600px] overflow-y-auto bg-surface-dim relative group">
+<!-- Simulated Screenshot -->
+<div class="w-full h-fit">
+<img alt="MockTalk Dashboard Preview" class="w-full h-auto" data-alt="High-tech dashboard showing active voice waveform and AI interview feedback" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfS4uqsryWoU21nfgbk2eOXcW5ln9Z6qfyQo0k7PnyPFngoGTXJsYSfZMzkYRJ82z9j5I__m7BJefA2dz7HTAbbZTVlVXQJU00Ttb3CcGonYEDUPdbJ4PdzXbE0H-OOfMNSTbk2tRquyE79EPMaeFzehklgIGcxDO2qD08TneRb4OvIvpusXgN_uevbOgHa33KNtOCMJ08GtDv8hOoNh6y8xl3T5XoFrvidpQ-C0cVkxfjtvljD505VBvsOzkuGIswl55mHGu-5FY"/>
+<!-- Overlaying Decorative Elements to sell the vibe -->
+<div class="absolute inset-0 pointer-events-none">
+<div class="absolute top-20 right-10 p-6 glass-panel rounded-xl border border-primary-container/10 w-64">
+<div class="text-[10px] text-primary-container mb-2 uppercase tracking-tighter">AI Pulse Detected</div>
+<div class="flex items-end gap-0.5 h-8">
+<div class="w-1 bg-primary-container/40 h-1/2"></div>
+<div class="w-1 bg-primary-container/60 h-3/4"></div>
+<div class="w-1 bg-primary-container h-full"></div>
+<div class="w-1 bg-primary-container/80 h-2/3"></div>
+<div class="w-1 bg-primary-container/50 h-1/3"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Scroll Indicator -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+<span class="text-[10px] uppercase tracking-widest font-label">Scroll to explore</span>
+<span class="material-symbols-outlined animate-bounce" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-[#e6e2d9] dark:bg-[#12120f] full-width py-16 mt-24">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 w-full max-w-screen-2xl mx-auto">
+<div class="mb-8 md:mb-0">
+<span class="font-noto-serif text-xl text-[#1c1c17] dark:text-[#fdf9f0]">Digital Sanctuary Editorial</span>
+<p class="font-plus-jakarta text-sm tracking-wide text-[#1c1c17]/70 dark:text-[#fdf9f0]/70 mt-2">© 2024 Digital Sanctuary Editorial. All rights reserved.</p>
+</div>
+<nav class="flex gap-12">
+<a class="font-plus-jakarta text-sm tracking-wide text-[#1c1c17]/70 dark:text-[#fdf9f0]/70 hover:opacity-70 transition-opacity" href="https://www.linkedin.com/in/rohan-katara-5895952b6/" target="_blank" rel="noopener noreferrer">Contact</a>
+</nav>
+</div>
+</footer>
+</body></html>

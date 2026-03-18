@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Intelligent CRM &amp; Lead Qualification Pipeline | Case Study</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#74db9d",
+              "tertiary-fixed": "#91f8b8",
+              "surface": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#00522f",
+              "on-surface-variant": "#43474e",
+              "surface-container-low": "#f2f4f6",
+              "on-primary-fixed-variant": "#2d476f",
+              "on-secondary-container": "#5b6577",
+              "primary": "#002045",
+              "tertiary": "#002713",
+              "on-error-container": "#93000a",
+              "surface-container": "#eceef0",
+              "surface-container-highest": "#e0e3e5",
+              "secondary": "#555f70",
+              "on-primary-fixed": "#001b3c",
+              "on-primary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-tertiary-container": "#4bb278",
+              "on-primary-container": "#86a0cd",
+              "surface-tint": "#455f88",
+              "surface-variant": "#e0e3e5",
+              "secondary-fixed-dim": "#bdc7db",
+              "surface-dim": "#d8dadc",
+              "outline-variant": "#c4c6cf",
+              "inverse-on-surface": "#eff1f3",
+              "primary-fixed-dim": "#adc7f7",
+              "outline": "#74777f",
+              "on-background": "#191c1e",
+              "primary-container": "#1a365d",
+              "surface-bright": "#f7f9fb",
+              "secondary-fixed": "#d9e3f8",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "on-secondary-fixed": "#121c2b",
+              "error": "#ba1a1a",
+              "on-secondary-fixed-variant": "#3e4758",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#d6e3ff",
+              "on-tertiary-fixed": "#002110",
+              "background": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "secondary-container": "#d9e3f8",
+              "inverse-primary": "#adc7f7",
+              "tertiary-container": "#003f23",
+              "surface-container-lowest": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .blue-gradient-text {
+        background: linear-gradient(to right, #002045, #1a365d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* ── Custom scrollbar — webkit ──────────────────────────────────── */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #64748b;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #0f172a;
+        background-clip: padding-box;
+      }
+
+      /* ── Firefox fallback ───────────────────────────────────────────── */
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #64748b transparent;
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-blue-900 dark:text-blue-50 font-headline">Intelligent CRM</span>
+<div class="hidden md:flex gap-6">
+<a class="text-blue-700 dark:text-blue-400 font-semibold border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">Impact</a>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-5 py-2 rounded-lg text-sm font-semibold transition-all active:scale-[0.98]" onclick="window.parent.postMessage('closeModal','*')">
+                Back to Cafe
+            </button>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800 h-[1px] w-full absolute bottom-0"></div>
+</nav>
+<main class="pt-24 pb-20">
+<!-- Hero Section -->
+<header class="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center md:text-left">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-xs font-bold tracking-widest uppercase mb-6">
+<span class="material-symbols-outlined text-[14px]">architecture</span>
+                Case Study: Q4 Infrastructure
+            </div>
+<h1 class="text-5xl md:text-7xl font-extrabold font-headline tracking-tight text-primary leading-tight mb-4">
+                Intelligent CRM &amp; <br/>Lead Qualification Pipeline
+            </h1>
+<p class="text-xl md:text-2xl text-on-secondary-fixed-variant max-w-2xl font-light leading-relaxed">
+                Automating Sales Routing &amp; Client Management with enterprise-grade precision.
+            </p>
+</header>
+<!-- About Section (Architectural Grid) -->
+<section class="max-w-7xl mx-auto px-6 mb-32">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<div class="lg:col-span-5 space-y-8">
+<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
+<div class="p-3 bg-secondary-container rounded-lg text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</div>
+<div>
+<h3 class="text-lg font-bold font-headline text-primary mb-2">Automated Architecture</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                                Architected an automated lead qualification pipeline utilizing Make.com to seamlessly integrate Google Forms, OpenAI, Gmail, and Slack.
+                            </p>
+</div>
+</div>
+<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
+<div class="p-3 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-lg">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h3 class="text-lg font-bold font-headline text-primary mb-2">Intelligent Routing</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                                Engineered an intelligent routing system leveraging OpenAI's API to analyze incoming client queries in real-time, instantly categorizing leads by intent and budget.
+                            </p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 hidden lg:flex flex-col items-center justify-center">
+<div class="w-[1px] h-full bg-gradient-to-b from-transparent via-outline-variant to-transparent opacity-30"></div>
+</div>
+<div class="lg:col-span-5 space-y-8">
+<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
+<div class="p-3 bg-secondary-container rounded-lg text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="mark_email_read">mark_email_read</span>
+</div>
+<div>
+<h3 class="text-lg font-bold font-headline text-primary mb-2">Eliminated Manual Sorting</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                                Streamlined client relationship management by automating personalized email follow-ups for standard inquiries, entirely eliminating manual inbox sorting.
+                            </p>
+</div>
+</div>
+<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
+<div class="p-3 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-lg">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</div>
+<div>
+<h3 class="text-lg font-bold font-headline text-primary mb-2">Priority VIP Mechanism</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                                Developed a priority alert mechanism using custom Slack webhooks to instantly notify the team of high-ticket VIP clients, drastically optimizing response time.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Success Metrics Ticker -->
+<div class="mt-20 flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
+<div class="text-center">
+<span class="block text-4xl font-extrabold font-headline text-primary">94%</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Auto-Categorized</span>
+</div>
+<div class="text-center">
+<span class="block text-4xl font-extrabold font-headline text-primary">&lt; 2m</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Response Time</span>
+</div>
+<div class="text-center">
+<span class="block text-4xl font-extrabold font-headline text-primary">12.5k</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Leads Processed</span>
+</div>
+</div>
+</section>
+<!-- App Showcase Window -->
+<!-- Final Quote/Closing Section -->
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-4">
+<span class="text-slate-900 dark:text-slate-100 font-label text-xs uppercase tracking-widest font-medium">
+                © 2024 Intelligent CRM. Built on Architectural Ledger Principles.
+            </span>
+<div class="flex gap-8">
+<a class="font-label text-xs uppercase tracking-widest font-medium text-slate-500 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all" href="https://www.linkedin.com/in/rohan-katara-5895952b6/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+</div>
+</div>
+</footer>
+</body></html>

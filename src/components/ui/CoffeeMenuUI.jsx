@@ -55,7 +55,7 @@ export default function CoffeeMenuUI() {
     <div
       ref={panelRef}
       className="absolute bottom-[8%] left-1/2 -translate-x-1/2 z-40 opacity-0"
-      style={{ pointerEvents: 'auto', width: 'min(480px, 90vw)' }}
+      style={{ pointerEvents: 'auto', width: 'min(580px, 92vw)' }}
     >
       {/* Amber glow border ring */}
       <div style={{
@@ -129,19 +129,13 @@ export default function CoffeeMenuUI() {
               boxShadow: `0 0 6px ${project.color}88`,
             }} />
 
-            {/* Name + tagline */}
+            {/* Title */}
             <span style={{ flex: 1, textAlign: 'left' }}>
               <span style={{
-                display: 'block', color: '#f5e6c8', fontSize: '0.95rem', fontWeight: 600,
-                fontFamily: 'Noto Serif, Georgia, serif',
+                display: 'block', color: '#f5e6c8', fontSize: '0.92rem', fontWeight: 600,
+                fontFamily: 'Noto Serif, Georgia, serif', lineHeight: 1.35,
               }}>
-                {project.name}
-              </span>
-              <span style={{
-                display: 'block', color: 'rgba(200,127,76,0.80)', fontSize: '0.78rem',
-                fontStyle: 'italic', fontFamily: 'Noto Serif, Georgia, serif',
-              }}>
-                {project.tagline}
+                {project.title}
               </span>
             </span>
 

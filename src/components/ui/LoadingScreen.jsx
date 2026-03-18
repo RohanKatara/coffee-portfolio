@@ -16,16 +16,25 @@ export default function LoadingScreen() {
   const overlayRef = useRef(null)
   const barRef = useRef(null)
   const hasTransitioned = useRef(false)
+  const maxProgress = useRef(0)
+
+  // Clamp progress so it never goes backwards
+  const clampedProgress = Math.max(maxProgress.current, progress)
+  maxProgress.current = clampedProgress
 
   // Animate progress bar
   useEffect(() => {
     if (barRef.current) {
-      gsap.to(barRef.current, { width: `${progress}%`, duration: 0.3, ease: 'power1.out' })
+      gsap.to(barRef.current, { width: `${clampedProgress}%`, duration: 0.3, ease: 'power1.out' })
     }
-  }, [progress])
+  }, [clampedProgress])
 
   const doTransition = () => {
     if (hasTransitioned.current) return
+    if (!overlayRef.current) {
+      setScene('LANDING')
+      return
+    }
     hasTransitioned.current = true
     gsap.to(overlayRef.current, {
       opacity: 0,
@@ -63,7 +72,7 @@ export default function LoadingScreen() {
       </svg>
 
       <p className="text-[#3d2b1f] font-serif text-xl mb-6 tracking-wide">
-        Brewing your portfolio…
+        Brewing portfolio…
       </p>
 
       <div className="w-56 h-1.5 bg-[#e8d5b7] rounded-full overflow-hidden">
@@ -71,7 +80,7 @@ export default function LoadingScreen() {
       </div>
 
       <p className="text-[#9b8070] text-sm mt-3 font-serif">
-        {Math.round(progress)}%
+        {Math.round(clampedProgress)}%
       </p>
     </div>
   )

@@ -298,12 +298,5 @@ function IndoorPlant() {
 
 // ─── Root export ──────────────────────────────────────────────────────────────
 export default function ZoneBRightDecor() {
-  return (
-    <>
-      <POSTerminal />
-      <CounterAccents />
-      <WallShelves />
-      <IndoorPlant />
-    </>
-  )
+  return null
 }

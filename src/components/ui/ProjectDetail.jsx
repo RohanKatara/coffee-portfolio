@@ -41,11 +41,13 @@ export default function ProjectDetail() {
       <div style={{
         pointerEvents: 'auto',
         position: 'relative',
-        width: 'min(520px, 90vw)',
+        width: 'min(600px, 92vw)',
+        maxHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
         background: 'rgba(14, 9, 4, 0.93)',
         border: `1px solid ${project.color}44`,
         borderRadius: '8px',
-        padding: '32px 40px 28px',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         boxShadow: [
@@ -60,103 +62,64 @@ export default function ProjectDetail() {
         <div style={{
           position: 'absolute', top: 0, left: '20%', right: '20%', height: '1px',
           background: `linear-gradient(90deg, transparent, ${project.color}99, transparent)`,
+          flexShrink: 0,
         }} />
 
-        {/* Close button */}
-        <button
-          onClick={goBackToMachine}
-          style={{
-            position: 'absolute', top: '14px', right: '16px',
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            color: 'rgba(200,127,76,0.55)', fontSize: '1rem', lineHeight: 1,
-            padding: '4px 8px', borderRadius: '4px', transition: 'color 0.2s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#c87f4c' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(200,127,76,0.55)' }}
-        >
-          ✕
-        </button>
+        {/* Header — fixed, does not scroll */}
+        <div style={{ padding: '32px 40px 0', flexShrink: 0 }}>
 
-        {/* Project name */}
-        <h2 style={{
-          color: '#f5e6c8', fontSize: '1.7rem', fontWeight: 700, marginBottom: '4px',
-          fontFamily: 'Noto Serif, Georgia, "Times New Roman", serif',
-          textShadow: `0 2px 12px ${project.color}55`,
-        }}>
-          {project.name}
-        </h2>
+          {/* Close button */}
+          <button
+            onClick={goBackToMachine}
+            style={{
+              position: 'absolute', top: '14px', right: '16px',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'rgba(200,127,76,0.55)', fontSize: '1rem', lineHeight: 1,
+              padding: '4px 8px', borderRadius: '4px', transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#c87f4c' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(200,127,76,0.55)' }}
+          >
+            ✕
+          </button>
 
-        {/* Tagline */}
-        <p style={{
-          color: project.color, fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.88,
-          fontFamily: 'Noto Serif, Georgia, serif', marginBottom: '18px',
-        }}>
-          {project.tagline}
-        </p>
+          {/* Full project title */}
+          <h2 style={{
+            color: '#f5e6c8', fontSize: '1.45rem', fontWeight: 700, marginBottom: '18px',
+            fontFamily: 'Noto Serif, Georgia, "Times New Roman", serif',
+            lineHeight: 1.35, paddingRight: '28px',
+            textShadow: `0 2px 12px ${project.color}55`,
+          }}>
+            {project.title}
+          </h2>
 
-        {/* Divider */}
-        <div style={{
-          height: '1px', marginBottom: '16px',
-          background: `linear-gradient(90deg, transparent, ${project.color}44, transparent)`,
-        }} />
-
-        {/* Description */}
-        <p style={{
-          color: 'rgba(245,230,200,0.80)', fontSize: '0.875rem', lineHeight: 1.7,
-          fontFamily: 'Georgia, serif', marginBottom: '20px',
-        }}>
-          {project.description}
-        </p>
-
-        {/* Tech stack tags */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '24px' }}>
-          {project.tech.map((t) => (
-            <span key={t} style={{
-              background: 'rgba(200,127,76,0.10)',
-              border: `1px solid ${project.color}44`,
-              color: project.color,
-              borderRadius: '100px', padding: '3px 10px',
-              fontSize: '0.72rem', fontFamily: 'monospace', letterSpacing: '0.04em',
-            }}>
-              {t}
-            </span>
-          ))}
+          {/* Divider */}
+          <div style={{
+            height: '1px', marginBottom: '16px',
+            background: `linear-gradient(90deg, transparent, ${project.color}44, transparent)`,
+          }} />
         </div>
 
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <a
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              flex: 1, display: 'block', textAlign: 'center', padding: '10px 0',
-              background: `${project.color}22`, border: `1.5px solid ${project.color}`,
-              color: '#f5e6c8', borderRadius: '4px', fontSize: '0.88rem',
-              fontWeight: 600, letterSpacing: '0.06em', textDecoration: 'none',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = `${project.color}44` }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = `${project.color}22` }}
-          >
-            Live Demo
-          </a>
-          <a
-            href={project.repoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              flex: 1, display: 'block', textAlign: 'center', padding: '10px 0',
-              background: 'transparent', border: '1.5px solid rgba(200,127,76,0.35)',
-              color: 'rgba(245,230,200,0.70)', borderRadius: '4px', fontSize: '0.88rem',
-              fontWeight: 600, letterSpacing: '0.06em', textDecoration: 'none',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(200,127,76,0.08)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-          >
-            Source Code
-          </a>
+        {/* Scrollable description */}
+        <div style={{
+          overflowY: 'auto', flex: 1,
+          padding: '0 40px 28px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${project.color}44 transparent`,
+        }}>
+          <ul style={{
+            margin: 0, paddingLeft: '1.2em',
+            listStyleType: 'disc',
+          }}>
+            {project.description.map((point, i) => (
+              <li key={i} style={{
+                color: 'rgba(245,230,200,0.82)', fontSize: '0.875rem', lineHeight: 1.75,
+                fontFamily: 'Georgia, serif', marginBottom: '10px',
+              }}>
+                {point}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Bottom accent line */}

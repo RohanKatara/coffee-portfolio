@@ -1,9 +1,12 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { Box3 } from 'three'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
-useGLTF.preload('/models/grinder.glb')
+useGLTF.preload('/models/coffee_grinder.glb')
+
+const GRINDER_SCALE    = 0.05
+const GRINDER_POSITION = [0, 0.6, 0]
+const GRINDER_ROTATION = [0, 0, 0]
 
 function CoffeeGrinderPlaceholder({ position }) {
   return (
@@ -27,42 +30,30 @@ function CoffeeGrinderPlaceholder({ position }) {
   )
 }
 
-function CoffeeGrinderModel({ position, scale, rotation }) {
-  const { scene } = useGLTF('/models/grinder.glb')
-  const [sx, sy, sz] = scale
-  const [rx, ry, rz] = rotation
-
-  const [clone, liftY] = useMemo(() => {
-    const c = scene.clone(true)
-    // Apply scale and rotation before bbox so liftY is correct for this size
-    c.scale.set(sx, sy, sz)
-    c.rotation.set(rx, ry, rz)
-    c.traverse(node => {
-      if (!node.isMesh) return
-      node.castShadow    = true
-      node.receiveShadow = true
-    })
-    c.updateMatrixWorld(true)
-    const box = new Box3().setFromObject(c)
-    return [c, -box.min.y]
-  }, [scene, sx, sy, sz, rx, ry, rz])
-
+// ── GLB model — native materials, no overrides ────────────────────────────────
+function CoffeeGrinderModel({ position }) {
+  const grinderModel = useGLTF('/models/coffee_grinder.glb')
   return (
-    <group position={[position[0], position[1] + liftY, position[2]]}>
-      <primitive object={clone} />
-    </group>
+    <primitive
+      object={grinderModel.scene}
+      position={[
+        position[0] + GRINDER_POSITION[0],
+        position[1] + GRINDER_POSITION[1],
+        position[2] + GRINDER_POSITION[2],
+      ]}
+      scale={GRINDER_SCALE}
+      rotation={GRINDER_ROTATION}
+    />
   )
 }
 
 export default function CoffeeGrinder({
   position = [10, -0.53, -0.5],
-  scale    = [1, 1, 1],
-  rotation = [0, 0, 0],
 }) {
   return (
     <ModelErrorBoundary fallback={<CoffeeGrinderPlaceholder position={position} />}>
       <Suspense fallback={<CoffeeGrinderPlaceholder position={position} />}>
-        <CoffeeGrinderModel position={position} scale={scale} rotation={rotation} />
+        <CoffeeGrinderModel position={position} />
       </Suspense>
     </ModelErrorBoundary>
   )

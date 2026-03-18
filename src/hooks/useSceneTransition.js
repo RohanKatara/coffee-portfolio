@@ -7,11 +7,17 @@ import useSceneStore from '../store/useSceneStore'
 
 // Module-level Vector3 for the lookAt target — persists across renders,
 // gets damped in useFrame so the camera always looks toward the right spot.
-const _lookAt = new Vector3()
+// Exported so AnimatedEffects can drive DoF without any extra state.
+export const _lookAt = new Vector3()
+
+// Set to true while a TransformControls helper is being dragged so the
+// damp3 loop doesn't fight the gizmo for camera ownership.
+export const cameraLock = { active: false }
 
 // Lambda controls damp speed (exponential decay).
-// λ = 4  →  ~99 % arrival in ≈ 1.15 s at 60 fps — cinematic glide.
-const CAM_LAMBDA = 4
+// λ = 2.5  →  ~99 % arrival in ≈ 1.85 s at 60 fps — heavier cinematic glide.
+// Reduced from 4 to soften the A→B transition and mask frustum-cull stutter.
+const CAM_LAMBDA = 2.5
 
 /**
  * Single-loop camera driver using maath damp3.
@@ -42,6 +48,7 @@ export function useSceneTransition() {
   }, [camera])
 
   useFrame((_, delta) => {
+    if (cameraLock.active) return
     const scene   = useSceneStore.getState().scene
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
 

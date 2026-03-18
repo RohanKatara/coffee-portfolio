@@ -1,11 +1,10 @@
 import { useRef, useEffect, useMemo, Suspense } from 'react'
 import { ContactShadows, Environment, useGLTF, Center } from '@react-three/drei'
-import { Box3, MeshStandardMaterial } from 'three'
+import { Box3, MeshStandardMaterial, Color } from 'three'
 import ShelfProps from './ShelfProps'
 
 useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
 useGLTF.preload('/models/industrial_diamond_pendant_light.glb')
-useGLTF.preload('/models/plant.glb')
 
 /**
  * Full 3D café environment.
@@ -33,7 +32,8 @@ const M = {
   shelfWood:  { color: '#3d2010', roughness: 0.55, metalness: 0.04 },
   bracket:    { color: '#251a0a', roughness: 0.75 },
   stoneBlack: { color: '#18181a', roughness: 0.62, metalness: 0.10, envMapIntensity: 0.5 },
-  woodTop:    { color: '#4a2a10', roughness: 0.38, metalness: 0.06, envMapIntensity: 0.8 },
+  // Lower roughness + higher metalness → catches reflections of neon + pendants
+  woodTop:    { color: '#4a2a10', roughness: 0.16, metalness: 0.18, envMapIntensity: 1.4 },
   pendant:    { color: '#111111', roughness: 0.55 },
   tableTop:   { color: '#251208', roughness: 0.62, metalness: 0.04 },
   darkMetal:  { color: '#1c1c1e', roughness: 0.52, metalness: 0.48 },
@@ -99,6 +99,12 @@ function DiamondPendantLight({ position }) {
       if (!node.isMesh) return
       node.castShadow    = true
       node.receiveShadow = true
+      // Restore original materials — no emissive overrides
+      if (node.material) {
+        node.material = node.material.clone()
+        node.material.emissive.set(0x000000)
+        node.material.emissiveIntensity = 0
+      }
     })
     return c
   }, [scene])
@@ -111,32 +117,6 @@ function DiamondPendantLight({ position }) {
   )
 }
 
-// ─── Hanging plant (GLB) ──────────────────────────────────────────────────────
-function HangingPlant({ position, scale = [0.5, 0.5, 0.5] }) {
-  const { scene } = useGLTF('/models/plant.glb')
-
-  useEffect(() => {
-    scene.traverse(child => {
-      if (!child.isMesh) return
-      // Hide any structural pole/support mesh
-      if (/pole|post|support/i.test(child.name)) {
-        child.visible = false
-        return
-      }
-      child.castShadow    = true
-      child.receiveShadow = true
-      child.material = new MeshStandardMaterial({ color: '#4f7942', roughness: 0.8 })
-    })
-  }, [scene])
-
-  return (
-    <group position={position}>
-      <Center>
-        <primitive object={scene} scale={scale} />
-      </Center>
-    </group>
-  )
-}
 
 // ─── Round bistro table ───────────────────────────────────────────────────────
 // All child positions are relative to floor level (group.y = -1.5)
@@ -265,7 +245,7 @@ export default function CafeEnvironment() {
         distance={13}
         decay={1.3}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-near={0.5}
         shadow-camera-far={13}
         shadow-bias={-0.0003}
@@ -458,9 +438,11 @@ export default function CafeEnvironment() {
       {/* ── SHARED PENDANT FILL LIGHTS ──────────────────────────────────── */}
       {/* 3 point lights spread across the lamp row instead of one per lamp. */}
       {/* y=1.7 sits just below the fixtures so light spills downward.      */}
-      <pointLight position={[0.8,  1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
-      <pointLight position={[1.65, 1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
-      <pointLight position={[2.5,  1.7, -1.2]} intensity={1.0} color="#ffccaa" distance={4.0} decay={2} />
+      {/* Pendant fill lights — no castShadow: point-light shadow maps cost 6 draw
+          calls each; N8AO + ContactShadows handle the contact darkening instead  */}
+      <pointLight position={[0.8,  1.7, -1.2]} intensity={2.2} color="#ffccaa" distance={4.5} decay={2} />
+      <pointLight position={[1.65, 1.7, -1.2]} intensity={1.8} color="#ffccaa" distance={4.0} decay={2} />
+      <pointLight position={[2.5,  1.7, -1.2]} intensity={2.2} color="#ffccaa" distance={4.5} decay={2} />
 
       {/* ── SHELVES — 3 floating wooden shelves left of back wall ────────── */}
       {/*   GLB: /modern_floating_wooden_shelf.glb                          */}
@@ -480,13 +462,6 @@ export default function CafeEnvironment() {
       {/*   Scale + position tunable in ShelfProps.jsx                     */}
       <ShelfProps />
 
-      {/* ── HANGING PLANT ───────────────────────────────────────────────── */}
-      {/*   position[1]=2.5 sits above the top shelf surface (y≈1.78).      */}
-      {/*   Lower y toward 1.78 once the model is visually confirmed.       */}
-      {/*   If the GLB is missing textures, replace with a new model file.  */}
-      <Suspense fallback={null}>
-        <HangingPlant position={[0, 2.8, -1.4]} scale={[0.5, 0.5, 0.5]} />
-      </Suspense>
 
       {/* ── BAR COUNTER — MAIN SECTION ──────────────────────────────────── */}
       {/*   Runs left → right across the scene, sitting on the floor.       */}
@@ -558,13 +533,9 @@ export default function CafeEnvironment() {
 
       {/* Table 1 — x=-2.3, z=-1.6 */}
       <BistroTable x={-2.3} z={-1.6} />
-      {/* Two chairs around table 1 */}
-      <BistroChair x={-2.3} z={-1.1} ry={Math.PI} />       {/* front, facing away */}
-      <BistroChair x={-2.85} z={-1.6} ry={Math.PI / 2} />  {/* left side, facing right */}
 
       {/* Table 2 — further back and left, mostly out of main frame */}
       <BistroTable x={-3.9} z={-2.05} />
-      <BistroChair x={-3.9} z={-1.55} ry={Math.PI} />      {/* front chair */}
 
       {/* ── CONTACT SHADOW + ENVIRONMENT ────────────────────────────────── */}
       <ContactShadows

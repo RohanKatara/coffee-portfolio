@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Content Multiplier &amp; Syndication Engine | Portfolio Case Study</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline-variant": "#494651",
+              "surface-variant": "#272431",
+              "surface-container-highest": "#272431",
+              "primary-dim": "#e4006c",
+              "tertiary": "#d674ff",
+              "primary-container": "#ff719b",
+              "secondary-container": "#914c00",
+              "surface": "#0f0d16",
+              "tertiary-container": "#be0dff",
+              "tertiary-dim": "#bb00fc",
+              "secondary": "#ff8a00",
+              "primary-fixed-dim": "#ff528c",
+              "on-background": "#f5eefc",
+              "on-error-container": "#ffb2b9",
+              "on-surface": "#f5eefc",
+              "surface-container-high": "#211e2a",
+              "error-container": "#a70138",
+              "surface-container-lowest": "#000000",
+              "secondary-fixed": "#ffc69c",
+              "outline": "#78737f",
+              "surface-container": "#1b1823",
+              "surface-tint": "#ff8aa9",
+              "inverse-surface": "#fdf7ff",
+              "surface-dim": "#0f0d16",
+              "on-tertiary-container": "#000000",
+              "on-secondary-fixed-variant": "#7d4100",
+              "inverse-on-surface": "#57535f",
+              "on-primary-fixed": "#000000",
+              "error": "#ff6e84",
+              "error-dim": "#d73357",
+              "secondary-dim": "#ef8100",
+              "inverse-primary": "#bc0058",
+              "primary": "#ff8aa9",
+              "on-secondary": "#442100",
+              "on-surface-variant": "#aea9b6",
+              "on-tertiary": "#390050",
+              "surface-container-low": "#14121c",
+              "on-secondary-container": "#fff6f2",
+              "on-primary-container": "#4c0020",
+              "surface-bright": "#2d2a39",
+              "on-tertiary-fixed": "#2c003f",
+              "on-primary": "#62002b",
+              "primary-fixed": "#ff719b",
+              "background": "#0f0d16",
+              "on-tertiary-fixed-variant": "#600083",
+              "secondary-fixed-dim": "#ffb377",
+              "on-secondary-fixed": "#532900",
+              "on-error": "#490013",
+              "on-primary-fixed-variant": "#5e0028",
+              "tertiary-fixed": "#e192ff",
+              "tertiary-fixed-dim": "#d97dff"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0f0d16;
+            color: #f5eefc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(27, 24, 35, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 138, 169, 0.1);
+        }
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, #ff8aa9, #ff8a00);
+            z-index: -1;
+            border-radius: inherit;
+            opacity: 0.3;
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 50% -20%, rgba(214, 116, 255, 0.15) 0%, rgba(15, 13, 22, 0) 70%);
+        }
+
+        /* ── Custom scrollbar — webkit ──────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #ff8aa9, #ff8a00);
+            border-radius: 10px;
+            border: 2px solid #0f0d16;
+            background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #ff5c8a, #ff6a00);
+            background-clip: padding-box;
+        }
+
+        /* ── Firefox fallback (no gradient support) ─────────────────────── */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #ff8aa9 transparent;
+        }
+    </style>
+</head>
+<body class="selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0f0d16]/70 backdrop-blur-xl border-b border-[#ff8aa9]/10 shadow-[0_0_20px_rgba(255,138,169,0.05)]">
+<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold bg-gradient-to-r from-[#ff8aa9] to-[#d674ff] bg-clip-text text-transparent font-['Space_Grotesk']">AI Content Multiplier</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="flex items-center gap-2 text-[#ff8aa9] font-['Plus_Jakarta_Sans'] font-bold hover:opacity-80 transition-all active:scale-95" href="#" onclick="window.parent.postMessage('closeModal','*');return false;">
+<span>Back to Cafe</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+</nav>
+<main class="pt-24 hero-gradient">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-6 pt-20 pb-32 text-center md:text-left">
+<div class="grid md:grid-cols-12 gap-12 items-center">
+<div class="md:col-span-8">
+<h1 class="font-headline font-bold text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.9] mb-8">
+                    AI Content Multiplier &amp; <span class="bg-gradient-to-br from-primary via-tertiary to-secondary bg-clip-text text-transparent">Syndication Engine</span>
+</h1>
+<p class="font-body text-xl md:text-2xl text-on-surface-variant max-w-2xl leading-relaxed">
+                    Scaling Digital Presence with Generative AI. Transforming core ideas into a multi-channel content ecosystem.
+                </p>
+</div>
+<div class="md:col-span-4 hidden md:block">
+<div class="w-full aspect-square rounded-2xl bg-surface-container border border-outline-variant/20 flex items-center justify-center relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-tertiary/10 opacity-50"></div>
+<span class="material-symbols-outlined text-8xl text-primary/30 group-hover:scale-110 transition-transform duration-700" data-icon="hub">hub</span>
+</div>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section class="bg-surface-container-low py-32">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid md:grid-cols-2 gap-20">
+<div>
+<h2 class="font-headline text-tertiary text-sm font-bold tracking-[0.2em] uppercase mb-4">Project Overview</h2>
+<h3 class="font-headline text-4xl font-bold mb-8">The Engineering of <br/>Scale and Precision</h3>
+</div>
+<div class="space-y-12">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shadow-[0_0_15px_rgba(255,138,169,0.1)]">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<p class="font-body text-lg leading-relaxed text-on-surface-variant">
+                            Engineered an automated content repurposing system using Generative AI to instantly transform long-form core content into platform-specific short-form copy.
+                        </p>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary shadow-[0_0_15px_rgba(255,138,0,0.1)]">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+</div>
+<p class="font-body text-lg leading-relaxed text-on-surface-variant">
+                            Streamlined digital marketing workflows by integrating API-driven automation to format and prepare content for distribution across multiple social channels.
+                        </p>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary shadow-[0_0_15px_rgba(214,116,255,0.1)]">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<p class="font-body text-lg leading-relaxed text-on-surface-variant">
+                            Leveraged advanced prompt engineering to ensure the AI maintained a consistent brand voice and optimized messaging for maximum audience engagement on different platforms.
+                        </p>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary-dim shadow-[0_0_15px_rgba(228,0,108,0.1)]">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<p class="font-body text-lg leading-relaxed text-on-surface-variant">
+                            Scaled digital presence and content output capacity, drastically reducing manual copywriting hours while simultaneously increasing cross-platform visibility.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Skills & Tech Stack Section -->
+<section class="py-32">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<h2 class="font-headline text-4xl font-bold mb-16">Tech Stack &amp; Methodology</h2>
+<div class="flex flex-wrap justify-center gap-4 md:gap-6">
+<div class="px-8 py-3 rounded-full border border-primary/30 bg-primary/5 text-primary font-label font-medium shadow-[0_0_20px_rgba(255,138,169,0.1)] hover:bg-primary/10 transition-colors cursor-default">
+                    Generative AI
+                </div>
+<div class="px-8 py-3 rounded-full border border-secondary/30 bg-secondary/5 text-secondary font-label font-medium shadow-[0_0_20px_rgba(255,138,0,0.1)] hover:bg-secondary/10 transition-colors cursor-default">
+                    Advanced Prompt Engineering
+                </div>
+<div class="px-8 py-3 rounded-full border border-tertiary/30 bg-tertiary/5 text-tertiary font-label font-medium shadow-[0_0_20px_rgba(214,116,255,0.1)] hover:bg-tertiary/10 transition-colors cursor-default">
+                    API Integration
+                </div>
+<div class="px-8 py-3 rounded-full border border-primary-dim/30 bg-primary-dim/5 text-primary-dim font-label font-medium shadow-[0_0_20px_rgba(228,0,108,0.1)] hover:bg-primary-dim/10 transition-colors cursor-default">
+                    Workflow Automation
+                </div>
+<div class="px-8 py-3 rounded-full border border-on-surface-variant/30 bg-surface-container-high text-on-surface font-label font-medium hover:bg-surface-bright transition-colors cursor-default">
+                    Content Syndication
+                </div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0f0d16] w-full py-12 border-t border-[#1b1823]">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-['Space_Grotesk'] font-bold text-[#f5eefc] text-xl">Kinetic Gallery</span>
+<p class="font-['Plus_Jakarta_Sans'] text-sm tracking-wide text-[#f5eefc]/40">© 2024 Kinetic Gallery | AI Syndication Engine</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['Plus_Jakarta_Sans'] text-sm tracking-wide text-[#f5eefc]/40 hover:text-[#ff8a00] transition-colors" href="https://www.linkedin.com/in/rohan-katara-5895952b6/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm tracking-wide text-[#f5eefc]/40 hover:text-[#ff8a00] transition-colors" href="https://github.com/RohanKatara" target="_blank" rel="noopener noreferrer">GitHub</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Modern Scribe | Krishna.AI Case Study</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#e9c349",
+                        "on-tertiary-fixed": "#241a00",
+                        "surface-container-highest": "#e4e2de",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#944925",
+                        "on-surface": "#1b1c1a",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#d8c3b4",
+                        "on-tertiary-container": "#584500",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffe088",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d7b23a",
+                        "on-secondary-fixed": "#2f1500",
+                        "primary-fixed": "#ffdbcd",
+                        "surface-container-low": "#f5f3ef",
+                        "primary": "#944925",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#6e3900",
+                        "secondary": "#8d4f11",
+                        "on-primary-fixed": "#360f00",
+                        "primary-fixed-dim": "#ffb596",
+                        "surface": "#fbf9f5",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#773e00",
+                        "surface-container": "#efeeea",
+                        "secondary-fixed-dim": "#ffb77d",
+                        "surface-variant": "#e4e2de",
+                        "surface-bright": "#fbf9f5",
+                        "secondary-fixed": "#ffdcc3",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-primary-fixed-variant": "#76320f",
+                        "outline": "#857467",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#ffb596",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "background": "#fbf9f5",
+                        "on-background": "#1b1c1a",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#534439",
+                        "inverse-surface": "#30312e",
+                        "secondary-container": "#feac67",
+                        "tertiary": "#735c00",
+                        "surface-dim": "#dbdad6",
+                        "surface-container-high": "#eae8e4",
+                        "on-primary-container": "#773310",
+                        "primary-container": "#fe9d72"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .text-shimmer {
+            background: linear-gradient(135deg, #944925 0%, #fe9d72 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── Custom scrollbar — webkit ──────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #944925;
+            border-radius: 6px;
+            border: 2px solid #fbf9f5;
+            background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6e3211;
+            background-clip: padding-box;
+        }
+
+        /* ── Firefox fallback ───────────────────────────────────────────── */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #944925 transparent;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#fbf9f5]/80 dark:bg-[#1b1c1a]/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(148,73,37,0.06)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<a class="text-2xl font-['Noto_Serif'] font-bold text-[#1b1c1a] dark:text-[#fbf9f5]" href="#">The Modern Scribe</a>
+<div class="hidden md:flex items-center gap-6">
+<a class="font-['Noto_Serif'] font-semibold tracking-tight text-[#944925] dark:text-[#fe9d72] border-b-2 border-[#944925] pb-1" href="#">Work</a>
+<a class="font-['Noto_Serif'] font-semibold tracking-tight text-[#857467] dark:text-[#dbdad6] hover:text-[#1b1c1a] dark:hover:text-[#ffffff] transition-colors" href="#">About</a>
+<a class="font-['Noto_Serif'] font-semibold tracking-tight text-[#857467] dark:text-[#dbdad6] hover:text-[#1b1c1a] dark:hover:text-[#ffffff] transition-colors" href="#">Sanctuary</a>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label font-medium hover:scale-95 duration-200 ease-in-out transition-all flex items-center gap-2" onclick="window.parent.postMessage('closeModal','*')">
+<span class="material-symbols-outlined text-sm">coffee</span>
+                Back to Cafe
+            </button>
+</div>
+</nav>
+<main class="pt-24">
+<!-- Hero Section -->
+<section class="min-h-[819px] flex flex-col items-center justify-center px-6 text-center bg-surface">
+<div class="max-w-4xl mx-auto space-y-6">
+<h1 class="font-headline text-7xl md:text-9xl font-bold tracking-tight text-on-surface">
+                    Krishna.AI
+                </h1>
+<p class="font-headline italic text-2xl md:text-4xl text-tertiary">
+                    Ancient Wisdom for Modern Problems.
+                </p>
+<div class="pt-12 flex justify-center">
+<div class="w-px h-24 bg-gradient-to-b from-primary to-transparent opacity-30"></div>
+</div>
+</div>
+</section>
+<!-- About Section: Intentional Asymmetry -->
+<section class="py-24 px-6 md:px-24 bg-surface-container-low">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
+<div class="md:col-span-5 space-y-8">
+<span class="font-label text-sm uppercase tracking-[0.2em] text-outline font-semibold">The Genesis</span>
+<h2 class="font-headline text-4xl md:text-5xl text-on-surface leading-tight">
+                        Bridging the <span class="text-tertiary italic">Eternal</span> and the <span class="text-primary italic">Digital</span>.
+                    </h2>
+</div>
+<div class="md:col-span-7 space-y-12">
+<div class="space-y-8">
+<div class="flex gap-6 group">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<p class="text-xl leading-relaxed text-on-surface-variant font-light">
+                                AI-powered web platform providing personalized life guidance inspired by the Bhagavad Gita.
+                            </p>
+</div>
+<div class="flex gap-6 group">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-tertiary shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<p class="text-xl leading-relaxed text-on-surface-variant font-light">
+                                Designed to help users apply ancient wisdom to modern problems like financial stress, ethical dilemmas, and personal decision-making.
+                            </p>
+</div>
+<div class="flex gap-6 group">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-secondary shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<p class="text-xl leading-relaxed text-on-surface-variant font-light">
+                                Implemented prompt engineering with ChatGPT API and created an accessible, interactive interface for busy individuals.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Aphorism Component -->
+<section class="w-full bg-surface-container-lowest py-24 px-6">
+<div class="max-w-4xl mx-auto text-center space-y-4">
+<span class="material-symbols-outlined text-4xl text-tertiary-container" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<blockquote class="font-headline text-3xl md:text-5xl text-tertiary leading-relaxed italic">
+                    "The soul is neither born, nor does it ever die; nor having once existed, does it ever cease to be."
+                </blockquote>
+<cite class="block font-label text-outline mt-8 not-italic tracking-widest">— BHAGAVAD GITA, 2.20</cite>
+</div>
+</section>
+<!-- App Showcase Window -->
+<section class="py-32 px-6 md:px-12 bg-surface">
+<div class="max-w-6xl mx-auto">
+<div class="relative group">
+<!-- Glass Frame Mockup -->
+<div class="absolute -inset-4 bg-gradient-to-tr from-primary/10 to-tertiary/10 rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
+<div class="relative bg-surface-container-lowest border border-outline-variant/20 rounded-[2rem] overflow-hidden shadow-2xl">
+<!-- Toolbar -->
+<div class="flex justify-between items-center px-6 py-4 border-b border-outline-variant/10 bg-surface-container-high/30 backdrop-blur-md">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error/40"></div>
+<div class="w-3 h-3 rounded-full bg-tertiary/40"></div>
+<div class="w-3 h-3 rounded-full bg-secondary-container"></div>
+</div>
+<div class="font-label text-xs tracking-widest text-outline uppercase font-bold">App UI Preview</div>
+<div class="w-12"></div> <!-- Spacer -->
+</div>
+<!-- Mockup Content -->
+<div class="aspect-[16/10] bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="Modern AI interface with gold and saffron accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO2OCX3JFUPYoXr8Pxr416Ql4oANfIeXq6iZ7gg4woTvGC1um2QPirL93Uze1vlMnF8jEz33pcKyTMvfGhQQ5J5kUlujzPndcyjG4VyFEnXsNrhzae3EzHd8fno-2S4rS3t4-YfSG_vP6Ys0T_x3KrfaujKzLQC2osDCGkDyXTpbiWHitp1nfymXTjWkA7wbB9jTGNwXtxD_Dg_1mfhtd7Tyvzsm_ZcG6unU3M-8aNZrM1t4Fio7XiXG8DekX6Th9TshxX5lcn7zw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/20 to-transparent"></div>
+<!-- Floating UI Elements -->
+<div class="absolute bottom-8 left-8 p-6 glass-effect bg-white/10 rounded-xl border border-white/20 text-white max-w-xs space-y-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="text-xs font-bold uppercase tracking-wider">Neural Sage</span>
+</div>
+<p class="text-sm font-light">How can I apply detachment to my career goals today?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom CTA / Featured Card -->
+<section class="py-24 px-6">
+<div class="max-w-5xl mx-auto bg-surface-container-low rounded-[3rem] p-12 md:p-24 relative overflow-hidden flex flex-col md:flex-row items-center gap-12">
+<div class="relative z-10 flex-1 space-y-6">
+<h3 class="font-headline text-4xl text-on-surface">Experience the Sanctuary</h3>
+<p class="text-on-surface-variant text-lg">Krishna.AI is more than a tool; it's a digital space for reflection and ethical growth in the age of acceleration.</p>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-4 rounded-full font-label font-bold tracking-wide shadow-xl hover:scale-105 transition-all">
+                        Launch Live Application
+                    </button>
+</div>
+<div class="relative z-10 w-full md:w-1/3 aspect-square rounded-2xl overflow-hidden shadow-inner">
+<img class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" data-alt="Zen meditation garden with stones and sand" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsU2lBwY0YKvhGbSMHtag1w6OHK5KCWYYaw1_fGTiip7F_Vcz7h9ShUivZpn5ibcF8QEJMSeTiUy7M1a0RRHDkN77QlFmhMieZMCztIIVdvTOCUWY24ttAvHAYaE56WEbnOoK87GhpeqsTD7BGPfxob12Ig1JRrG9_71jdEXEg-AHugNHZ0Rx3kb_orRu-oYYzKVAlvyzeQSlmHYwBfa_-pYGmzl6NErft5G_yZjIsk9aEtpXiw-vISsq8O3VGH1hh9v7bzx3fmJs"/>
+</div>
+<!-- Abstract Decorative Element -->
+<div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-primary-fixed-dim/20 rounded-full blur-3xl"></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-24 bg-[#dbdad6] dark:bg-[#121211]">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-12 py-16 max-w-7xl mx-auto">
+<div class="mb-8 md:mb-0">
+<div class="text-lg font-['Noto_Serif'] italic text-[#1b1c1a] dark:text-[#fbf9f5]">The Digital Sanctuary</div>
+<p class="font-['Manrope'] text-sm tracking-wide leading-relaxed text-[#857467] dark:text-[#857467] mt-2">© 2024 The Digital Sanctuary. Handcrafted for the slow web.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['Manrope'] text-sm tracking-wide leading-relaxed text-[#857467] dark:text-[#857467] hover:text-[#944925] dark:hover:text-[#fe9d72] transition-colors duration-300" href="https://www.linkedin.com/in/rohan-katara-5895952b6/" target="_blank" rel="noopener noreferrer">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>

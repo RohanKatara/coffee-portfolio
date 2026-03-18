@@ -1,50 +1,12 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import { useGLTF } from '@react-three/drei'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
 useGLTF.preload('/models/espresso_machine.glb')
 
-// ── Transform config ──────────────────────────────────────────────────────────
 const MACHINE_SCALE    = 0.013
 const MACHINE_POSITION = [0, 0, 0]
 const MACHINE_ROTATION = [0, 0, 0]
-
-// ── PBR material classification (applied once on GLB load) ────────────────────
-function applyPBR(scene) {
-  scene.traverse((child) => {
-    if (!child.isMesh || !child.material) return
-    const n = (child.material.name || '').toLowerCase()
-
-    if (
-      n.includes('glass') || n.includes('screen') || n.includes('ekran') ||
-      n.includes('emision') || n.includes('icon') || n.includes('number') ||
-      n.includes('ren_l')
-    ) return
-
-    if (
-      n.includes('nikelaj') || n.includes('renksiz') ||
-      n.includes('aleminyum') || n.includes('logo')
-    ) {
-      child.material.metalness      = 0.98
-      child.material.roughness      = 0.05
-      child.material.envMapIntensity = 4.0
-    } else if (n.includes('metal')) {
-      child.material.metalness      = 0.9
-      child.material.roughness      = 0.2
-      child.material.envMapIntensity = 2.5
-    } else if (n.includes('parlak')) {
-      child.material.metalness      = 0.2
-      child.material.roughness      = 0.15
-      child.material.envMapIntensity = 1.5
-    } else if (n.includes('plastik') || n.includes('siyah')) {
-      child.material.metalness      = 0.1
-      child.material.roughness      = 0.75
-      child.material.envMapIntensity = 0.8
-    }
-
-    child.material.needsUpdate = true
-  })
-}
 
 // ── Static placeholder (shown while GLB is absent / loading) ─────────────────
 function EspressoMachinePlaceholder({ position }) {
@@ -74,10 +36,9 @@ function EspressoMachinePlaceholder({ position }) {
   )
 }
 
-// ── Static GLB model ──────────────────────────────────────────────────────────
+// ── GLB model — native materials, no overrides ────────────────────────────────
 function EspressoMachineModel() {
   const { scene } = useGLTF('/models/espresso_machine.glb')
-  useEffect(() => { applyPBR(scene) }, [scene])
   return (
     <primitive
       object={scene}

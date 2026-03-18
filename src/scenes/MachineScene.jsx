@@ -43,11 +43,7 @@ export default function MachineScene() {
         rotation={[0, 0, 0]}
       />
 
-      <CoffeeGrinder
-        position={[10.5, -0.53, -0.3]}
-        scale={   [0.28,  0.28,  0.28]}
-        rotation={[0, Math.PI * 0.75, 0]}
-      />
+      <CoffeeGrinder position={[10.5, -0.53, -0.3]} />
 
       <ZoneBRightDecor />
     </group>

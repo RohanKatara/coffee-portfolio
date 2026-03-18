@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { Coffee } from 'lucide-react'
-import { Html } from '@react-three/drei'
+import { Html, Float } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { damp3 } from 'maath/easing'
 import useSceneStore from '../../store/useSceneStore'
@@ -12,9 +12,9 @@ const BUTTON_PROJECTS = projects.slice(0, 4)
 // ── Tunable config ────────────────────────────────────────────────────────────
 const BUTTON_ACTIVE_SCALE = 0.02
 const BUTTON_SPACING      = 28
-const GROUP_X_POSITION    = 11.82
-const GROUP_Y_POSITION    =  0.05
-const GROUP_Z_POSITION    =  0.22
+const GROUP_X_POSITION    = 12.15
+const GROUP_Y_POSITION    =  0.20
+const GROUP_Z_POSITION    = -0.50
 
 const GROUP_POSITION = [GROUP_X_POSITION, GROUP_Y_POSITION, GROUP_Z_POSITION]
 
@@ -157,9 +157,10 @@ function EspressoDialButton({ label, isHovered, size = 72 }) {
 }
 
 // ── Scene-level container ─────────────────────────────────────────────────────
-export default function ProjectButtons3D() {
+export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCrmClick, onContentClick }) {
   const startPour       = useSceneStore((s) => s.startPour)
   const buttonsGroupRef = useRef()
+  const buttonRefs      = useRef([null, null, null, null])
 
   // One hover state per button — managed here, fed to Three.js raycaster meshes.
   // This avoids relying on DOM onMouseEnter/onMouseLeave inside Html portals,
@@ -172,7 +173,7 @@ export default function ProjectButtons3D() {
       const next = [...prev]; next[i] = val; return next
     })
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (!buttonsGroupRef.current) return
     const { scene, isPouring } = useSceneStore.getState()
 
@@ -186,13 +187,20 @@ export default function ProjectButtons3D() {
 
     damp3(buttonsGroupRef.current.scale, [BUTTON_ACTIVE_SCALE, BUTTON_ACTIVE_SCALE, BUTTON_ACTIVE_SCALE], SCALE_LAMBDA, delta)
     buttonsGroupRef.current.visible = buttonsGroupRef.current.scale.x > 0.002
+
+    // Bob each button independently with a staggered phase offset.
+    // Amplitude of 12 in buttonsGroupRef local space ≈ 0.16 world units — visible bob.
+    const t = state.clock.elapsedTime
+    buttonRefs.current.forEach((ref, i) => {
+      if (ref) ref.position.y = Math.sin(t * 2 + i * 0.8) * 4
+    })
   })
 
   return (
-    <group position={GROUP_POSITION} rotation={[-0.25, 0, 0]} scale={0.45}>
+    <group position={GROUP_POSITION} rotation={[-0.25, 0, 0]} scale={0.65}>
       <group ref={buttonsGroupRef} scale={[0, 0, 0]}>
         {BUTTON_PROJECTS.map((project, i) => (
-          <group key={project.id} position={[FLOAT_POSITIONS[i][0], 0, 0]}>
+          <group key={project.id} ref={(el) => { buttonRefs.current[i] = el }} position={[FLOAT_POSITIONS[i][0], 0, 0]}>
 
             {/* ── Invisible hit sphere — Three.js raycasting for hover ──────── */}
             {/* Positioned at [0,-0.4,0] to match the Html anchor exactly.      */}
@@ -205,9 +213,18 @@ export default function ProjectButtons3D() {
               onPointerOut={()   => {                      setHover(i, false); document.body.style.cursor = 'auto'    }}
               onClick={(e) => {
                 e.stopPropagation()
-                startPour(project.id)
-                // Show the project modal only after the pour animation finishes
-                setTimeout(() => useSceneStore.getState().finishPour(), 2500)
+                if (project.id === 0 && onMocktalkClick) {
+                  onMocktalkClick()
+                } else if (project.id === 1 && onKrishnaClick) {
+                  onKrishnaClick()
+                } else if (project.id === 2 && onCrmClick) {
+                  onCrmClick()
+                } else if (project.id === 3 && onContentClick) {
+                  onContentClick()
+                } else {
+                  startPour(project.id)
+                  setTimeout(() => useSceneStore.getState().finishPour(), 2500)
+                }
               }}
             >
               <sphereGeometry args={[12, 10, 10]} />
