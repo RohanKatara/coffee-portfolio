@@ -41,25 +41,33 @@ export default function LoadingScreen() {
 
   const doTransition = () => {
     if (hasTransitioned.current) return
-    if (!overlayRef.current) { setScene('LANDING'); return }
     hasTransitioned.current = true
-    gsap.to(overlayRef.current, {
-      opacity: 0,
-      duration: 0.6,
-      onComplete: () => setScene('LANDING'),
-    })
+    if (!overlayRef.current) { setScene('LANDING'); return }
+    // 500 ms settle: even after isGpuReady fires, the browser may still be
+    // uploading textures to VRAM or finishing async GPU work. This small pause
+    // guarantees at least one fully-rendered frame is on screen before we
+    // start fading, eliminating the black-canvas flash on production.
+    setTimeout(() => {
+      gsap.to(overlayRef.current, {
+        opacity: 0,
+        duration: 1.0,
+        ease: 'power2.inOut',
+        onComplete: () => setScene('LANDING'),
+      })
+    }, 500)
   }
 
   // Primary gate: dismiss only when BOTH assets AND GPU are ready.
-  // isGpuReady is set by ShaderPrecompiler after progress===100 + 5 frames.
+  // isGpuReady is set by ShaderPrecompiler after gl.finish() + 30 frames.
   useEffect(() => {
     if (isGpuReady) doTransition()
   }, [isGpuReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Hard fallback: covers placeholder mode (no GLBs) where isGpuReady may
-  // fire quickly or useProgress may never reach 100.
+  // Hard fallback: covers placeholder mode (no GLBs) or very slow GPUs.
+  // Raised to 12 s so production asset delivery + shader compilation has
+  // enough headroom before the fallback fires.
   useEffect(() => {
-    const id = setTimeout(doTransition, 5000)
+    const id = setTimeout(doTransition, 12000)
     return () => clearTimeout(id)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

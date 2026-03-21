@@ -266,24 +266,35 @@ function ShaderPrecompiler() {
       const savedQuat = camera.quaternion.clone()
       const mb        = CAMERA_POSITIONS.MACHINE
 
+      // gl.getContext().finish() is the WebGL GPU fence: it blocks the JS
+      // thread until the GPU has truly finished processing all pending commands,
+      // including shader program compilation. Without this, gl.compile() only
+      // *submits* compilation work — the GPU may still be compiling for another
+      // 1-3 seconds, causing a black-screen stall when the canvas first renders.
+      const ctx = gl.getContext()
+
       // ── Shadow-ON variants (normal scene state) ────────────────────────
-      gl.compile(scene, camera)                                         // A-shadow
+      gl.compile(scene, camera)
+      ctx.finish()                                                      // A-shadow ✓
 
       camera.position.set(mb.position.x, mb.position.y, mb.position.z)
       camera.lookAt(mb.target.x, mb.target.y, mb.target.z)
       camera.updateMatrixWorld()
-      gl.compile(scene, camera)                                         // B-shadow
+      gl.compile(scene, camera)
+      ctx.finish()                                                      // B-shadow ✓
 
       // ── Shadow-OFF variants (used during the camera pan) ──────────────
       if (dirLightRef.current) {
         dirLightRef.current.castShadow = false
 
-        gl.compile(scene, camera)                                       // B-no-shadow
+        gl.compile(scene, camera)
+        ctx.finish()                                                    // B-no-shadow ✓
 
         camera.position.copy(savedPos)
         camera.quaternion.copy(savedQuat)
         camera.updateMatrixWorld()
-        gl.compile(scene, camera)                                       // A-no-shadow
+        gl.compile(scene, camera)
+        ctx.finish()                                                    // A-no-shadow ✓
 
         dirLightRef.current.castShadow = true   // restore
       } else {
@@ -294,10 +305,11 @@ function ShaderPrecompiler() {
       }
     }
 
-    // Phase 3: count 10 frames so the GPU command queue has time to flush
-    // all four compile passes before signalling ready.
+    // Phase 3: count 30 rendered frames after compilation so R3F has had
+    // time to run a full render loop with compiled shaders before we signal
+    // ready. 30 frames ≈ 500 ms at 60 fps — belt-and-suspenders after finish().
     frameCountRef.current += 1
-    if (frameCountRef.current >= 10) {
+    if (frameCountRef.current >= 30) {
       firedRef.current = true
       useSceneStore.getState().setGpuReady()
     }
@@ -456,6 +468,10 @@ export default function App() {
           // blow out, and lifts the dark teal walls into a richer grade
           gl.toneMapping         = ACESFilmicToneMapping
           gl.toneMappingExposure = 1.05
+          // Match the WebGL clear color to the CSS canvas background so
+          // any gap between loading-screen fade and first rendered frame
+          // shows cafe-dark (#1a0e08) instead of pure black.
+          gl.setClearColor('#1a0e08', 1)
         }}
       >
         <Suspense fallback={null}>
