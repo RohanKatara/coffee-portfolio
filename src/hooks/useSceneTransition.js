@@ -4,6 +4,7 @@ import { Vector3 } from 'three'
 import { damp3 } from 'maath/easing'
 import { CAMERA_POSITIONS } from '../utils/cameraPositions'
 import useSceneStore from '../store/useSceneStore'
+import { getIsMobile, getIsTablet } from './useBreakpoint'
 
 // Distance threshold below which the camera is considered converged.
 // Below this, AdaptiveDpr is allowed to recover DPR and isTransitioning clears.
@@ -19,10 +20,8 @@ export const _lookAt = new Vector3()
 export const cameraLock = { active: false }
 
 // Lambda controls damp speed (exponential decay).
-// λ = 3.5  →  ~99 % arrival in ≈ 1.32 s at 60 fps — snappy but still smooth.
-// Raised from 2.5 to reduce the long "creeping to final position" tail where
-// frame drops are most perceptible because the camera barely moves each frame.
-const CAM_LAMBDA = 3.5
+// λ = 4.5  →  ~99 % arrival in ≈ 1.02 s at 60 fps.
+const CAM_LAMBDA = 4.5
 
 // Delta cap: never simulate more than one 30fps frame worth of movement in a
 // single tick. Without this, a GC pause or SpeechBubble backdrop-filter paint
@@ -49,18 +48,64 @@ const MAX_DELTA = 1 / 30
 // as peak Zone B render cost — all deferred work fires on calmer frames after.
 const SETTLE_FRAMES = 3
 
+// FOV per breakpoint — wider on narrow screens to reclaim horizontal extent.
+const FOV_DESKTOP = 45
+const FOV_TABLET  = 52
+const FOV_MOBILE  = 62
+
+function getResponsiveFov() {
+  if (getIsMobile())  return FOV_MOBILE
+  if (getIsTablet())  return FOV_TABLET
+  return FOV_DESKTOP
+}
+
+// Returns the correct LANDING / LANDING_INTRO / MACHINE position set
+// for the current viewport width — read synchronously, no React state needed.
+function getLandingPositions() {
+  if (getIsMobile()) {
+    return {
+      intro:   CAMERA_POSITIONS.LANDING_INTRO_MOBILE,
+      landing: CAMERA_POSITIONS.LANDING_MOBILE,
+      machine: CAMERA_POSITIONS.MACHINE_MOBILE,
+    }
+  }
+  if (getIsTablet()) {
+    return {
+      intro:   CAMERA_POSITIONS.LANDING_INTRO_TABLET,
+      landing: CAMERA_POSITIONS.LANDING_TABLET,
+      machine: CAMERA_POSITIONS.MACHINE_TABLET,
+    }
+  }
+  return {
+    intro:   CAMERA_POSITIONS.LANDING_INTRO,
+    landing: CAMERA_POSITIONS.LANDING,
+    machine: CAMERA_POSITIONS.MACHINE,
+  }
+}
+
 export function useSceneTransition() {
   const camera      = useThree((s) => s.camera)
   const introSnapped   = useRef(false)
   const wasMoving      = useRef(false)
   const settleCount    = useRef(0)
 
-  // Snap to LANDING_INTRO position on first mount so damp3 produces the
-  // cinematic pull-back effect (close → landing resting position).
+  // Set FOV based on current breakpoint, and keep it in sync with resize.
+  useEffect(() => {
+    const applyFov = () => {
+      camera.fov = getResponsiveFov()
+      camera.updateProjectionMatrix()
+    }
+    applyFov()
+    window.addEventListener('resize', applyFov)
+    return () => window.removeEventListener('resize', applyFov)
+  }, [camera])
+
+  // Snap to the breakpoint-correct LANDING_INTRO on first mount so damp3
+  // produces the cinematic pull-back from the right starting position.
   useEffect(() => {
     if (!introSnapped.current) {
       introSnapped.current = true
-      const intro = CAMERA_POSITIONS.LANDING_INTRO
+      const intro = getLandingPositions().intro
       camera.position.set(intro.position.x, intro.position.y, intro.position.z)
       _lookAt.set(intro.target.x, intro.target.y, intro.target.z)
     }
@@ -78,6 +123,7 @@ export function useSceneTransition() {
     if (scene === 'LOADING') return
 
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
+    const { landing, machine } = getLandingPositions()
 
     let pos, tgt
     if (scene === 'CUP') {
@@ -89,11 +135,11 @@ export function useSceneTransition() {
       pos = pouringCam.position
       tgt = pouringCam.target
     } else if (isZoneB) {
-      pos = CAMERA_POSITIONS.MACHINE.position
-      tgt = CAMERA_POSITIONS.MACHINE.target
+      pos = machine.position
+      tgt = machine.target
     } else {
-      pos = CAMERA_POSITIONS.LANDING.position
-      tgt = CAMERA_POSITIONS.LANDING.target
+      pos = landing.position
+      tgt = landing.target
     }
 
     // Cap delta so a single slow frame (GC pause, compositor hit, etc.)
