@@ -49,14 +49,15 @@ export default function SpeechBubble() {
           WebkitBackdropFilter: 'blur(8px)',
           border: '1px solid rgba(200, 127, 76, 0.22)',
           borderRadius: '18px',
-          padding: '22px 32px 20px',
+          padding: 'clamp(14px, 4vw, 22px) clamp(16px, 6vw, 32px) clamp(12px, 3vw, 20px)',
           marginBottom: '16px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(200,127,76,0.08)',
+          maxWidth: 'min(480px, 88vw)',
         }}>
           <span style={{
             color: '#d4905a',
             fontWeight: 800,
-            fontSize: '1.8rem',
+            fontSize: 'clamp(1.1rem, 5vw, 1.8rem)',
             textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 0 28px rgba(200,100,30,0.4)',
             letterSpacing: '0.01em',
             lineHeight: 1.2,

@@ -70,8 +70,8 @@ export default function CoffeeMenuUI() {
   return (
     <div
       ref={panelRef}
-      className="absolute bottom-[8%] left-1/2 -translate-x-1/2 z-40 opacity-0"
-      style={{ pointerEvents: 'auto', width: 'min(580px, 92vw)' }}
+      className="absolute bottom-[4%] left-1/2 -translate-x-1/2 z-40 opacity-0"
+      style={{ pointerEvents: 'auto', width: 'min(580px, 96vw)' }}
     >
       {/* Amber glow border ring */}
       <div style={{
@@ -85,7 +85,7 @@ export default function CoffeeMenuUI() {
         background: 'rgba(14, 9, 4, 0.92)',
         border: '1px solid rgba(200, 127, 76, 0.2)',
         borderRadius: '8px',
-        padding: '28px 36px 24px',
+        padding: 'clamp(16px, 4vw, 28px) clamp(16px, 5vw, 36px) clamp(14px, 3vw, 24px)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         boxShadow: [
@@ -104,7 +104,7 @@ export default function CoffeeMenuUI() {
 
         {/* Heading */}
         <h2 style={{
-          color: '#f5e6c8', fontSize: '1.5rem', fontWeight: 700, textAlign: 'center',
+          color: '#f5e6c8', fontSize: 'clamp(1.1rem, 4vw, 1.5rem)', fontWeight: 700, textAlign: 'center',
           fontFamily: 'Noto Serif, Georgia, "Times New Roman", serif',
           letterSpacing: '0.06em', marginBottom: '10px',
           textShadow: '0 2px 12px rgba(200,100,40,0.4), 0 1px 3px rgba(0,0,0,0.6)',
@@ -137,6 +137,8 @@ export default function CoffeeMenuUI() {
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(200,127,76,0.08)' }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            onTouchStart={(e) => { e.currentTarget.style.background = 'rgba(200,127,76,0.12)' }}
+            onTouchEnd={(e) => { e.currentTarget.style.background = 'transparent' }}
           >
             {/* Project colour dot */}
             <span style={{
@@ -148,7 +150,7 @@ export default function CoffeeMenuUI() {
             {/* Title */}
             <span style={{ flex: 1, textAlign: 'left' }}>
               <span style={{
-                display: 'block', color: '#f5e6c8', fontSize: '0.92rem', fontWeight: 600,
+                display: 'block', color: '#f5e6c8', fontSize: 'clamp(0.8rem, 3.5vw, 0.92rem)', fontWeight: 600,
                 fontFamily: 'Noto Serif, Georgia, serif', lineHeight: 1.35,
               }}>
                 {project.title}

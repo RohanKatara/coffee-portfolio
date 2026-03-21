@@ -41,8 +41,8 @@ export default function ProjectDetail() {
       <div style={{
         pointerEvents: 'auto',
         position: 'relative',
-        width: 'min(600px, 92vw)',
-        maxHeight: '80vh',
+        width: 'min(600px, 96vw)',
+        maxHeight: 'min(80vh, calc(100dvh - 32px))',
         display: 'flex',
         flexDirection: 'column',
         background: 'rgba(14, 9, 4, 0.93)',
@@ -66,16 +66,17 @@ export default function ProjectDetail() {
         }} />
 
         {/* Header — fixed, does not scroll */}
-        <div style={{ padding: '32px 40px 0', flexShrink: 0 }}>
+        <div style={{ padding: 'clamp(20px, 5vw, 32px) clamp(20px, 6vw, 40px) 0', flexShrink: 0 }}>
 
           {/* Close button */}
           <button
             onClick={goBackToMachine}
             style={{
-              position: 'absolute', top: '14px', right: '16px',
+              position: 'absolute', top: '12px', right: '12px',
               background: 'transparent', border: 'none', cursor: 'pointer',
               color: 'rgba(200,127,76,0.55)', fontSize: '1rem', lineHeight: 1,
-              padding: '4px 8px', borderRadius: '4px', transition: 'color 0.2s',
+              padding: '8px 12px', borderRadius: '4px', transition: 'color 0.2s',
+              minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#c87f4c' }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(200,127,76,0.55)' }}
@@ -85,7 +86,7 @@ export default function ProjectDetail() {
 
           {/* Full project title */}
           <h2 style={{
-            color: '#f5e6c8', fontSize: '1.45rem', fontWeight: 700, marginBottom: '18px',
+            color: '#f5e6c8', fontSize: 'clamp(1.1rem, 4.5vw, 1.45rem)', fontWeight: 700, marginBottom: '18px',
             fontFamily: 'Noto Serif, Georgia, "Times New Roman", serif',
             lineHeight: 1.35, paddingRight: '28px',
             textShadow: `0 2px 12px ${project.color}55`,
@@ -103,7 +104,7 @@ export default function ProjectDetail() {
         {/* Scrollable description */}
         <div style={{
           overflowY: 'auto', flex: 1,
-          padding: '0 40px 28px',
+          padding: '0 clamp(20px, 6vw, 40px) clamp(16px, 4vw, 28px)',
           scrollbarWidth: 'thin',
           scrollbarColor: `${project.color}44 transparent`,
         }}>

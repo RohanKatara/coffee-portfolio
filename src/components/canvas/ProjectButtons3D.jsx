@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Coffee } from 'lucide-react'
 import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { damp3 } from 'maath/easing'
 import useSceneStore from '../../store/useSceneStore'
 import projects from '../../data/projects'
+
+// Detect touch devices synchronously — used to skip hover state on mobile.
+const isTouchDevice = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 
 // ── CSS injected once into <head> ─────────────────────────────────────────────
 const BUTTON_CSS = `
@@ -167,6 +170,13 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
   // DOM refs for .pb-hover-root divs — hover toggled via dataset, no React state.
   const hoverRefs = useRef([null, null, null, null])
 
+  // On touch devices, a tap fires touchstart → touchend but NOT mouseenter/mouseleave.
+  // Without this, the button stays in default (un-hovered) state and the click
+  // never fires because the parent div has pointer-events:none on mobile browsers
+  // that synthesize mouse events with a 300ms delay. Instead, we handle touchend
+  // directly — no delay, no hover state needed, just fire the click callback.
+  const touchIsActive = useRef(false)
+
   useEffect(() => {
     const el = document.createElement('style')
     el.id = 'pb-button-styles'
@@ -248,14 +258,25 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
                   className="pb-hover-root"
                   style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                   onMouseEnter={() => {
+                    if (isTouchDevice()) return
                     if (hoverRefs.current[i]) hoverRefs.current[i].dataset.hovered = ''
                     document.body.style.cursor = 'pointer'
                   }}
                   onMouseLeave={() => {
+                    if (isTouchDevice()) return
                     if (hoverRefs.current[i]) delete hoverRefs.current[i].dataset.hovered
                     document.body.style.cursor = 'auto'
                   }}
                   onClick={clickHandlers[i]}
+                  onTouchStart={() => { touchIsActive.current = true }}
+                  onTouchEnd={(e) => {
+                    if (!touchIsActive.current) return
+                    touchIsActive.current = false
+                    // Prevent the 300ms synthetic click that mobile browsers fire after touchend.
+                    // We fire the handler ourselves immediately so there is zero delay.
+                    e.preventDefault()
+                    clickHandlers[i]()
+                  }}
                 >
                   <EspressoDialButton label={project.name} size={26} />
                 </div>
