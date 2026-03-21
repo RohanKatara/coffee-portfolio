@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import EspressoMachine from '../components/canvas/EspressoMachine'
 import CoffeeGrinder from '../components/canvas/CoffeeGrinder'
 import ZoneBRightDecor from '../components/canvas/ZoneBRightDecor'
+import useSceneStore from '../store/useSceneStore'
 
 // Aimed spotlight — SpotLight.target must be added to the scene manually,
 // so we set it imperatively via useEffect after mount.
@@ -19,7 +20,11 @@ function MachineSpotlight() {
       intensity={80}
       angle={0.5}
       penumbra={1}
-      castShadow
+      // castShadow intentionally omitted: the directional light in App.jsx
+      // handles all global shadows. Removing this eliminates one shadow-map
+      // depth pass at startup and — more importantly — removes the per-fragment
+      // shadow-map sample from every Zone B mesh's shader, which was the main
+      // GPU cost during the Zone A→B camera pan.
     />
   )
 }
@@ -33,9 +38,13 @@ function MachineSpotlight() {
  * The scene is simply off-camera until the damp3 camera glide arrives.
  */
 export default function MachineScene() {
+  const lightingZone = useSceneStore((s) => s.lightingZone)
+  const zoneBOn = lightingZone === 'ALL' || lightingZone === 'B'
   return (
     <group>
-      <MachineSpotlight />
+      <group visible={zoneBOn}>
+        <MachineSpotlight />
+      </group>
 
       <EspressoMachine
         position={[12,   -0.53, -0.3]}

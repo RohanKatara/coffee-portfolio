@@ -1,6 +1,6 @@
-import { Suspense, useRef, useEffect, useState, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Preload, BakeShadows, Center, ContactShadows, TransformControls } from '@react-three/drei'
+import { Suspense, useRef, useEffect, useMemo, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useGLTF, useProgress, Preload, BakeShadows, Center, ContactShadows, Environment } from '@react-three/drei'
 import { PCFSoftShadowMap } from 'three'
 import * as THREE from 'three'
 import { EffectComposer, SMAA, Bloom, Vignette, BrightnessContrast } from '@react-three/postprocessing'
@@ -19,7 +19,6 @@ import CupScene from './scenes/CupScene'
 
 import ProjectButtons3D from './components/canvas/ProjectButtons3D'
 import TreePot from './components/canvas/TreePot'
-import Books from './components/canvas/Books'
 import Draggable from './components/canvas/Draggable'
 import BusinessCardHolder from './components/canvas/BusinessCardHolder'
 
@@ -32,52 +31,26 @@ import CRMModal from './components/ui/CRMModal'
 import ContentEngineModal from './components/ui/ContentEngineModal'
 
 import useSceneStore from './store/useSceneStore'
-import { cameraLock } from './hooks/useSceneTransition'
-
-// ── HelperBox ─────────────────────────────────────────────────────────────────
-// Uses useState as a callback ref so TransformControls only mounts after the
-// mesh exists — avoids the null-ref timing bug with the object prop.
-function HelperBox({ color, startPos, label }) {
-  const [mesh, setMesh] = useState(null)
-  return (
-    <>
-      {mesh && (
-        <TransformControls
-          object={mesh}
-          mode="translate"
-          onMouseDown={() => { cameraLock.active = true }}
-          onMouseUp={() => { cameraLock.active = false }}
-          onObjectChange={() => {
-            const { x, y, z } = mesh.position
-            console.log(`${label}: [${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`)
-          }}
-        />
-      )}
-      <mesh ref={setMesh} position={startPos}>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshBasicMaterial color={color} wireframe={true} />
-      </mesh>
-    </>
-  )
-}
-
+import { CAMERA_POSITIONS } from './utils/cameraPositions'
 // ── TabletStand ───────────────────────────────────────────────────────────────
 function TabletStand(props) {
-  const { scene } = useGLTF('/models/tablet_stand.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/tablet_stand.glb')
   useEffect(() => {
     scene.traverse((child) => {
-      if (child.isMesh && child.material) {
-        if (child.material.map) {
-          // Screen — natural colors with soft realistic glow
-          child.material.color.set('#ffffff')
-          child.material.emissiveIntensity = 0.4
-        } else {
-          // Stand — warm brushed metal to catch the pendant lights
-          child.material.color.set('#5c5651')
-          child.material.roughness = 0.6
-          child.material.metalness = 0.6
+      if (child.isMesh) {
+        child.castShadow    = true
+        child.receiveShadow = true
+        if (child.material) {
+          if (child.material.map) {
+            child.material.color.set('#ffffff')
+            child.material.emissiveIntensity = 0.4
+          } else {
+            child.material.color.set('#5c5651')
+            child.material.roughness = 0.6
+            child.material.metalness = 0.6
+          }
+          child.material.needsUpdate = true
         }
-        child.material.needsUpdate = true
       }
     })
   }, [scene])
@@ -86,11 +59,15 @@ function TabletStand(props) {
 
 // ── BonsaiTree ────────────────────────────────────────────────────────────────
 function BonsaiTree(props) {
-  const { scene } = useGLTF('/models/bonsai_tree.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/bonsai_tree.glb')
   const treeRef = useRef()
 
   useEffect(() => {
     scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow    = true
+        child.receiveShadow = true
+      }
       if (child.isMesh && child.material) {
         // Vibrant, healthy green with faked subsurface scattering
         child.material.color = new THREE.Color('#588147')
@@ -104,13 +81,16 @@ function BonsaiTree(props) {
     })
   }, [scene])
 
+  // Only sway while the camera is in Zone A — the bonsai is at [-2.7, -0.61, 0.6]
+  // and is off-camera during Zone B, so running the sway there wastes CPU.
+  const isZoneA = useSceneStore((s) => s.scene === 'LOADING' || s.scene === 'LANDING')
+
   // Gentle cafe-breeze sway — microscopic figure-8 motion
   useFrame((state) => {
-    if (treeRef.current) {
-      const t = state.clock.getElapsedTime()
-      treeRef.current.rotation.z = Math.sin(t * 0.5) * 0.015
-      treeRef.current.rotation.x = Math.sin(t * 0.3) * 0.01
-    }
+    if (!isZoneA || !treeRef.current) return
+    const t = state.clock.getElapsedTime()
+    treeRef.current.rotation.z = Math.sin(t * 0.5) * 0.015
+    treeRef.current.rotation.x = Math.sin(t * 0.3) * 0.01
   })
 
   return (
@@ -118,7 +98,12 @@ function BonsaiTree(props) {
       <group ref={treeRef}>
         <primitive object={scene} {...props} />
       </group>
-      {/* Contact shadow directly under the pot to ground it */}
+      {/* Contact shadow directly under the pot to ground it.
+          frames={1} bakes the shadow once at startup and never re-renders it.
+          ContactShadows is its own render pass that bypasses BakeShadows —
+          without frames={1} it fires every frame even when the bonsai is
+          completely off-screen, stealing GPU time during the Zone B pan.
+          The bonsai sway is subtle enough that a static shadow is imperceptible. */}
       <ContactShadows
         position={[0, 0, 0]}
         opacity={0.45}
@@ -126,6 +111,7 @@ function BonsaiTree(props) {
         blur={1.5}
         far={0.5}
         color="#1a0e08"
+        frames={1}
       />
     </>
   )
@@ -133,45 +119,75 @@ function BonsaiTree(props) {
 
 // ── BarStool ──────────────────────────────────────────────────────────────────
 function BarStool(props) {
-  const { scene } = useGLTF('/models/bar_stool.glb', 'https://www.gstatic.com/draco/v1/decoders/')
-  const clone = useMemo(() => scene.clone(true), [scene])
+  const { scene } = useGLTF('/models/bar_stool.glb')
+  const clone = useMemo(() => {
+    const c = scene.clone(true)
+    c.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+    return c
+  }, [scene])
   return <primitive object={clone} {...props} />
 }
 
 // ── Bookcase ──────────────────────────────────────────────────────────────────
 function Bookcase(props) {
-  const { scene } = useGLTF('/models/bookcase.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/bookcase.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+  }, [scene])
   return <primitive object={scene} {...props} />
 }
 
 // ── BlackMug ──────────────────────────────────────────────────────────────────
 function BlackMug(props) {
-  const { scene } = useGLTF('/models/black_ceramic_mug.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/black_ceramic_mug.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+  }, [scene])
   return <primitive object={scene} {...props} />
 }
 
 // ── CeramicMug ────────────────────────────────────────────────────────────────
 function CeramicMug(props) {
-  const { scene } = useGLTF('/models/ceramic_mug.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/ceramic_mug.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+  }, [scene])
   return <primitive object={scene} {...props} />
 }
 
 // ── WelcomeSign ───────────────────────────────────────────────────────────────
 function WelcomeSign(props) {
-  const { scene } = useGLTF('/models/welcome_sign_restaurant.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/welcome_sign_restaurant.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+  }, [scene])
   return <primitive object={scene} {...props} />
 }
 
 // ── CoffeeModel ───────────────────────────────────────────────────────────────
 function CoffeeModel(props) {
-  const { scene } = useGLTF('/models/coffee.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/coffee.glb')
   useEffect(() => {
     scene.traverse((child) => {
-      if (child.isMesh && child.material) {
-        child.material.roughness = 0.85
-        child.material.metalness = 0.0
-        child.material.envMapIntensity = 0.2
-        child.material.needsUpdate = true
+      if (child.isMesh) {
+        child.castShadow    = true
+        child.receiveShadow = true
+        if (child.material) {
+          child.material.roughness = 0.85
+          child.material.metalness = 0.0
+          child.material.envMapIntensity = 0.2
+          child.material.needsUpdate = true
+        }
       }
     })
   }, [scene])
@@ -180,13 +196,18 @@ function CoffeeModel(props) {
 
 // ── CoffeeMenu ────────────────────────────────────────────────────────────────
 function CoffeeMenu(props) {
-  const { scene } = useGLTF('/models/coffee_menu.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/coffee_menu.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true }
+    })
+  }, [scene])
   return <primitive object={scene} {...props} />
 }
 
 // ── NeonSign ──────────────────────────────────────────────────────────────────
 function NeonSign(props) {
-  const { scene } = useGLTF('/models/neon_sign.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/neon_sign.glb')
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -201,17 +222,98 @@ function NeonSign(props) {
   return <primitive object={scene} {...props} />
 }
 
+// ── Shader Precompiler ────────────────────────────────────────────────────────
+// Waits until useProgress hits 100% (all Suspense boundaries have reconciled
+// and every model is in the scene graph), THEN calls gl.compile with the
+// complete scene, then counts 5 rendered frames to let the GPU flush its
+// compile queue, and finally sets isGpuReady in the store.
+//
+// This is the only reliable signal the LoadingScreen should wait for.
+// A fixed-duration timer is wrong because it cannot know whether the GPU
+// finished or not — this approach does.
+function ShaderPrecompiler({ cafeEnvRef }) {
+  const { gl, scene, camera } = useThree()
+  const { progress } = useProgress()
+  const progressRef   = useRef(0)
+  const compiledRef   = useRef(false)
+  const frameCountRef = useRef(0)
+  const firedRef      = useRef(false)
+
+  // Keep a always-current ref so useFrame closure never goes stale
+  progressRef.current = progress
+
+  useFrame(() => {
+    if (firedRef.current) return
+
+    // Phase 1: wait until all assets are loaded
+    if (progressRef.current < 100) return
+
+    // Phase 2: compile shaders from BOTH camera positions so Zone B shaders
+    // are warmed up before the camera ever travels there.
+    // gl.compile frustum-culls objects outside the camera view — objects at
+    // x=10–18 (Zone B) are completely invisible from the Zone A loading position,
+    // so without this second pass their shaders compile on-demand when the camera
+    // arrives, causing the stutter at the end of the transition.
+    //
+    // Additionally, pre-compile all three lighting zone variants (ALL / A-only /
+    // B-only) so toggling group.visible at runtime never causes a shader recompile.
+    if (!compiledRef.current) {
+      compiledRef.current = true
+
+      // Zone A compile (current loading position, ALL lights on)
+      gl.compile(scene, camera)
+
+      // Teleport camera to Zone B, compile again (ALL lights)
+      const savedPos  = camera.position.clone()
+      const savedQuat = camera.quaternion.clone()
+
+      const mb = CAMERA_POSITIONS.MACHINE
+      camera.position.set(mb.position.x, mb.position.y, mb.position.z)
+      camera.lookAt(mb.target.x, mb.target.y, mb.target.z)
+      camera.updateMatrixWorld()
+      gl.compile(scene, camera)
+
+      // Pre-compile Zone A-only variant (Zone B group hidden)
+      if (cafeEnvRef.current) {
+        cafeEnvRef.current.zoneBGroup.visible = false
+        gl.compile(scene, camera)
+        cafeEnvRef.current.zoneBGroup.visible = true
+      }
+
+      // Restore camera then pre-compile Zone B-only variant (Zone A group hidden)
+      camera.position.copy(savedPos)
+      camera.quaternion.copy(savedQuat)
+      camera.updateMatrixWorld()
+      if (cafeEnvRef.current) {
+        cafeEnvRef.current.zoneAGroup.visible = false
+        gl.compile(scene, camera)
+        cafeEnvRef.current.zoneAGroup.visible = true
+      }
+    }
+
+    // Phase 3: count 10 frames so the GPU command queue has time to flush
+    // all compile passes before signalling ready.
+    frameCountRef.current += 1
+    if (frameCountRef.current >= 10) {
+      firedRef.current = true
+      useSceneStore.getState().setGpuReady()
+    }
+  })
+
+  return null
+}
+
 // ── Cinematic post-processing pipeline ───────────────────────────────────────
 // Bloom intensity tweens 1.5 → 1.8 during the cinematic transition.
-// DoF focal point follows _lookAt every frame with zero React re-renders —
-// the same damp3-smoothed Vector3 that drives the camera lookAt.
+// IMPORTANT: intensity is driven via a ref to the BloomEffect instance and
+// mutated imperatively in useFrame — this avoids React state updates every
+// frame which would re-render the EffectComposer on every tick.
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
   const isPouring       = useSceneStore((s) => s.isPouring)
-  const [bloomIntensity, setBloomIntensity] = useState(1.2)
-  const obj  = useRef({ val: 1.2 })
-  const prev = useRef(1.2)
+  const bloomRef = useRef()
+  const obj      = useRef({ val: 1.2 })
 
   useEffect(() => {
     gsap.killTweensOf(obj.current)
@@ -222,11 +324,10 @@ function AnimatedEffects() {
     gsap.to(obj.current, { val: target, duration, ease })
   }, [isTransitioning, isPouring])
 
+  // Mutate the BloomEffect intensity directly — no React state, no re-renders.
   useFrame(() => {
-    const v = obj.current.val
-    if (Math.abs(v - prev.current) > 0.005) {
-      prev.current = v
-      setBloomIntensity(v)
+    if (bloomRef.current) {
+      bloomRef.current.intensity = obj.current.val
     }
   })
 
@@ -238,9 +339,10 @@ function AnimatedEffects() {
       {/* Bloom — high threshold so only the neon sign and pendant emissives
           glow; the rest of the scene is unaffected                          */}
       <Bloom
+        ref={bloomRef}
         luminanceThreshold={0.85}
         luminanceSmoothing={0.1}
-        intensity={bloomIntensity}
+        intensity={1.2}
         mipmapBlur
       />
 
@@ -258,12 +360,36 @@ export default function App() {
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
   const [contentOpen, setContentOpen]   = useState(false)
+  const lightingZone = useSceneStore((s) => s.lightingZone)
+  const cafeEnvRef = useRef()
+
+  // Any modal open → pause the 3D scene entirely so the 2D overlay gets
+  // 100% of the browser's resources for smooth scrolling.
+  const anyModalOpen = mocktalkOpen || krishnaOpen || crmOpen || contentOpen
 
   return (
     <div className="relative w-full h-full">
-      {/* ── 3D Canvas ────────────────────────────────────────── */}
+      {/* ── 3D Canvas — always visible; the LoadingScreen overlay (z-50) sits
+          on top and fades out to reveal the already-rendered scene, so no
+          opacity toggle is needed here and no black flash can occur.         */}
+      <div style={{
+        position: 'absolute',
+        top:      0,
+        left:     0,
+        width:    '100vw',
+        height:   '100vh',
+        zIndex:   1,
+        // Pull the canvas off the compositor while a modal is open.
+        // visibility:hidden keeps the WebGL context alive (no context loss)
+        // while telling the browser it doesn't need to composite this layer.
+        visibility: anyModalOpen ? 'hidden' : 'visible',
+      }}>
       <Canvas
-        dpr={[1, 1.5]}
+        // frameloop="never" stops all useFrame callbacks and the rAF loop,
+        // freeing the CPU thread for smooth DOM scrolling in the modal.
+        // "always" resumes immediately when the modal closes.
+        frameloop={anyModalOpen ? 'never' : 'always'}
+        dpr={[1, 2]}
         camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0.5, 5] }}
         shadows
         gl={{ antialias: false, alpha: false }}
@@ -277,9 +403,21 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Restore base illumination — low enough to keep shadows, high
-              enough to stop the walls going dark from the environment map */}
-          <ambientLight intensity={0.5} color="#ffffff" />
+          {/* Image-based lighting — city preset gives glossy surfaces
+              realistic reflections without blowing out the warm tone    */}
+          <Environment preset="city" environmentIntensity={0.5} />
+
+          {/* Warm ambient base — cream-white to unify the cafe palette */}
+          <ambientLight intensity={0.4} color="#fff0dd" />
+
+          {/* Main key light — warm window sunlight from upper-right      */}
+          <directionalLight
+            position={[5, 8, 5]}
+            intensity={1.5}
+            color="#ffce8a"
+            castShadow
+            shadow-mapSize={[1024, 1024]}
+          />
 
           {/* Freeze shadow maps after initial bake — no per-frame
               shadow recalculation during the camera pan             */}
@@ -289,7 +427,7 @@ export default function App() {
           <SceneCamera />
 
           {/* Persistent lighting + floor + walls + counter */}
-          <CafeEnvironment />
+          <CafeEnvironment ref={cafeEnvRef} />
 
           {/* Scene groups (all stay mounted) */}
           <LandingScene />
@@ -304,11 +442,6 @@ export default function App() {
             onContentClick={() => setContentOpen(true)}
           />
 
-          {/* Books — high shelf */}
-          <Center position={[-1.06, 0.30, -2.63]}>
-            <Books scale={0.08} rotation={[0, Math.PI * 1.5, 0]} />
-          </Center>
-
           {/* TabletStand — POS system on the counter, right of barista */}
           {/* TabletStand — floor kiosk, front-right customer area */}
           <Center position={[2.2, -0.4, 1.5]}>
@@ -316,7 +449,7 @@ export default function App() {
           </Center>
 
           {/* BonsaiTree */}
-          <Center position={[-3.44, -0.61, 0.08]}>
+          <Center position={[-2.7, -0.61, 0.6]}>
             <BonsaiTree scale={1} />
           </Center>
 
@@ -332,16 +465,18 @@ export default function App() {
                orange glow that a real neon tube casts onto nearby surfaces.
                Placed 0.4 units in front of the sign face (z=0.4) so the
                light hits the counter top and character, not the wall.      */}
-          <Center position={[1.32, 0.84, 0.00]}>
+          <Center position={[1.32, 0.84, -2.55]}>
             <NeonSign scale={0.55} />
           </Center>
-          <pointLight
-            position={[1.32, 0.84, 0.40]}
-            intensity={2.2}
-            color="#ff6520"
-            distance={3.5}
-            decay={2}
-          />
+          {(lightingZone === 'ALL' || lightingZone === 'A') && (
+            <pointLight
+              position={[1.32, 0.84,-2.90]}
+              intensity={2.2}
+              color="#ff6520"
+              distance={3.5}
+              decay={2}
+            />
+          )}
 
           {/* BarStool — Zone B */}
           <group position={[14.04, -1.0, 0.69]}>
@@ -399,22 +534,22 @@ export default function App() {
           </Center>
         </Suspense>
 
-        {/* Drag Helpers */}
-        <HelperBox color="blue" startPos={[-3, 0.5, 0]} label="🟦 ZONE A" />
-        <HelperBox color="orange" startPos={[14, -0.5, 1]} label="🟧 ZONE B" />
-
         {/* Particle pour — conditionally mounted, no WebGL context risk */}
         <PouringScene />
 
         {/* Post-processing — bloom ramps during the cinematic transition */}
         <AnimatedEffects />
 
-        {/* Force shader/material compilation for all off-screen assets on
-            initial load — prevents stutter when Zone B enters the frustum */}
+        {/* Preload all off-screen assets so useProgress reaches 100% only
+            after every GLB/texture is fully resident in memory           */}
         <Preload all />
-      </Canvas>
 
-      {/* ── HTML Overlays (above canvas) ─────────────────────── */}
+        {/* Compiles shaders after progress===100 and signals isGpuReady */}
+        <ShaderPrecompiler cafeEnvRef={cafeEnvRef} />
+      </Canvas>
+      </div>
+
+      {/* ── HTML Overlays (above canvas, z-50 covers the invisible Canvas) */}
       <LoadingScreen />
       <SpeechBubble />
       <ProjectDetail />

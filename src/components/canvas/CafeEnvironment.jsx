@@ -1,7 +1,9 @@
-import { useRef, useEffect, useMemo, Suspense } from 'react'
+import { useRef, useEffect, useMemo, Suspense, forwardRef, useImperativeHandle } from 'react'
 import { ContactShadows, Environment, useGLTF, Center } from '@react-three/drei'
-import { Box3, MeshStandardMaterial, Color } from 'three'
+import { Box3, MeshStandardMaterial, Color, BoxGeometry, Matrix4 } from 'three'
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import ShelfProps from './ShelfProps'
+import useSceneStore from '../../store/useSceneStore'
 
 useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
 useGLTF.preload('/models/industrial_diamond_pendant_light.glb')
@@ -190,7 +192,96 @@ function BistroChair({ x, z, ry = 0 }) {
   )
 }
 
-export default function CafeEnvironment() {
+const CafeEnvironment = forwardRef(function CafeEnvironment(props, ref) {
+  // Zone visibility — driven by store
+  const lightingZone = useSceneStore((s) => s.lightingZone)
+  const zoneAOn = lightingZone === 'ALL' || lightingZone === 'A'
+  const zoneBOn = lightingZone === 'ALL' || lightingZone === 'B'
+
+  // Group refs for shader pre-warm imperative toggling
+  const zoneAGroupRef = useRef()
+  const zoneBGroupRef = useRef()
+
+  useImperativeHandle(ref, () => ({
+    zoneAGroup: zoneAGroupRef.current,
+    zoneBGroup: zoneBGroupRef.current,
+  }))
+
+  // ── Merged geometry — computed once, never re-created ─────────────────────
+  // Each group merges all meshes that share the same material, collapsing
+  // N separate draw calls into 1. World-space transforms are baked into the
+  // geometry so <mesh> can sit at position=[0,0,0] with no matrix overhead.
+
+  // Merged walls (back + right + left): M.wall
+  const mergedWallGeo = useMemo(() => {
+    const backWall  = new BoxGeometry(29, 14, 0.14)
+    backWall.applyMatrix4(new Matrix4().makeTranslation(6.5, 5.5, -2.7))
+
+    const rightWall = new BoxGeometry(0.14, 14, 14)
+    rightWall.applyMatrix4(new Matrix4().makeTranslation(21, 5.5, 2))
+
+    const leftWall  = new BoxGeometry(0.14, 5.1, 12)
+    leftWall.applyMatrix4(new Matrix4().makeTranslation(-5.5, 1.05, -0.6))
+
+    return mergeGeometries([backWall, rightWall, leftWall])
+  }, [])
+
+  // Merged dado rails (back + right): M.wallTrim
+  const mergedTrimGeo = useMemo(() => {
+    const backTrim  = new BoxGeometry(29, 0.07, 0.08)
+    backTrim.applyMatrix4(new Matrix4().makeTranslation(6.5, -0.42, -2.64))
+
+    const rightTrim = new BoxGeometry(0.08, 0.07, 14)
+    rightTrim.applyMatrix4(new Matrix4().makeTranslation(20.93, -0.42, 2))
+
+    return mergeGeometries([backTrim, rightTrim])
+  }, [])
+
+  // Merged baseboards (back + right): M.baseboard
+  const mergedBaseGeo = useMemo(() => {
+    const backBase  = new BoxGeometry(29, 0.16, 0.08)
+    backBase.applyMatrix4(new Matrix4().makeTranslation(6.5, -1.42, -2.64))
+
+    const rightBase = new BoxGeometry(0.08, 0.16, 14)
+    rightBase.applyMatrix4(new Matrix4().makeTranslation(20.93, -1.42, 2))
+
+    return mergeGeometries([backBase, rightBase])
+  }, [])
+
+  // Merged counter stone bases (main + Zone B extension + Zone A L-return + Zone B L-return): M.stoneBlack
+  const mergedStoneGeo = useMemo(() => {
+    const mainBase   = new BoxGeometry(7.0, 0.9, 1.0)
+    mainBase.applyMatrix4(new Matrix4().makeTranslation(0.5, -1.05, -0.2))
+
+    const lReturnA   = new BoxGeometry(0.86, 0.9, 2.50)
+    lReturnA.applyMatrix4(new Matrix4().makeTranslation(4.07, -1.05, 0.55))
+
+    const zoneBBase  = new BoxGeometry(17.0, 0.9, 1.0)
+    zoneBBase.applyMatrix4(new Matrix4().makeTranslation(12.5, -1.05, -0.2))
+
+    const lReturnB   = new BoxGeometry(1.0, 0.9, 3.2)
+    lReturnB.applyMatrix4(new Matrix4().makeTranslation(20.5, -1.05, 0.9))
+
+    return mergeGeometries([mainBase, lReturnA, zoneBBase, lReturnB])
+  }, [])
+
+  // Merged counter wood tops (main + Zone B extension + Zone A L-return + Zone B L-return): M.woodTop
+  const mergedWoodGeo = useMemo(() => {
+    const mainTop    = new BoxGeometry(7.14, 0.07, 1.12)
+    mainTop.applyMatrix4(new Matrix4().makeTranslation(0.5, -0.565, -0.2))
+
+    const lReturnATop = new BoxGeometry(1.00, 0.07, 2.64)
+    lReturnATop.applyMatrix4(new Matrix4().makeTranslation(4.07, -0.565, 0.55))
+
+    const zoneBTop   = new BoxGeometry(17.14, 0.07, 1.12)
+    zoneBTop.applyMatrix4(new Matrix4().makeTranslation(12.5, -0.565, -0.2))
+
+    const lReturnBTop = new BoxGeometry(1.12, 0.07, 3.34)
+    lReturnBTop.applyMatrix4(new Matrix4().makeTranslation(20.5, -0.565, 0.9))
+
+    return mergeGeometries([mainTop, lReturnATop, zoneBTop, lReturnBTop])
+  }, [])
+
   // Three focused spotlights — each needs its own ref so we can aim its target
   const spotKeyRef      = useRef() // main barista key — upper-right-front
   const spotCounterRef  = useRef() // counter/cup fill — upper-left-front
@@ -229,134 +320,140 @@ export default function CafeEnvironment() {
           from local lights so the background falls naturally into shadow   */}
       <ambientLight intensity={0.08} color="#1a0802" />
 
-      {/* ── SPOTLIGHTS ──────────────────────────────────────────────────── */}
+      {/* ── ZONE A LIGHTS (barista area: x≈-3 → 5) ─────────────────────── */}
+      <group ref={zoneAGroupRef} visible={zoneAOn}>
 
-      {/* 1. Barista key light — primary drama source.
-             Wide warm cone from upper-right-front.  Casts shadows.
-             Does NOT reach the back wall (distance 13, starts falling off
-             well before z = -2.7).                                         */}
-      <spotLight
-        ref={spotKeyRef}
-        position={[2.8, 4.0, 2.8]}
-        angle={0.42}
-        penumbra={0.65}
-        intensity={5.5}
-        color="#ffccaa"
-        distance={13}
-        decay={1.3}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-near={0.5}
-        shadow-camera-far={13}
-        shadow-bias={-0.0003}
-      />
+        {/* ── SPOTLIGHTS ────────────────────────────────────────────────── */}
 
-      {/* 2. Counter fill — softer cone from upper-left-front.
-             Lifts the counter surface and coffee cups on the shadow side
-             of the key, prevents harsh under-counter darkness.             */}
-      <spotLight
-        ref={spotCounterRef}
-        position={[-1.5, 3.2, 1.8]}
-        angle={0.30}
-        penumbra={0.90}
-        intensity={2.6}
-        color="#ffd4a0"
-        distance={7}
-        decay={1.6}
-      />
+        {/* 1. Barista key light — primary drama source.
+               Wide warm cone from upper-right-front.  Casts shadows.
+               Does NOT reach the back wall (distance 13, starts falling off
+               well before z = -2.7).                                         */}
+        <spotLight
+          ref={spotKeyRef}
+          position={[2.8, 4.0, 2.8]}
+          angle={0.42}
+          penumbra={0.65}
+          intensity={5.5}
+          color="#ffccaa"
+          distance={13}
+          decay={1.3}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-near={0.5}
+          shadow-camera-far={13}
+          shadow-bias={-0.0003}
+        />
 
-      {/* 3. Machine accent — right side, aimed at the espresso machine area
-             that appears in the MACHINE scene.  Short distance so it fades
-             before it washes out the wall behind.                          */}
-      <spotLight
-        ref={spotMachineRef}
-        position={[3.5, 3.5, 0.5]}
-        angle={0.35}
-        penumbra={0.75}
-        intensity={3.0}
-        color="#ffccaa"
-        distance={8}
-        decay={1.5}
-      />
+        {/* 2. Counter fill — softer cone from upper-left-front.
+               Lifts the counter surface and coffee cups on the shadow side
+               of the key, prevents harsh under-counter darkness.             */}
+        <spotLight
+          ref={spotCounterRef}
+          position={[-1.5, 3.2, 1.8]}
+          angle={0.30}
+          penumbra={0.90}
+          intensity={2.6}
+          color="#ffd4a0"
+          distance={7}
+          decay={1.6}
+        />
 
-      {/* ── RIM ─────────────────────────────────────────────────────────── */}
-      {/* Subtle warm amber edge — gives the character cinematic separation
-          from the dark background.  Directional but very low intensity so
-          it just kisses edges without filling the back wall.               */}
-      <directionalLight position={[-4, 5, -3]} intensity={0.28} color="#ff8833" />
+        {/* 3. Machine accent — right side, aimed at the espresso machine area
+               that appears in the MACHINE scene.  Short distance so it fades
+               before it washes out the wall behind.                          */}
+        <spotLight
+          ref={spotMachineRef}
+          position={[3.5, 3.5, 0.5]}
+          angle={0.35}
+          penumbra={0.75}
+          intensity={3.0}
+          color="#ffccaa"
+          distance={8}
+          decay={1.5}
+        />
 
-      {/* ── PENDANT POINT LIGHTS (0xffccaa) ─────────────────────────────── */}
-      {/* Tight distance values are the key to the background fade:
-          at distance 3.8 the light is exactly zero.  The back wall is 1.5+
-          units further from these lights than their rated distance, so it
-          receives essentially nothing from them.                            */}
+        {/* ── RIM ───────────────────────────────────────────────────────── */}
+        {/* Subtle warm amber edge — gives the character cinematic separation
+            from the dark background.  Directional but very low intensity so
+            it just kisses edges without filling the back wall.               */}
+        <directionalLight position={[-4, 5, -3]} intensity={0.28} color="#ff8833" />
 
-      {/* Counter fill lights — reduced now that GLB pendants carry their own bulbs */}
-      <pointLight
-        position={[-1.0, 1.45, -1.2]}
-        intensity={2.5}
-        color="#ffccaa"
-        distance={3.8}
-        decay={2}
-      />
-      <pointLight
-        position={[1.8, 1.45, -1.2]}
-        intensity={2.5}
-        color="#ffccaa"
-        distance={3.8}
-        decay={2}
-      />
-      {/* Background seating pendant — dimmer, shorter range,
-          just enough to pick out the bistro tables in shadow             */}
-      <pointLight
-        position={[-2.8, 1.45, -1.7]}
-        intensity={2.8}
-        color="#ffccaa"
-        distance={2.6}
-        decay={2}
-      />
+        {/* ── PENDANT POINT LIGHTS (0xffccaa) ─────────────────────────── */}
+        {/* Tight distance values are the key to the background fade:
+            at distance 3.8 the light is exactly zero.  The back wall is 1.5+
+            units further from these lights than their rated distance, so it
+            receives essentially nothing from them.                            */}
 
-      {/* ── ZONE B LIGHTING (espresso machine + grinder at x≈10–12) ────── */}
+        {/* Counter fill lights — reduced now that GLB pendants carry their own bulbs */}
+        <pointLight
+          position={[-1.0, 1.45, -1.2]}
+          intensity={2.5}
+          color="#ffccaa"
+          distance={3.8}
+          decay={2}
+        />
+        <pointLight
+          position={[1.8, 1.45, -1.2]}
+          intensity={2.5}
+          color="#ffccaa"
+          distance={3.8}
+          decay={2}
+        />
+        {/* Background seating pendant — dimmer, shorter range,
+            just enough to pick out the bistro tables in shadow             */}
+        <pointLight
+          position={[-2.8, 1.45, -1.7]}
+          intensity={2.8}
+          color="#ffccaa"
+          distance={2.6}
+          decay={2}
+        />
+      </group>
 
-      {/* Machine key — warm cone from upper-right, main drama source for Zone B */}
-      <spotLight
-        ref={spotZoneBKeyRef}
-        position={[14, 4.5, 2.0]}
-        angle={0.38}
-        penumbra={0.65}
-        intensity={5.0}
-        color="#ffccaa"
-        distance={12}
-        decay={1.3}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0003}
-      />
+      {/* ── ZONE B LIGHTS (espresso machine + grinder at x≈10–12) ────────── */}
+      <group ref={zoneBGroupRef} visible={zoneBOn}>
 
-      {/* Grinder fill — softer cone lifts the grinder from the shadow side */}
-      <spotLight
-        ref={spotZoneBFillRef}
-        position={[8.5, 3.0, 1.5]}
-        angle={0.32}
-        penumbra={0.85}
-        intensity={2.5}
-        color="#ffd4a0"
-        distance={8}
-        decay={1.6}
-      />
+        {/* Machine key — warm cone from upper-right, main drama source for Zone B */}
+        <spotLight
+          ref={spotZoneBKeyRef}
+          position={[14, 4.5, 2.0]}
+          angle={0.38}
+          penumbra={0.65}
+          intensity={5.0}
+          color="#ffccaa"
+          distance={12}
+          decay={1.3}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-bias={-0.0003}
+        />
 
-      {/* Zone B right-area fill — warms the décor section beyond the machine.
-          Low-hanging point light so it pools on the counter and shelves without
-          blowing out the background wall. Amber hue matches the room palette.  */}
-      <pointLight
-        position={[16.5, 2.4, 0.2]}
-        intensity={3.8}
-        color="#ffb060"
-        distance={9}
-        decay={1.5}
-      />
+        {/* Grinder fill — softer cone lifts the grinder from the shadow side */}
+        <spotLight
+          ref={spotZoneBFillRef}
+          position={[8.5, 3.0, 1.5]}
+          angle={0.32}
+          penumbra={0.85}
+          intensity={2.5}
+          color="#ffd4a0"
+          distance={8}
+          decay={1.6}
+        />
 
-      {/* ── COOL SHADOW FILL ────────────────────────────────────────────── */}
+        {/* Zone B right-area fill — warms the décor section beyond the machine.
+            Low-hanging point light so it pools on the counter and shelves without
+            blowing out the background wall. Amber hue matches the room palette.  */}
+        <pointLight
+          position={[16.5, 2.4, 0.2]}
+          intensity={3.8}
+          color="#ffb060"
+          distance={9}
+          decay={1.5}
+        />
+      </group>
+
+      {/* ── COOL SHADOW FILL — always on (global) ────────────────────────── */}
       {/* Very faint blue-purple from the camera side.  Keeps deep shadows
           from going pure black (0,0,0) while maintaining depth contrast.  */}
       <pointLight
@@ -381,49 +478,19 @@ export default function CafeEnvironment() {
         <meshStandardMaterial {...M.ceiling} />
       </mesh>
 
-      {/* ── BACK WALL — dark teal plaster (extends across Zone A + Zone B) ── */}
-      {/*   Centre x=6.5 → covers x=−8 → x=21 (29 units wide).             */}
-      {/*   y: −1.5 (floor) → 12.5 (ceiling) = 14 h, centre y = 5.5       */}
-      <mesh position={[6.5, 5.5, -2.7]} receiveShadow>
-        <boxGeometry args={[29, 14, 0.14]} />
+      {/* ── WALLS — back + right + left merged into 1 draw call ──────────── */}
+      <mesh geometry={mergedWallGeo} receiveShadow>
         <meshStandardMaterial {...M.wall} />
       </mesh>
 
-      {/* Dado rail — horizontal accent strip at mid-wall */}
-      <mesh position={[6.5, -0.42, -2.64]}>
-        <boxGeometry args={[29, 0.07, 0.08]} />
+      {/* ── DADO RAILS — back + right merged into 1 draw call ────────────── */}
+      <mesh geometry={mergedTrimGeo}>
         <meshStandardMaterial {...M.wallTrim} />
       </mesh>
 
-      {/* Baseboard — dark strip at floor line */}
-      <mesh position={[6.5, -1.42, -2.64]}>
-        <boxGeometry args={[29, 0.16, 0.08]} />
+      {/* ── BASEBOARDS — back + right merged into 1 draw call ────────────── */}
+      <mesh geometry={mergedBaseGeo}>
         <meshStandardMaterial {...M.baseboard} />
-      </mesh>
-
-      {/* ── RIGHT SIDE WALL — closes the room at x=21 ──────────────────── */}
-      {/*   Height 14 matches back wall (y=−1.5 → 12.5, centre 5.5).       */}
-      {/*   Depth 14, centre z=2 → covers z=−5 → z=9, well past the        */}
-      {/*   camera's max z=4.5 so the front edge is never exposed.          */}
-      <mesh position={[21, 5.5, 2]} receiveShadow>
-        <boxGeometry args={[0.14, 14, 14]} />
-        <meshStandardMaterial {...M.wall} />
-      </mesh>
-      {/* Dado rail on right side wall */}
-      <mesh position={[20.93, -0.42, 2]}>
-        <boxGeometry args={[0.08, 0.07, 14]} />
-        <meshStandardMaterial {...M.wallTrim} />
-      </mesh>
-      {/* Baseboard on right side wall */}
-      <mesh position={[20.93, -1.42, 2]}>
-        <boxGeometry args={[0.08, 0.16, 14]} />
-        <meshStandardMaterial {...M.baseboard} />
-      </mesh>
-
-      {/* ── LEFT SIDE WALL (partial — for depth) ────────────────────────── */}
-      <mesh position={[-5.5, 1.05, -0.6]} receiveShadow>
-        <boxGeometry args={[0.14, 5.1, 12]} />
-        <meshStandardMaterial {...M.wall} />
       </mesh>
 
       {/* ── PENDANT LAMPS (GLB) ─────────────────────────────────────────── */}
@@ -463,67 +530,14 @@ export default function CafeEnvironment() {
       <ShelfProps />
 
 
-      {/* ── BAR COUNTER — MAIN SECTION ──────────────────────────────────── */}
-      {/*   Runs left → right across the scene, sitting on the floor.       */}
-      {/*   x: -3.0 → 4.0   (width 7.0, center 0.5)                        */}
-      {/*   z: -0.7 → 0.3   (depth 1.0, center -0.2)                       */}
-      {/*   Front face at z=0.3 is 0.3 units closer than character (z=0)   */}
-      {/*   → character's lower body is naturally occluded = barista look   */}
-
-      {/* Matte black stone base */}
-      <mesh position={[0.5, -1.05, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[7.0, 0.9, 1.0]} />
+      {/* ── BAR COUNTER — all stone bases merged into 1 draw call ───────── */}
+      {/*   Covers: main section + Zone A L-return + Zone B extension + Zone B L-return */}
+      <mesh geometry={mergedStoneGeo} castShadow receiveShadow>
         <meshStandardMaterial {...M.stoneBlack} />
       </mesh>
-      {/* Polished dark wood top — 6 cm overhang all round */}
-      <mesh position={[0.5, -0.565, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[7.14, 0.07, 1.12]} />
-        <meshStandardMaterial {...M.woodTop} />
-      </mesh>
 
-      {/* ── BAR COUNTER — RIGHT L-RETURN ────────────────────────────────── */}
-      {/*   Extends toward camera on the right end of the main counter.     */}
-      {/*   x: 3.64 → 4.50  z: -0.70 → 1.80   (matches main counter back) */}
-
-      {/* Stone base */}
-      <mesh position={[4.07, -1.05, 0.55]} castShadow receiveShadow>
-        <boxGeometry args={[0.86, 0.9, 2.50]} />
-        <meshStandardMaterial {...M.stoneBlack} />
-      </mesh>
-      {/* Wood top — slight overhang */}
-      <mesh position={[4.07, -0.565, 0.55]} castShadow receiveShadow>
-        <boxGeometry args={[1.00, 0.07, 2.64]} />
-        <meshStandardMaterial {...M.woodTop} />
-      </mesh>
-
-      {/* ── BAR COUNTER — ZONE B EXTENSION ─────────────────────────────── */}
-      {/*   Runs from x=4.0 → x=21.0 (17 units); centre x=12.5.           */}
-      {/*   Terminates at the right side wall (x=21).                      */}
-
-      {/* Stone base */}
-      <mesh position={[12.5, -1.05, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[17.0, 0.9, 1.0]} />
-        <meshStandardMaterial {...M.stoneBlack} />
-      </mesh>
-      {/* Polished dark wood top */}
-      <mesh position={[12.5, -0.565, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[17.14, 0.07, 1.12]} />
-        <meshStandardMaterial {...M.woodTop} />
-      </mesh>
-
-      {/* ── BAR COUNTER — RIGHT L-RETURN ─────────────────────────────────── */}
-      {/*   Caps the Zone B counter corner, mirroring the Zone A L-return.  */}
-      {/*   x: 20.0 → 21.0 (centre 20.5, width 1.0)                        */}
-      {/*   z: −0.7 → 2.5  (centre 0.9,  depth 3.2) — steps toward camera  */}
-
-      {/* Stone base */}
-      <mesh position={[20.5, -1.05, 0.9]} castShadow receiveShadow>
-        <boxGeometry args={[1.0, 0.9, 3.2]} />
-        <meshStandardMaterial {...M.stoneBlack} />
-      </mesh>
-      {/* Polished dark wood top */}
-      <mesh position={[20.5, -0.565, 0.9]} castShadow receiveShadow>
-        <boxGeometry args={[1.12, 0.07, 3.34]} />
+      {/* ── BAR COUNTER — all wood tops merged into 1 draw call ──────────── */}
+      <mesh geometry={mergedWoodGeo} castShadow receiveShadow>
         <meshStandardMaterial {...M.woodTop} />
       </mesh>
 
@@ -550,4 +564,6 @@ export default function CafeEnvironment() {
       <Environment preset="city" background={false} environmentIntensity={1.5} />
     </>
   )
-}
+})
+
+export default CafeEnvironment

@@ -10,8 +10,14 @@ const useSceneStore = create((set) => ({
   isPouring: false,
   cupFillAmount: 0.0,
   isTransitioning: false,
+  isGpuReady: false,
+  lightingZone: 'ALL',   // 'ALL' | 'A' | 'B'
 
   setScene: (scene) => set({ scene }),
+
+  setLightingZone: (zone) => set({ lightingZone: zone }),
+
+  setGpuReady: () => set({ isGpuReady: true }),
 
   setTransitioning: (val) => set({ isTransitioning: val }),
 
