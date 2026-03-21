@@ -426,7 +426,28 @@ function SceneOffsetGroup({ children }) {
   return <group position={[0, y, 0]}>{children}</group>
 }
 
+// ── SceneReadyReporter ────────────────────────────────────────────────────────
+// Mounted inside <Canvas>. Fires onReady after two requestAnimationFrame ticks,
+// which guarantees the WebGL renderer has actually submitted at least one frame
+// to the GPU before we start fading the loading screen.
+function SceneReadyReporter({ onReady }) {
+  useEffect(() => {
+    let id1, id2
+    id1 = requestAnimationFrame(() => {
+      id2 = requestAnimationFrame(() => {
+        onReady()
+      })
+    })
+    return () => {
+      cancelAnimationFrame(id1)
+      cancelAnimationFrame(id2)
+    }
+  }, [onReady])
+  return null
+}
+
 export default function App() {
+  const [isScenePainted, setIsScenePainted] = useState(false)
   const [mocktalkOpen, setMocktalkOpen] = useState(false)
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
@@ -630,11 +651,14 @@ export default function App() {
 
         {/* Compiles shaders after progress===100 and signals isGpuReady */}
         <ShaderPrecompiler />
+
+        {/* Fires onReady after 2 rAF ticks — guarantees ≥1 rendered frame */}
+        <SceneReadyReporter onReady={() => setIsScenePainted(true)} />
       </Canvas>
       </div>
 
       {/* ── HTML Overlays (above canvas, z-50 covers the invisible Canvas) */}
-      <LoadingScreen />
+      <LoadingScreen isScenePainted={isScenePainted} />
       <SpeechBubble />
       <ProjectDetail />
       {mocktalkOpen && <MocktalkModal onClose={() => setMocktalkOpen(false)} />}

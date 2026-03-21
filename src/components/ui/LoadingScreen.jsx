@@ -8,23 +8,22 @@ import useSceneStore from '../../store/useSceneStore'
  *
  * Dismissal sequence:
  *   1. useProgress reaches 100 % (all network assets downloaded).
- *   2. Wait BUFFER_MS — gives the GPU time to upload textures to VRAM and
- *      compile shader programs before we reveal the canvas.
- *   3. Advance scene to LANDING so the camera intro starts playing
- *      *behind* the still-visible overlay.
- *   4. CSS opacity transition fades the overlay out over FADE_MS.
- *   5. setSceneReady() — SpeechBubble is now allowed to animate in.
- *   6. Component unmounts.
+ *   2. SceneReadyReporter in App.jsx fires two rAF ticks and sets
+ *      isScenePainted=true — guarantees ≥1 real WebGL frame rendered.
+ *   3. BOTH conditions met → triggerFade fires immediately (no arbitrary buffer).
+ *   4. setScene('LANDING') — camera intro starts playing behind the overlay.
+ *   5. CSS opacity transition fades the overlay out over FADE_MS.
+ *   6. setSceneReady() — SpeechBubble is now allowed to animate in.
+ *   7. Component unmounts.
  *
  * Hard fallback at FALLBACK_MS from mount covers deployments where
  * useProgress stalls or assets are served from a slow CDN.
  */
 
-const BUFFER_MS  = 1500   // post-100% GPU warm-up buffer
-const FADE_MS    = 1000   // CSS opacity crossfade duration
-const FALLBACK_MS = 10000 // hard maximum wait from page load
+const FADE_MS     = 1000   // CSS opacity crossfade duration
+const FALLBACK_MS = 15000  // hard maximum wait from page load
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ isScenePainted }) {
   const { progress } = useProgress()
   const setScene      = useSceneStore((s) => s.setScene)
   const setSceneReady = useSceneStore((s) => s.setSceneReady)
@@ -67,12 +66,11 @@ export default function LoadingScreen() {
     }, FADE_MS)
   }
 
-  // Primary: 1.5 s buffer after assets finish downloading
+  // Primary gate: BOTH assets downloaded AND first WebGL frame rendered.
   useEffect(() => {
-    if (progress < 100 || hasTriggered.current) return
-    const id = setTimeout(triggerFade, BUFFER_MS)
-    return () => clearTimeout(id)
-  }, [progress]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (progress < 100 || !isScenePainted || hasTriggered.current) return
+    triggerFade()
+  }, [progress, isScenePainted]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Hard fallback — fires at FALLBACK_MS from mount no matter what
   useEffect(() => {
