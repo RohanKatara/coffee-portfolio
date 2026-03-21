@@ -11,10 +11,16 @@ const useSceneStore = create((set) => ({
   cupFillAmount: 0.0,
   isTransitioning: false,
   isGpuReady: false,
+  // True once the loading screen has fully faded out and the 3D canvas
+  // is confirmed visible. UI overlays (SpeechBubble) gate their animations
+  // on this flag so they never appear before the scene is rendered.
+  isSceneReady: false,
 
   setScene: (scene) => set({ scene }),
 
   setGpuReady: () => set({ isGpuReady: true }),
+
+  setSceneReady: () => set({ isSceneReady: true }),
 
   setTransitioning: (val) => set({ isTransitioning: val }),
 

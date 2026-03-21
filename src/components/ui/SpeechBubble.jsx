@@ -17,8 +17,9 @@ import { triggerMachineTransition } from '../../utils/triggerMachineTransition'
  * to the bottom edge so the barista's upper body stays visible above it.
  */
 export default function SpeechBubble() {
-  const scene    = useSceneStore((s) => s.scene)
-  const setScene = useSceneStore((s) => s.setScene)
+  const scene        = useSceneStore((s) => s.scene)
+  const setScene     = useSceneStore((s) => s.setScene)
+  const isSceneReady = useSceneStore((s) => s.isSceneReady)
   const containerRef = useRef(null)
   const hasEntered   = useRef(false)
 
@@ -45,16 +46,18 @@ export default function SpeechBubble() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // Only animate in once the loading screen has fully faded and isSceneReady
+  // is true — guarantees the 3D canvas is visible before the text appears.
   useEffect(() => {
-    if (scene === 'LANDING' && containerRef.current && !hasEntered.current) {
+    if (scene === 'LANDING' && isSceneReady && containerRef.current && !hasEntered.current) {
       hasEntered.current = true
       gsap.fromTo(
         containerRef.current,
         { opacity: 0, y: 32 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.8, ease: 'power3.out' },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.4, ease: 'power3.out' },
       )
     }
-  }, [scene])
+  }, [scene, isSceneReady])
 
   // Unmount once scene leaves LANDING — GSAP fade-out runs first (300 ms delay)
   if (scene !== 'LANDING') return null

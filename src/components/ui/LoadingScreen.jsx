@@ -1,82 +1,95 @@
 import { useProgress } from '@react-three/drei'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import useSceneStore from '../../store/useSceneStore'
 
 /**
- * Full-screen loading overlay shown while assets are being fetched.
+ * Full-screen loading overlay.
  *
- * Dismissal is gated on TWO conditions being simultaneously true:
- *   1. useProgress reports progress === 100 (all assets resident in memory)
- *   2. isGpuReady === true (ShaderPrecompiler has compiled the full scene
- *      graph and confirmed 5 rendered frames — GPU command queue flushed)
+ * Dismissal sequence:
+ *   1. useProgress reaches 100 % (all network assets downloaded).
+ *   2. Wait BUFFER_MS — gives the GPU time to upload textures to VRAM and
+ *      compile shader programs before we reveal the canvas.
+ *   3. Advance scene to LANDING so the camera intro starts playing
+ *      *behind* the still-visible overlay.
+ *   4. CSS opacity transition fades the overlay out over FADE_MS.
+ *   5. setSceneReady() — SpeechBubble is now allowed to animate in.
+ *   6. Component unmounts.
  *
- * This means the 3D canvas is guaranteed to show its first frame the instant
- * the loading screen finishes fading, with no black-screen gap.
- *
- * Fallback: if isGpuReady never fires (e.g. no GLBs present, placeholder mode)
- * a 5 s hard timeout dismisses the screen anyway.
+ * Hard fallback at FALLBACK_MS from mount covers deployments where
+ * useProgress stalls or assets are served from a slow CDN.
  */
+
+const BUFFER_MS  = 1500   // post-100% GPU warm-up buffer
+const FADE_MS    = 1000   // CSS opacity crossfade duration
+const FALLBACK_MS = 10000 // hard maximum wait from page load
+
 export default function LoadingScreen() {
   const { progress } = useProgress()
-  const scene      = useSceneStore((s) => s.scene)
-  const setScene   = useSceneStore((s) => s.setScene)
-  const isGpuReady = useSceneStore((s) => s.isGpuReady)
+  const setScene      = useSceneStore((s) => s.setScene)
+  const setSceneReady = useSceneStore((s) => s.setSceneReady)
 
-  const overlayRef      = useRef(null)
-  const barRef          = useRef(null)
-  const hasTransitioned = useRef(false)
-  const maxProgress     = useRef(0)
+  const barRef       = useRef(null)
+  const hasTriggered = useRef(false)
+  const maxProgress  = useRef(0)
 
   // Clamp so the bar never animates backwards on cache hits
   const clampedProgress = Math.max(maxProgress.current, progress)
   maxProgress.current   = clampedProgress
 
-  // Animate progress bar width
+  // isFading: CSS opacity → 0 (overlay still in DOM, pointer-events off)
+  // isHidden: component returns null (fully gone)
+  const [isFading, setIsFading] = useState(false)
+  const [isHidden, setIsHidden] = useState(false)
+
+  // Animate progress bar width via GSAP
   useEffect(() => {
     if (barRef.current) {
       gsap.to(barRef.current, { width: `${clampedProgress}%`, duration: 0.3, ease: 'power1.out' })
     }
   }, [clampedProgress])
 
-  const doTransition = () => {
-    if (hasTransitioned.current) return
-    hasTransitioned.current = true
-    if (!overlayRef.current) { setScene('LANDING'); return }
-    // 500 ms settle: even after isGpuReady fires, the browser may still be
-    // uploading textures to VRAM or finishing async GPU work. This small pause
-    // guarantees at least one fully-rendered frame is on screen before we
-    // start fading, eliminating the black-canvas flash on production.
+  const triggerFade = () => {
+    if (hasTriggered.current) return
+    hasTriggered.current = true
+
+    // Advance the scene now so the camera pull-back intro plays while
+    // the overlay is still fading — user sees the scene appear beneath it.
+    setScene('LANDING')
+
+    // CSS fade starts on this render tick via isFading state.
+    setIsFading(true)
+
+    // After the CSS fade finishes, signal readiness and unmount.
     setTimeout(() => {
-      gsap.to(overlayRef.current, {
-        opacity: 0,
-        duration: 1.0,
-        ease: 'power2.inOut',
-        onComplete: () => setScene('LANDING'),
-      })
-    }, 500)
+      setSceneReady(true)
+      setIsHidden(true)
+    }, FADE_MS)
   }
 
-  // Primary gate: dismiss only when BOTH assets AND GPU are ready.
-  // isGpuReady is set by ShaderPrecompiler after gl.finish() + 30 frames.
+  // Primary: 1.5 s buffer after assets finish downloading
   useEffect(() => {
-    if (isGpuReady) doTransition()
-  }, [isGpuReady]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (progress < 100 || hasTriggered.current) return
+    const id = setTimeout(triggerFade, BUFFER_MS)
+    return () => clearTimeout(id)
+  }, [progress]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Hard fallback: covers placeholder mode (no GLBs) or very slow GPUs.
-  // Raised to 12 s so production asset delivery + shader compilation has
-  // enough headroom before the fallback fires.
+  // Hard fallback — fires at FALLBACK_MS from mount no matter what
   useEffect(() => {
-    const id = setTimeout(doTransition, 12000)
+    const id = setTimeout(triggerFade, FALLBACK_MS)
     return () => clearTimeout(id)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (scene !== 'LOADING') return null
+  if (isHidden) return null
 
   return (
     <div
-      ref={overlayRef}
       className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#fdf6ee]"
+      style={{
+        opacity:       isFading ? 0 : 1,
+        transition:    `opacity ${FADE_MS}ms ease`,
+        pointerEvents: isFading ? 'none' : 'auto',
+      }}
     >
       {/* Coffee cup icon */}
       <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="mb-6 animate-pulse">
