@@ -25,7 +25,6 @@ import CupScene from './scenes/CupScene'
 import ProjectButtons3D from './components/canvas/ProjectButtons3D'
 import TreePot from './components/canvas/TreePot'
 import Draggable from './components/canvas/Draggable'
-import BusinessCardHolder from './components/canvas/BusinessCardHolder'
 
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
