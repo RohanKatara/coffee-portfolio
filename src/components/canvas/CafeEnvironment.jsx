@@ -1,9 +1,8 @@
-import { useRef, useEffect, useMemo, Suspense, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useEffect, useMemo, Suspense } from 'react'
 import { ContactShadows, Environment, useGLTF, Center } from '@react-three/drei'
 import { Box3, MeshStandardMaterial, Color, BoxGeometry, Matrix4 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import ShelfProps from './ShelfProps'
-import useSceneStore from '../../store/useSceneStore'
 
 useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
 useGLTF.preload('/models/industrial_diamond_pendant_light.glb')
@@ -192,21 +191,7 @@ function BistroChair({ x, z, ry = 0 }) {
   )
 }
 
-const CafeEnvironment = forwardRef(function CafeEnvironment(props, ref) {
-  // Zone visibility — driven by store
-  const lightingZone = useSceneStore((s) => s.lightingZone)
-  const zoneAOn = lightingZone === 'ALL' || lightingZone === 'A'
-  const zoneBOn = lightingZone === 'ALL' || lightingZone === 'B'
-
-  // Group refs for shader pre-warm imperative toggling
-  const zoneAGroupRef = useRef()
-  const zoneBGroupRef = useRef()
-
-  useImperativeHandle(ref, () => ({
-    zoneAGroup: zoneAGroupRef.current,
-    zoneBGroup: zoneBGroupRef.current,
-  }))
-
+export default function CafeEnvironment() {
   // ── Merged geometry — computed once, never re-created ─────────────────────
   // Each group merges all meshes that share the same material, collapsing
   // N separate draw calls into 1. World-space transforms are baked into the
@@ -320,140 +305,134 @@ const CafeEnvironment = forwardRef(function CafeEnvironment(props, ref) {
           from local lights so the background falls naturally into shadow   */}
       <ambientLight intensity={0.08} color="#1a0802" />
 
-      {/* ── ZONE A LIGHTS (barista area: x≈-3 → 5) ─────────────────────── */}
-      <group ref={zoneAGroupRef} visible={zoneAOn}>
+      {/* ── SPOTLIGHTS ──────────────────────────────────────────────────── */}
 
-        {/* ── SPOTLIGHTS ────────────────────────────────────────────────── */}
+      {/* 1. Barista key light — primary drama source.
+             Wide warm cone from upper-right-front.  Casts shadows.
+             Does NOT reach the back wall (distance 13, starts falling off
+             well before z = -2.7).                                         */}
+      <spotLight
+        ref={spotKeyRef}
+        position={[2.8, 4.0, 2.8]}
+        angle={0.42}
+        penumbra={0.65}
+        intensity={5.5}
+        color="#ffccaa"
+        distance={13}
+        decay={1.3}
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-near={0.5}
+        shadow-camera-far={13}
+        shadow-bias={-0.0003}
+      />
 
-        {/* 1. Barista key light — primary drama source.
-               Wide warm cone from upper-right-front.  Casts shadows.
-               Does NOT reach the back wall (distance 13, starts falling off
-               well before z = -2.7).                                         */}
-        <spotLight
-          ref={spotKeyRef}
-          position={[2.8, 4.0, 2.8]}
-          angle={0.42}
-          penumbra={0.65}
-          intensity={5.5}
-          color="#ffccaa"
-          distance={13}
-          decay={1.3}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-          shadow-camera-near={0.5}
-          shadow-camera-far={13}
-          shadow-bias={-0.0003}
-        />
+      {/* 2. Counter fill — softer cone from upper-left-front.
+             Lifts the counter surface and coffee cups on the shadow side
+             of the key, prevents harsh under-counter darkness.             */}
+      <spotLight
+        ref={spotCounterRef}
+        position={[-1.5, 3.2, 1.8]}
+        angle={0.30}
+        penumbra={0.90}
+        intensity={2.6}
+        color="#ffd4a0"
+        distance={7}
+        decay={1.6}
+      />
 
-        {/* 2. Counter fill — softer cone from upper-left-front.
-               Lifts the counter surface and coffee cups on the shadow side
-               of the key, prevents harsh under-counter darkness.             */}
-        <spotLight
-          ref={spotCounterRef}
-          position={[-1.5, 3.2, 1.8]}
-          angle={0.30}
-          penumbra={0.90}
-          intensity={2.6}
-          color="#ffd4a0"
-          distance={7}
-          decay={1.6}
-        />
+      {/* 3. Machine accent — right side, aimed at the espresso machine area
+             that appears in the MACHINE scene.  Short distance so it fades
+             before it washes out the wall behind.                          */}
+      <spotLight
+        ref={spotMachineRef}
+        position={[3.5, 3.5, 0.5]}
+        angle={0.35}
+        penumbra={0.75}
+        intensity={3.0}
+        color="#ffccaa"
+        distance={8}
+        decay={1.5}
+      />
 
-        {/* 3. Machine accent — right side, aimed at the espresso machine area
-               that appears in the MACHINE scene.  Short distance so it fades
-               before it washes out the wall behind.                          */}
-        <spotLight
-          ref={spotMachineRef}
-          position={[3.5, 3.5, 0.5]}
-          angle={0.35}
-          penumbra={0.75}
-          intensity={3.0}
-          color="#ffccaa"
-          distance={8}
-          decay={1.5}
-        />
+      {/* ── RIM ─────────────────────────────────────────────────────────── */}
+      {/* Subtle warm amber edge — gives the character cinematic separation
+          from the dark background.  Directional but very low intensity so
+          it just kisses edges without filling the back wall.               */}
+      <directionalLight position={[-4, 5, -3]} intensity={0.28} color="#ff8833" />
 
-        {/* ── RIM ───────────────────────────────────────────────────────── */}
-        {/* Subtle warm amber edge — gives the character cinematic separation
-            from the dark background.  Directional but very low intensity so
-            it just kisses edges without filling the back wall.               */}
-        <directionalLight position={[-4, 5, -3]} intensity={0.28} color="#ff8833" />
+      {/* ── PENDANT POINT LIGHTS (0xffccaa) ─────────────────────────────── */}
+      {/* Tight distance values are the key to the background fade:
+          at distance 3.8 the light is exactly zero.  The back wall is 1.5+
+          units further from these lights than their rated distance, so it
+          receives essentially nothing from them.                            */}
 
-        {/* ── PENDANT POINT LIGHTS (0xffccaa) ─────────────────────────── */}
-        {/* Tight distance values are the key to the background fade:
-            at distance 3.8 the light is exactly zero.  The back wall is 1.5+
-            units further from these lights than their rated distance, so it
-            receives essentially nothing from them.                            */}
+      {/* Counter fill lights — reduced now that GLB pendants carry their own bulbs */}
+      <pointLight
+        position={[-1.0, 1.45, -1.2]}
+        intensity={2.5}
+        color="#ffccaa"
+        distance={3.8}
+        decay={2}
+      />
+      <pointLight
+        position={[1.8, 1.45, -1.2]}
+        intensity={2.5}
+        color="#ffccaa"
+        distance={3.8}
+        decay={2}
+      />
+      {/* Background seating pendant — dimmer, shorter range,
+          just enough to pick out the bistro tables in shadow             */}
+      <pointLight
+        position={[-2.8, 1.45, -1.7]}
+        intensity={2.8}
+        color="#ffccaa"
+        distance={2.6}
+        decay={2}
+      />
 
-        {/* Counter fill lights — reduced now that GLB pendants carry their own bulbs */}
-        <pointLight
-          position={[-1.0, 1.45, -1.2]}
-          intensity={2.5}
-          color="#ffccaa"
-          distance={3.8}
-          decay={2}
-        />
-        <pointLight
-          position={[1.8, 1.45, -1.2]}
-          intensity={2.5}
-          color="#ffccaa"
-          distance={3.8}
-          decay={2}
-        />
-        {/* Background seating pendant — dimmer, shorter range,
-            just enough to pick out the bistro tables in shadow             */}
-        <pointLight
-          position={[-2.8, 1.45, -1.7]}
-          intensity={2.8}
-          color="#ffccaa"
-          distance={2.6}
-          decay={2}
-        />
-      </group>
+      {/* ── ZONE B LIGHTING (espresso machine + grinder at x≈10–12) ────── */}
 
-      {/* ── ZONE B LIGHTS (espresso machine + grinder at x≈10–12) ────────── */}
-      <group ref={zoneBGroupRef} visible={zoneBOn}>
+      {/* Machine key — warm cone from upper-right, main drama source for Zone B */}
+      <spotLight
+        ref={spotZoneBKeyRef}
+        position={[14, 4.5, 2.0]}
+        angle={0.38}
+        penumbra={0.65}
+        intensity={5.0}
+        color="#ffccaa"
+        distance={12}
+        decay={1.3}
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.0003}
+      />
 
-        {/* Machine key — warm cone from upper-right, main drama source for Zone B */}
-        <spotLight
-          ref={spotZoneBKeyRef}
-          position={[14, 4.5, 2.0]}
-          angle={0.38}
-          penumbra={0.65}
-          intensity={5.0}
-          color="#ffccaa"
-          distance={12}
-          decay={1.3}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-          shadow-bias={-0.0003}
-        />
+      {/* Grinder fill — softer cone lifts the grinder from the shadow side */}
+      <spotLight
+        ref={spotZoneBFillRef}
+        position={[8.5, 3.0, 1.5]}
+        angle={0.32}
+        penumbra={0.85}
+        intensity={2.5}
+        color="#ffd4a0"
+        distance={8}
+        decay={1.6}
+      />
 
-        {/* Grinder fill — softer cone lifts the grinder from the shadow side */}
-        <spotLight
-          ref={spotZoneBFillRef}
-          position={[8.5, 3.0, 1.5]}
-          angle={0.32}
-          penumbra={0.85}
-          intensity={2.5}
-          color="#ffd4a0"
-          distance={8}
-          decay={1.6}
-        />
+      {/* Zone B right-area fill — warms the décor section beyond the machine.
+          Low-hanging point light so it pools on the counter and shelves without
+          blowing out the background wall. Amber hue matches the room palette.  */}
+      <pointLight
+        position={[16.5, 2.4, 0.2]}
+        intensity={3.8}
+        color="#ffb060"
+        distance={9}
+        decay={1.5}
+      />
 
-        {/* Zone B right-area fill — warms the décor section beyond the machine.
-            Low-hanging point light so it pools on the counter and shelves without
-            blowing out the background wall. Amber hue matches the room palette.  */}
-        <pointLight
-          position={[16.5, 2.4, 0.2]}
-          intensity={3.8}
-          color="#ffb060"
-          distance={9}
-          decay={1.5}
-        />
-      </group>
-
-      {/* ── COOL SHADOW FILL — always on (global) ────────────────────────── */}
+      {/* ── COOL SHADOW FILL ────────────────────────────────────────────── */}
       {/* Very faint blue-purple from the camera side.  Keeps deep shadows
           from going pure black (0,0,0) while maintaining depth contrast.  */}
       <pointLight
@@ -564,6 +543,4 @@ const CafeEnvironment = forwardRef(function CafeEnvironment(props, ref) {
       <Environment preset="city" background={false} environmentIntensity={1.5} />
     </>
   )
-})
-
-export default CafeEnvironment
+}

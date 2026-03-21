@@ -2,8 +2,6 @@ import { useRef, useEffect } from 'react'
 import EspressoMachine from '../components/canvas/EspressoMachine'
 import CoffeeGrinder from '../components/canvas/CoffeeGrinder'
 import ZoneBRightDecor from '../components/canvas/ZoneBRightDecor'
-import useSceneStore from '../store/useSceneStore'
-
 // Aimed spotlight — SpotLight.target must be added to the scene manually,
 // so we set it imperatively via useEffect after mount.
 function MachineSpotlight() {
@@ -38,13 +36,9 @@ function MachineSpotlight() {
  * The scene is simply off-camera until the damp3 camera glide arrives.
  */
 export default function MachineScene() {
-  const lightingZone = useSceneStore((s) => s.lightingZone)
-  const zoneBOn = lightingZone === 'ALL' || lightingZone === 'B'
   return (
     <group>
-      <group visible={zoneBOn}>
-        <MachineSpotlight />
-      </group>
+      <MachineSpotlight />
 
       <EspressoMachine
         position={[12,   -0.53, -0.3]}

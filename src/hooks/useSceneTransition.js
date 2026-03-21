@@ -107,18 +107,6 @@ export function useSceneTransition() {
       Math.abs(camera.position.x - pos.x) > CONVERGE_THRESHOLD ||
       Math.abs(camera.position.z - pos.z) > CONVERGE_THRESHOLD
 
-    // ── Zone-based light culling ──────────────────────────────────────────────
-    // While panning, keep ALL lights active so there's no pop mid-transition.
-    // Once the camera fully settles, cull the off-camera zone to ~halve the
-    // fragment shader light evaluation cost.
-    const currentZone = useSceneStore.getState().lightingZone
-    if (isMoving) {
-      if (currentZone !== 'ALL') useSceneStore.getState().setLightingZone('ALL')
-    } else {
-      const targetZone = isZoneB ? 'B' : 'A'
-      if (currentZone === 'ALL') useSceneStore.getState().setLightingZone(targetZone)
-    }
-
     if (isMoving) {
       settleCount.current = 0
       // Mark the store so AnimatedEffects knows the camera is in motion.

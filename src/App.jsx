@@ -231,7 +231,7 @@ function NeonSign(props) {
 // This is the only reliable signal the LoadingScreen should wait for.
 // A fixed-duration timer is wrong because it cannot know whether the GPU
 // finished or not — this approach does.
-function ShaderPrecompiler({ cafeEnvRef }) {
+function ShaderPrecompiler() {
   const { gl, scene, camera } = useThree()
   const { progress } = useProgress()
   const progressRef   = useRef(0)
@@ -254,16 +254,13 @@ function ShaderPrecompiler({ cafeEnvRef }) {
     // x=10–18 (Zone B) are completely invisible from the Zone A loading position,
     // so without this second pass their shaders compile on-demand when the camera
     // arrives, causing the stutter at the end of the transition.
-    //
-    // Additionally, pre-compile all three lighting zone variants (ALL / A-only /
-    // B-only) so toggling group.visible at runtime never causes a shader recompile.
     if (!compiledRef.current) {
       compiledRef.current = true
 
-      // Zone A compile (current loading position, ALL lights on)
+      // Zone A compile (current loading position)
       gl.compile(scene, camera)
 
-      // Teleport camera to Zone B, compile again (ALL lights)
+      // Teleport camera to Zone B, compile again, then restore
       const savedPos  = camera.position.clone()
       const savedQuat = camera.quaternion.clone()
 
@@ -273,26 +270,13 @@ function ShaderPrecompiler({ cafeEnvRef }) {
       camera.updateMatrixWorld()
       gl.compile(scene, camera)
 
-      // Pre-compile Zone A-only variant (Zone B group hidden)
-      if (cafeEnvRef.current) {
-        cafeEnvRef.current.zoneBGroup.visible = false
-        gl.compile(scene, camera)
-        cafeEnvRef.current.zoneBGroup.visible = true
-      }
-
-      // Restore camera then pre-compile Zone B-only variant (Zone A group hidden)
       camera.position.copy(savedPos)
       camera.quaternion.copy(savedQuat)
       camera.updateMatrixWorld()
-      if (cafeEnvRef.current) {
-        cafeEnvRef.current.zoneAGroup.visible = false
-        gl.compile(scene, camera)
-        cafeEnvRef.current.zoneAGroup.visible = true
-      }
     }
 
     // Phase 3: count 10 frames so the GPU command queue has time to flush
-    // all compile passes before signalling ready.
+    // both the Zone A and Zone B compile passes before signalling ready.
     frameCountRef.current += 1
     if (frameCountRef.current >= 10) {
       firedRef.current = true
@@ -360,9 +344,6 @@ export default function App() {
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
   const [contentOpen, setContentOpen]   = useState(false)
-  const lightingZone = useSceneStore((s) => s.lightingZone)
-  const cafeEnvRef = useRef()
-
   // Any modal open → pause the 3D scene entirely so the 2D overlay gets
   // 100% of the browser's resources for smooth scrolling.
   const anyModalOpen = mocktalkOpen || krishnaOpen || crmOpen || contentOpen
@@ -427,7 +408,7 @@ export default function App() {
           <SceneCamera />
 
           {/* Persistent lighting + floor + walls + counter */}
-          <CafeEnvironment ref={cafeEnvRef} />
+          <CafeEnvironment />
 
           {/* Scene groups (all stay mounted) */}
           <LandingScene />
@@ -468,15 +449,13 @@ export default function App() {
           <Center position={[1.32, 0.84, -2.55]}>
             <NeonSign scale={0.55} />
           </Center>
-          {(lightingZone === 'ALL' || lightingZone === 'A') && (
-            <pointLight
-              position={[1.32, 0.84,-2.90]}
-              intensity={2.2}
-              color="#ff6520"
-              distance={3.5}
-              decay={2}
-            />
-          )}
+          <pointLight
+            position={[1.32, 0.84,-2.90]}
+            intensity={2.2}
+            color="#ff6520"
+            distance={3.5}
+            decay={2}
+          />
 
           {/* BarStool — Zone B */}
           <group position={[14.04, -1.0, 0.69]}>
@@ -545,7 +524,7 @@ export default function App() {
         <Preload all />
 
         {/* Compiles shaders after progress===100 and signals isGpuReady */}
-        <ShaderPrecompiler cafeEnvRef={cafeEnvRef} />
+        <ShaderPrecompiler />
       </Canvas>
       </div>
 
