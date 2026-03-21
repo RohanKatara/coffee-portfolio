@@ -9,6 +9,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Preconnect to Draco CDN so the decoder JS loads without a DNS RTT penalty -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.gstatic.com" />
+
+    <!-- Preload the Draco WASM decoder — downloaded before React boots -->
+    <link rel="preload" href="https://www.gstatic.com/draco/versioned/decoders/1.5.7/draco_wasm_wrapper.js" as="script" crossorigin />
+    <link rel="preload" href="https://www.gstatic.com/draco/versioned/decoders/1.5.7/draco_decoder.wasm" as="fetch" crossorigin />
+
+    <!-- Preload the hero GLBs — largest assets, start fetching before JS parses -->
+    <link rel="preload" href="/models/barista.glb" as="fetch" crossorigin />
+    <link rel="preload" href="/models/espresso_machine.glb" as="fetch" crossorigin />
+    <link rel="preload" href="/models/coffee_grinder.glb" as="fetch" crossorigin />
   </head>
   <body>
     <div id="root"></div>

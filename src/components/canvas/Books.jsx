@@ -29,7 +29,7 @@ function BooksPlaceholder() {
 
 // ── GLB model ─────────────────────────────────────────────────────────────────
 function BooksModel(props) {
-  const { scene } = useGLTF('/models/books.glb', 'https://www.gstatic.com/draco/v1/decoders/')
+  const { scene } = useGLTF('/models/books.glb')
   return <primitive object={scene} {...props} />
 }
 

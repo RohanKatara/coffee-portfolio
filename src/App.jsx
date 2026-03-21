@@ -10,6 +10,21 @@ import gsap from 'gsap'
 // Draco decoder path for compressed GLB models
 useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
 
+// Kick off all GLB downloads immediately — before any component mounts.
+// Models that ARE used inside Canvas (EspressoMachine, Character, etc.) call
+// useGLTF.preload() in their own files. The ones below are inline components
+// defined in this file and have no separate preload call elsewhere.
+useGLTF.preload('/models/tablet_stand.glb')
+useGLTF.preload('/models/bonsai_tree.glb')
+useGLTF.preload('/models/bar_stool.glb')
+useGLTF.preload('/models/bookcase.glb')
+useGLTF.preload('/models/black_ceramic_mug.glb')
+useGLTF.preload('/models/ceramic_mug.glb')
+useGLTF.preload('/models/welcome_sign_restaurant.glb')
+useGLTF.preload('/models/coffee_menu.glb')
+useGLTF.preload('/models/neon_sign.glb')
+useGLTF.preload('/models/plant.glb')
+
 // Shared ref for the key directional light.
 // Accessed by both ShaderPrecompiler (pre-warm no-shadow variant) and
 // PerformanceManager (toggle castShadow at transition start/end).
@@ -305,11 +320,13 @@ function ShaderPrecompiler() {
       }
     }
 
-    // Phase 3: count 30 rendered frames after compilation so R3F has had
+    // Phase 3: count 90 rendered frames after compilation so R3F has had
     // time to run a full render loop with compiled shaders before we signal
-    // ready. 30 frames ≈ 500 ms at 60 fps — belt-and-suspenders after finish().
+    // ready. 90 frames ≈ 1500 ms at 60 fps — covers devices where ctx.finish()
+    // is non-blocking (mobile, Safari/WebKit) and the GPU driver compiles
+    // shaders asynchronously in the background after finish() returns.
     frameCountRef.current += 1
-    if (frameCountRef.current >= 30) {
+    if (frameCountRef.current >= 90) {
       firedRef.current = true
       useSceneStore.getState().setGpuReady()
     }
@@ -426,28 +443,7 @@ function SceneOffsetGroup({ children }) {
   return <group position={[0, y, 0]}>{children}</group>
 }
 
-// ── SceneReadyReporter ────────────────────────────────────────────────────────
-// Mounted inside <Canvas>. Fires onReady after two requestAnimationFrame ticks,
-// which guarantees the WebGL renderer has actually submitted at least one frame
-// to the GPU before we start fading the loading screen.
-function SceneReadyReporter({ onReady }) {
-  useEffect(() => {
-    let id1, id2
-    id1 = requestAnimationFrame(() => {
-      id2 = requestAnimationFrame(() => {
-        onReady()
-      })
-    })
-    return () => {
-      cancelAnimationFrame(id1)
-      cancelAnimationFrame(id2)
-    }
-  }, [onReady])
-  return null
-}
-
 export default function App() {
-  const [isScenePainted, setIsScenePainted] = useState(false)
   const [mocktalkOpen, setMocktalkOpen] = useState(false)
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
@@ -652,13 +648,11 @@ export default function App() {
         {/* Compiles shaders after progress===100 and signals isGpuReady */}
         <ShaderPrecompiler />
 
-        {/* Fires onReady after 2 rAF ticks — guarantees ≥1 rendered frame */}
-        <SceneReadyReporter onReady={() => setIsScenePainted(true)} />
       </Canvas>
       </div>
 
       {/* ── HTML Overlays (above canvas, z-50 covers the invisible Canvas) */}
-      <LoadingScreen isScenePainted={isScenePainted} />
+      <LoadingScreen />
       <SpeechBubble />
       <ProjectDetail />
       {mocktalkOpen && <MocktalkModal onClose={() => setMocktalkOpen(false)} />}

@@ -7,14 +7,15 @@ import useSceneStore from '../../store/useSceneStore'
  * Full-screen loading overlay.
  *
  * Dismissal sequence:
- *   1. useProgress reaches 100 % (all network assets downloaded).
- *   2. SceneReadyReporter in App.jsx fires two rAF ticks and sets
- *      isScenePainted=true — guarantees ≥1 real WebGL frame rendered.
- *   3. BOTH conditions met → triggerFade fires immediately (no arbitrary buffer).
- *   4. setScene('LANDING') — camera intro starts playing behind the overlay.
- *   5. CSS opacity transition fades the overlay out over FADE_MS.
- *   6. setSceneReady() — SpeechBubble is now allowed to animate in.
- *   7. Component unmounts.
+ *   1. ShaderPrecompiler in App.jsx waits for useProgress===100, runs four
+ *      gl.compile()+ctx.finish() passes across both camera positions and both
+ *      shadow variants, then counts 90 rendered frames as a GPU-warm buffer,
+ *      and finally sets isGpuReady=true in the store.
+ *   2. isGpuReady===true → triggerFade fires immediately.
+ *   3. setScene('LANDING') — camera intro starts playing behind the overlay.
+ *   4. CSS opacity transition fades the overlay out over FADE_MS.
+ *   5. setSceneReady() — SpeechBubble is now allowed to animate in.
+ *   6. Component unmounts.
  *
  * Hard fallback at FALLBACK_MS from mount covers deployments where
  * useProgress stalls or assets are served from a slow CDN.
@@ -23,8 +24,9 @@ import useSceneStore from '../../store/useSceneStore'
 const FADE_MS     = 1000   // CSS opacity crossfade duration
 const FALLBACK_MS = 15000  // hard maximum wait from page load
 
-export default function LoadingScreen({ isScenePainted }) {
+export default function LoadingScreen() {
   const { progress } = useProgress()
+  const isGpuReady    = useSceneStore((s) => s.isGpuReady)
   const setScene      = useSceneStore((s) => s.setScene)
   const setSceneReady = useSceneStore((s) => s.setSceneReady)
 
@@ -66,11 +68,13 @@ export default function LoadingScreen({ isScenePainted }) {
     }, FADE_MS)
   }
 
-  // Primary gate: BOTH assets downloaded AND first WebGL frame rendered.
+  // Primary gate: GPU shader compilation confirmed complete by ShaderPrecompiler.
+  // isGpuReady subsumes progress===100 — the ShaderPrecompiler never fires until
+  // progress hits 100, so no need to check progress here separately.
   useEffect(() => {
-    if (progress < 100 || !isScenePainted || hasTriggered.current) return
+    if (!isGpuReady || hasTriggered.current) return
     triggerFade()
-  }, [progress, isScenePainted]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isGpuReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Hard fallback — fires at FALLBACK_MS from mount no matter what
   useEffect(() => {
