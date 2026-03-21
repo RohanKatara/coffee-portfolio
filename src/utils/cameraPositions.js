@@ -40,6 +40,26 @@ export const CAMERA_POSITIONS = {
     target:   { x: 0, y: 0.2, z: -0.8 },
   },
 
+  // ── Mobile Landscape (<500 px height, orientation: landscape) ───────────────
+  // Phone rotated sideways: viewport is now ~844×390 (aspect ≈ 2.16).
+  // FOV_y=70° → FOV_x≈113°, half-FOV_x≈56.5° — neon sign is never an issue.
+  //
+  // Floor constraint at camY=0.6, camZ=2.8:
+  //   floor angle = atan2(0.6+1.5, 2.8-0.36) = atan2(2.1, 2.44) = 40.7°
+  //   half-FOV_y = 35°  →  40.7° > 35° → floor hidden ✓
+  //
+  // Camera Y lowered from 0.9 → 0.6 to fill the short viewport without tilt;
+  // target Y=0.2 produces a gentle 6.9° downward angle (barely perceptible).
+  // Counter top (y=-0.53) appears at ~85% from top of frame → anchors bottom ✓
+  LANDING_INTRO_MOBILE_LANDSCAPE: {
+    position: { x: 0.5, y: 0.6, z: 2.5 },  // slightly closer for cinematic start
+    target:   { x: 0.5, y: 0.2, z: -0.5 },
+  },
+  LANDING_MOBILE_LANDSCAPE: {
+    position: { x: 0.5, y: 0.6, z: 2.8 },
+    target:   { x: 0.5, y: 0.2, z: -0.5 },
+  },
+
   // ── Mobile (<768 px, portrait) ────────────────────────────────────────────
   // "Standing at the counter" — full-width first-person framing.
   //
@@ -62,12 +82,16 @@ export const CAMERA_POSITIONS = {
   //   barista chest (y≈0) at 69% from top, head (y≈0.5) at 58% from top ✓
   //   horizontal look → no tilt, no miniature feel ✓
   LANDING_INTRO_MOBILE: {
-    position: { x: 0.2, y: 0.9, z: 3.5 },   // cinematic intro start (slightly closer)
-    target:   { x: 0.2, y: 0.9, z: -0.5 },  // horizontal look
+    // z=4.0 satisfies Constraint A (neon sign fits) even at this closer Z.
+    // x=0.5 centres the composition between barista (x=0) and neon sign (x=1.32).
+    position: { x: 0.5, y: 0.9, z: 4.0 },
+    target:   { x: 0.5, y: 0.9, z: -0.5 },
   },
   LANDING_MOBILE: {
-    position: { x: 0, y: 0.9, z: 4.0 },     // resting — width + floor both solved at this Z
-    target:   { x: 0, y: 0.9, z: -0.5 },
+    // Pull-back to z=4.2 gives 5.5° margin on Constraint A and 1.0° on Constraint B.
+    // Horizontal look (target.y = camera.y = 0.9) — strictly no downward tilt.
+    position: { x: 0.5, y: 0.9, z: 4.2 },
+    target:   { x: 0.5, y: 0.9, z: -0.5 },
   },
 
   // Transient state: 4-waypoint cinematic arc from Zone A (x≈0) to Zone B (x≈12).
@@ -99,11 +123,17 @@ export const CAMERA_POSITIONS = {
     target:   { x: 12.2, y: -0.1, z: -0.2 },
   },
   MACHINE_MOBILE: {
-    // Same Z=4.0, Y=0.9 logic as Zone A — floor hidden, counter fills bottom.
-    // Camera at x=11.0 so machine (x=12) is 15.9° to the right, well within
-    // the 18.87° half-FOV_x, keeping the machine face centred in portrait view.
-    position: { x: 11.0, y: 0.9, z: 4.0 },
-    target:   { x: 12.2, y: 0.9, z: -0.2 },
+    // x=11.5 centres on the machine face (x=12) with matching 0.5-unit offset logic as Zone A.
+    // z=4.2 gives 5.5°+ margin on Constraint A and 1.0° on Constraint B.
+    // Horizontal look (target.y = camera.y = 0.9) — same eye-level framing as Zone A.
+    position: { x: 11.5, y: 0.9, z: 4.2 },
+    target:   { x: 12.0, y: 0.9, z: -0.2 },
+  },
+  MACHINE_MOBILE_LANDSCAPE: {
+    // Same floor/counter logic as LANDING_MOBILE_LANDSCAPE — y=0.6, z=2.8.
+    // x=11.5 centres the machine face (x=12) with 0.5-unit offset.
+    position: { x: 11.5, y: 0.6, z: 2.8 },
+    target:   { x: 12.0, y: 0.2, z: -0.2 },
   },
 
   // Push low and tight: camera looks down at the drip-tray / group-head area.

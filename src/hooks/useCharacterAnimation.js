@@ -12,7 +12,7 @@ import { LoopRepeat } from 'three'
  * @param {object} actions  – from useAnimations({ actions })
  * @param {string} scene    – current scene string from useSceneStore
  */
-export function useCharacterAnimation(actions, scene) {
+export function useCharacterAnimation(actions, scene, onReady) {
   const hasStarted = useRef(false)
   const timeoutRefs = useRef([])
   // Cache resolved clip names so lookups stay stable
@@ -63,6 +63,7 @@ export function useCharacterAnimation(actions, scene) {
 
     // Play idle immediately, looped
     playLooped(idle)
+    onReady?.()
 
     // If a Wave clip exists, sequence it after 2 s then return to idle
     if (wave) {

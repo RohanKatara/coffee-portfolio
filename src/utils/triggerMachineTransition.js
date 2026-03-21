@@ -15,7 +15,17 @@ import gsap from 'gsap'
 export function triggerMachineTransition(setScene) {
   const el = document.querySelector('[data-speech-bubble]')
   if (el) {
+    // Strip backdrop-filter BEFORE animating. While it exists, animating opacity
+    // on a parent forces the browser to re-composite the blurred layer against
+    // the live 3D canvas every frame — a costly main-thread paint that competes
+    // with the GPU during the camera pan. Removing it makes the fade a simple
+    // opacity tween with zero compositor overhead.
+    const card = el.querySelector('[data-speech-card]')
+    if (card) {
+      card.style.backdropFilter = 'none'
+      card.style.webkitBackdropFilter = 'none'
+    }
     gsap.to(el, { opacity: 0, y: -20, duration: 0.35, ease: 'power2.in' })
   }
-  gsap.delayedCall(0.3, () => setScene('MACHINE'))
+  gsap.delayedCall(0.05, () => setScene('MACHINE'))
 }

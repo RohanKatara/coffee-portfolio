@@ -8,6 +8,8 @@ import projects from '../../data/projects'
 
 // Detect touch devices synchronously — used to skip hover state on mobile.
 const isTouchDevice = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+// Portrait phone specifically — gets larger buttons for easier tapping.
+const isMobilePortrait = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse) and (max-width: 767px) and (orientation: portrait)').matches
 
 // ── CSS injected once into <head> ─────────────────────────────────────────────
 const BUTTON_CSS = `
@@ -89,7 +91,7 @@ function EspressoDialButton({ label, size = 72 }) {
         marginBottom: '6px',
         color: '#ffe080',
         fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-        fontSize: '8px', fontWeight: 'bold',
+        fontSize: isMobilePortrait() ? '11px' : '8px', fontWeight: 'bold',
         letterSpacing: '0.08em', textTransform: 'uppercase',
         whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none',
         textShadow: '0 1px 4px rgba(0,0,0,0.9)',
@@ -170,12 +172,33 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
   // DOM refs for .pb-hover-root divs — hover toggled via dataset, no React state.
   const hoverRefs = useRef([null, null, null, null])
 
-  // On touch devices, a tap fires touchstart → touchend but NOT mouseenter/mouseleave.
-  // Without this, the button stays in default (un-hovered) state and the click
-  // never fires because the parent div has pointer-events:none on mobile browsers
-  // that synthesize mouse events with a 300ms delay. Instead, we handle touchend
-  // directly — no delay, no hover state needed, just fire the click callback.
-  const touchIsActive = useRef(false)
+  // ── Touch interaction (Option A — Tap-to-Focus) ───────────────────────────
+  // Touch screens have no hover, so a single tap on a dark button is opaque
+  // to the user. Instead, the first tap focuses the button (reveals the orange
+  // glow + project label); the second tap on the SAME button fires the action.
+  // Tapping a different button moves focus without firing.
+  //
+  // All state lives in refs so nothing triggers a React re-render inside useFrame.
+  const touchIsActive  = useRef(false)
+  const focusedIndex   = useRef(null)   // null = none, 0-3 = focused button index
+
+  // Helper: set focus to index i, clearing the previous focused button.
+  const setFocus = useCallback((i) => {
+    if (focusedIndex.current !== null && focusedIndex.current !== i) {
+      const prev = hoverRefs.current[focusedIndex.current]
+      if (prev) delete prev.dataset.hovered
+    }
+    focusedIndex.current = i
+    const el = hoverRefs.current[i]
+    if (el) el.dataset.hovered = ''
+  }, [])
+
+  // Helper: clear focus for the given index.
+  const clearFocus = useCallback((i) => {
+    focusedIndex.current = null
+    const el = hoverRefs.current[i]
+    if (el) delete el.dataset.hovered
+  }, [])
 
   useEffect(() => {
     const el = document.createElement('style')
@@ -272,13 +295,19 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
                   onTouchEnd={(e) => {
                     if (!touchIsActive.current) return
                     touchIsActive.current = false
-                    // Prevent the 300ms synthetic click that mobile browsers fire after touchend.
-                    // We fire the handler ourselves immediately so there is zero delay.
+                    // Suppress the 300ms synthetic click so we control timing.
                     e.preventDefault()
-                    clickHandlers[i]()
+                    if (focusedIndex.current === i) {
+                      // Second tap on the focused button — fire the action.
+                      clearFocus(i)
+                      clickHandlers[i]()
+                    } else {
+                      // First tap — reveal hover state so the user can see the label.
+                      setFocus(i)
+                    }
                   }}
                 >
-                  <EspressoDialButton label={project.name} size={26} />
+                  <EspressoDialButton label={project.name} size={isMobilePortrait() ? 32 : isTouchDevice() ? 20 : 26} />
                 </div>
               </div>
             </Html>

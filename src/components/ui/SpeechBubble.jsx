@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import useSceneStore from '../../store/useSceneStore'
 import { triggerMachineTransition } from '../../utils/triggerMachineTransition'
@@ -12,12 +12,38 @@ import { triggerMachineTransition } from '../../utils/triggerMachineTransition'
  *
  * Stays mounted during MACHINE_TRANSITION so the GSAP fade-out has time to finish
  * before React unmounts the element.
+ *
+ * In mobile landscape (viewport height < 500px) the card compacts and drops
+ * to the bottom edge so the barista's upper body stays visible above it.
  */
 export default function SpeechBubble() {
   const scene    = useSceneStore((s) => s.scene)
   const setScene = useSceneStore((s) => s.setScene)
   const containerRef = useRef(null)
   const hasEntered   = useRef(false)
+
+  // Detect mobile landscape via media query so it reacts to orientation changes.
+  const [isLandscape, setIsLandscape] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)')
+    const handler = (e) => setIsLandscape(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  const [isMobilePortrait, setIsMobilePortrait] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px) and (orientation: portrait)')
+    const handler = (e) => setIsMobilePortrait(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     if (scene === 'LANDING' && containerRef.current && !hasEntered.current) {
@@ -37,8 +63,11 @@ export default function SpeechBubble() {
     <div
       ref={containerRef}
       data-speech-bubble
-      className="absolute bottom-[18%] left-1/2 -translate-x-1/2 z-40 opacity-0 text-center"
-      style={{ pointerEvents: 'auto' }}
+      className="absolute left-1/2 -translate-x-1/2 z-40 opacity-0 text-center"
+      style={{
+        pointerEvents: 'auto',
+        bottom: isLandscape ? '2%' : isMobilePortrait ? '10%' : '18%',
+      }}
     >
       <div className="float-ui">
 
@@ -49,15 +78,19 @@ export default function SpeechBubble() {
           WebkitBackdropFilter: 'blur(8px)',
           border: '1px solid rgba(200, 127, 76, 0.22)',
           borderRadius: '18px',
-          padding: 'clamp(14px, 4vw, 22px) clamp(16px, 6vw, 32px) clamp(12px, 3vw, 20px)',
-          marginBottom: '16px',
+          // Landscape: minimal padding so the card is short enough to fit near bottom
+          padding: isLandscape
+            ? '8px 20px 6px'
+            : 'clamp(14px, 4vw, 22px) clamp(16px, 6vw, 32px) clamp(12px, 3vw, 20px)',
+          marginBottom: isLandscape ? '8px' : '16px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(200,127,76,0.08)',
-          maxWidth: 'min(480px, 88vw)',
+          maxWidth: isLandscape ? 'min(520px, 92vw)' : 'min(480px, 88vw)',
         }}>
           <span style={{
             color: '#d4905a',
             fontWeight: 800,
-            fontSize: 'clamp(1.1rem, 5vw, 1.8rem)',
+            // Landscape: clamp down to a compact size (font-size drives card height)
+            fontSize: isLandscape ? '0.95rem' : 'clamp(1.1rem, 5vw, 1.8rem)',
             textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 0 28px rgba(200,100,30,0.4)',
             letterSpacing: '0.01em',
             lineHeight: 1.2,

@@ -10,6 +10,11 @@ import gsap from 'gsap'
 // Draco decoder path for compressed GLB models
 useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
 
+// Shared ref for the key directional light.
+// Accessed by both ShaderPrecompiler (pre-warm no-shadow variant) and
+// PerformanceManager (toggle castShadow at transition start/end).
+const dirLightRef = { current: null }
+
 import SceneCamera from './components/canvas/SceneCamera'
 import CafeEnvironment from './components/canvas/CafeEnvironment'
 import LandingScene from './scenes/LandingScene'
@@ -249,35 +254,49 @@ function ShaderPrecompiler() {
     // Phase 1: wait until all assets are loaded
     if (progressRef.current < 100) return
 
-    // Phase 2: compile shaders from BOTH camera positions so Zone B shaders
-    // are warmed up before the camera ever travels there.
-    // gl.compile frustum-culls objects outside the camera view — objects at
-    // x=10–18 (Zone B) are completely invisible from the Zone A loading position,
-    // so without this second pass their shaders compile on-demand when the camera
-    // arrives, causing the stutter at the end of the transition.
+    // Phase 2: compile shaders from BOTH camera positions, in BOTH lighting
+    // configurations (shadow on / shadow off), so every variant the camera
+    // transition will ever encounter is pre-warmed. Four compile passes total:
+    //   A-shadow, B-shadow, A-no-shadow, B-no-shadow
+    // Without all four, toggling dirLight.castShadow at runtime triggers an
+    // on-demand shader recompile that appears as a stutter mid-pan.
     if (!compiledRef.current) {
       compiledRef.current = true
 
-      // Zone A compile (current loading position)
-      gl.compile(scene, camera)
-
-      // Teleport camera to Zone B, compile again, then restore
       const savedPos  = camera.position.clone()
       const savedQuat = camera.quaternion.clone()
+      const mb        = CAMERA_POSITIONS.MACHINE
 
-      const mb = CAMERA_POSITIONS.MACHINE
+      // ── Shadow-ON variants (normal scene state) ────────────────────────
+      gl.compile(scene, camera)                                         // A-shadow
+
       camera.position.set(mb.position.x, mb.position.y, mb.position.z)
       camera.lookAt(mb.target.x, mb.target.y, mb.target.z)
       camera.updateMatrixWorld()
-      gl.compile(scene, camera)
+      gl.compile(scene, camera)                                         // B-shadow
 
-      camera.position.copy(savedPos)
-      camera.quaternion.copy(savedQuat)
-      camera.updateMatrixWorld()
+      // ── Shadow-OFF variants (used during the camera pan) ──────────────
+      if (dirLightRef.current) {
+        dirLightRef.current.castShadow = false
+
+        gl.compile(scene, camera)                                       // B-no-shadow
+
+        camera.position.copy(savedPos)
+        camera.quaternion.copy(savedQuat)
+        camera.updateMatrixWorld()
+        gl.compile(scene, camera)                                       // A-no-shadow
+
+        dirLightRef.current.castShadow = true   // restore
+      } else {
+        // dirLight not yet mounted — still restore camera
+        camera.position.copy(savedPos)
+        camera.quaternion.copy(savedQuat)
+        camera.updateMatrixWorld()
+      }
     }
 
     // Phase 3: count 10 frames so the GPU command queue has time to flush
-    // both the Zone A and Zone B compile passes before signalling ready.
+    // all four compile passes before signalling ready.
     frameCountRef.current += 1
     if (frameCountRef.current >= 10) {
       firedRef.current = true
@@ -288,44 +307,89 @@ function ShaderPrecompiler() {
   return null
 }
 
+// ── Runtime performance governor ─────────────────────────────────────────────
+// Fires on isTransitioning transitions (not every frame) via Zustand's
+// imperative subscribe — zero React re-renders, zero useFrame overhead.
+//
+// On pan START:
+//   • DPR → 0.5  (cuts pixel count by ~9× vs 1.5 DPR — single biggest saving)
+//   • dirLight.castShadow off  (eliminates PCF shadow sampling per-fragment;
+//     safe because BakeShadows froze the maps — they restore identically)
+//
+// On pan END:
+//   • DPR → device native (up to 1.5)
+//   • dirLight.castShadow on   (shadow maps still intact, no visual change)
+//
+// Both shader variants (shadow / no-shadow) were pre-compiled by
+// ShaderPrecompiler, so castShadow toggling is a GPU cache hit with no stutter.
+function PerformanceManager() {
+  const setDpr = useThree((s) => s.setDpr)
+
+  useEffect(() => {
+    const deviceDpr = Math.min(window.devicePixelRatio ?? 1, 1.5)
+
+    return useSceneStore.subscribe(
+      (s) => s.isTransitioning,
+      (transitioning) => {
+        setDpr(transitioning ? 0.5 : deviceDpr)
+        if (dirLightRef.current) {
+          dirLightRef.current.castShadow = !transitioning
+        }
+      },
+    )
+  }, [setDpr])
+
+  return null
+}
+
 // ── Cinematic post-processing pipeline ───────────────────────────────────────
-// Bloom intensity tweens 1.5 → 1.8 during the cinematic transition.
-// IMPORTANT: intensity is driven via a ref to the BloomEffect instance and
-// mutated imperatively in useFrame — this avoids React state updates every
-// frame which would re-render the EffectComposer on every tick.
+// Bloom + SMAA are disabled during camera pans — they add 10+ GPU passes per
+// frame for no visual benefit while the camera is moving fast. Both are
+// re-enabled the moment the camera settles.
+//
+// Imperative pattern: intensity and enabled are mutated directly on the Effect
+// instance inside useFrame (reads store state, no React re-renders per frame).
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
   const isPouring       = useSceneStore((s) => s.isPouring)
   const bloomRef = useRef()
+  const smaaRef  = useRef()
   const obj      = useRef({ val: 1.2 })
 
   useEffect(() => {
     gsap.killTweensOf(obj.current)
-    // isPouring wins: the wet espresso stream should glow brightest
-    const target   = isPouring ? 1.8 : isTransitioning ? 1.5 : 1.2
-    const duration = isPouring ? 0.4 : isTransitioning ? 0.6 : 0.8
-    const ease     = isPouring ? 'power2.out' : isTransitioning ? 'power2.out' : 'power2.inOut'
+    // isPouring: espresso stream glows brightest.
+    // Resting: default ambient neon glow.
+    // No intensity ramp during transition — bloom is off while moving anyway.
+    const target   = isPouring ? 1.8 : 1.2
+    const duration = isPouring ? 0.4 : 0.8
+    const ease     = isPouring ? 'power2.out' : 'power2.inOut'
     gsap.to(obj.current, { val: target, duration, ease })
-  }, [isTransitioning, isPouring])
+  }, [isPouring])
 
-  // Mutate the BloomEffect intensity directly — no React state, no re-renders.
+  // All effect mutations are imperative — zero React state changes per frame.
+  // During camera transitions: disable Bloom (8 Kawase passes) and SMAA (2
+  // passes) entirely. The camera is moving fast so these are imperceptible;
+  // cutting them frees ~10 full-screen GPU passes per frame on desktop.
   useFrame(() => {
+    const transitioning = useSceneStore.getState().isTransitioning
     if (bloomRef.current) {
+      bloomRef.current.enabled   = !transitioning
       bloomRef.current.intensity = obj.current.val
+    }
+    if (smaaRef.current) {
+      smaaRef.current.enabled = !transitioning
     }
   })
 
   return (
     <EffectComposer multisampling={0} disableNormalPass>
-      {/* Anti-aliasing */}
-      <SMAA />
+      {/* Anti-aliasing — disabled during pans (camera blur masks aliasing) */}
+      <SMAA ref={smaaRef} />
 
-      {/* Bloom — high threshold so only the neon sign and pendant emissives
-          glow; the rest of the scene is unaffected                          */}
-      {/* mipmapBlur removed — it generates up to 11 mip passes; the simpler
-          Kawase blur (default without mipmapBlur) is visually identical here
-          because our luminanceThreshold=0.85 limits bloom to bright emissives */}
+      {/* Bloom — high threshold so only neon sign and pendant emissives glow.
+          levels={4} → 4 downsample + 4 upsample passes; disabled during pan. */}
       <Bloom
         ref={bloomRef}
         luminanceThreshold={0.85}
@@ -334,9 +398,7 @@ function AnimatedEffects() {
         levels={4}
       />
 
-      {/* Vignette + BrightnessContrast — disabled during camera pan.
-          Both are full-screen GPU passes. The camera is moving fast during
-          transitions so these subtle effects are invisible anyway. */}
+      {/* Vignette + BrightnessContrast — full-screen passes, off during pan. */}
       <Vignette offset={0.5} darkness={0.5} enabled={!isTransitioning} />
       <BrightnessContrast brightness={-0.05} contrast={0.12} enabled={!isTransitioning} />
     </EffectComposer>
@@ -407,6 +469,7 @@ export default function App() {
 
           {/* Main key light — warm window sunlight from upper-right      */}
           <directionalLight
+            ref={(el) => { dirLightRef.current = el }}
             position={[5, 8, 5]}
             intensity={1.5}
             color="#ffce8a"
@@ -420,6 +483,11 @@ export default function App() {
 
           {/* Camera — useFrame-driven state transitions */}
           <SceneCamera />
+
+          {/* DPR + shadow governor: drops to 0.5 DPR and disables shadow
+              sampling the instant the camera starts moving, restores both
+              the moment it lands. Zero React re-renders — pure Zustand sub. */}
+          <PerformanceManager />
 
           {/* All scene geometry wrapped in a responsive Y-offset group.
               On mobile, shifts everything down 2 units so the counter

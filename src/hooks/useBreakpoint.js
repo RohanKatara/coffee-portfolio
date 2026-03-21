@@ -35,5 +35,9 @@ export function useBreakpoint() {
 }
 
 // Synchronous helpers — safe to call inside useFrame or outside React
-export const getIsMobile  = () => window.innerWidth < 768
-export const getIsTablet  = () => window.innerWidth < 1024
+export const getIsMobile        = () => window.innerWidth < 768
+export const getIsTablet        = () => window.innerWidth < 1024
+// Mobile landscape: phone rotated sideways (short height, wider than tall).
+// Matches CSS: (max-height: 500px) and (orientation: landscape)
+export const getIsMobileLandscape = () =>
+  window.innerHeight < 500 && window.innerWidth > window.innerHeight

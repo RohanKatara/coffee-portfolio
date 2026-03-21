@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useGLTF } from '@react-three/drei'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
@@ -39,6 +39,14 @@ function EspressoMachinePlaceholder({ position }) {
 // ── GLB model — native materials, no overrides ────────────────────────────────
 function EspressoMachineModel() {
   const { scene } = useGLTF('/models/espresso_machine.glb')
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow    = true
+        child.receiveShadow = true
+      }
+    })
+  }, [scene])
   return (
     <primitive
       object={scene}

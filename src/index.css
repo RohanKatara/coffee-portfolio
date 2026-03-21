@@ -14,7 +14,10 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #1a0e08;
+  /* Cream background matches the LoadingScreen so there is no black flash
+     before React mounts. The canvas covers this with its own dark background
+     once it is visible. */
+  background: #fdf6ee;
   font-family: 'Georgia', serif;
 }
 

@@ -1,4 +1,4 @@
-import { useRef, Suspense, useEffect } from 'react'
+import { useRef, Suspense, useEffect, useState } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import { useCharacterAnimation } from '../../hooks/useCharacterAnimation'
 import { useMouseLook } from '../../hooks/useMouseLook'
@@ -12,6 +12,7 @@ function CharacterModel({ visible }) {
   const scene = useSceneStore((s) => s.scene)
   const gltf = useGLTF('/models/barista.glb')
   const { actions } = useAnimations(gltf.animations, groupRef)
+  const [isReady, setIsReady] = useState(false)
 
   // Enable shadows and strip export artifacts from the GLB
   useEffect(() => {
@@ -35,14 +36,14 @@ function CharacterModel({ visible }) {
     })
   }, [gltf.scene])
 
-  useCharacterAnimation(actions, scene)
+  useCharacterAnimation(actions, scene, () => setIsReady(true))
   useMouseLook(groupRef, scene === 'LANDING')
 
   return (
     // z=-1.0 places the character behind the counter back face (z=-0.7).
     // y=-1.5 sits their feet exactly on the floor plane behind the bar.
     // scale may need tuning depending on the GLB's native unit (try 0.01 for cm exports)
-    <group ref={groupRef} position={[0, -1.5, -1.0]} scale={[1, 1, 1]} visible={visible}>
+    <group ref={groupRef} position={[0, -1.5, -1.0]} scale={[1, 1, 1]} visible={visible && isReady}>
       <primitive object={gltf.scene} />
     </group>
   )

@@ -24,6 +24,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@babel/parser": "^7.29.2",
     "@tailwindcss/vite": "^4.0.0",
     "@types/three": "^0.169.0",
     "@vitejs/plugin-react": "^4.3.4",

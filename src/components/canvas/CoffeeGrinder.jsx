@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useGLTF } from '@react-three/drei'
 import ModelErrorBoundary from './ModelErrorBoundary'
 
@@ -33,6 +33,14 @@ function CoffeeGrinderPlaceholder({ position }) {
 // ── GLB model — native materials, no overrides ────────────────────────────────
 function CoffeeGrinderModel({ position }) {
   const grinderModel = useGLTF('/models/coffee_grinder.glb')
+  useEffect(() => {
+    grinderModel.scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow    = true
+        child.receiveShadow = true
+      }
+    })
+  }, [grinderModel.scene])
   return (
     <primitive
       object={grinderModel.scene}

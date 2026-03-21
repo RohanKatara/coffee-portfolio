@@ -4,7 +4,7 @@ import { Vector3 } from 'three'
 import { damp3 } from 'maath/easing'
 import { CAMERA_POSITIONS } from '../utils/cameraPositions'
 import useSceneStore from '../store/useSceneStore'
-import { getIsMobile, getIsTablet } from './useBreakpoint'
+import { getIsMobile, getIsTablet, getIsMobileLandscape } from './useBreakpoint'
 
 // Distance threshold below which the camera is considered converged.
 // Below this, AdaptiveDpr is allowed to recover DPR and isTransitioning clears.
@@ -49,19 +49,32 @@ const MAX_DELTA = 1 / 30
 const SETTLE_FRAMES = 3
 
 // FOV per breakpoint — wider on narrow screens to reclaim horizontal extent.
-const FOV_DESKTOP = 45
-const FOV_TABLET  = 52
-const FOV_MOBILE  = 62
+const FOV_DESKTOP          = 45
+const FOV_TABLET           = 52
+const FOV_MOBILE           = 65
+// Landscape phone: viewport is now wide so use a larger FOV_y to fill the
+// short height without pulling the camera back (which causes the floating look).
+const FOV_MOBILE_LANDSCAPE = 70
 
 function getResponsiveFov() {
-  if (getIsMobile())  return FOV_MOBILE
-  if (getIsTablet())  return FOV_TABLET
+  if (getIsMobileLandscape()) return FOV_MOBILE_LANDSCAPE
+  if (getIsMobile())          return FOV_MOBILE
+  if (getIsTablet())          return FOV_TABLET
   return FOV_DESKTOP
 }
 
 // Returns the correct LANDING / LANDING_INTRO / MACHINE position set
-// for the current viewport width — read synchronously, no React state needed.
+// for the current viewport — read synchronously, no React state needed.
+// Landscape check must come before mobile/tablet so a rotated phone
+// gets its dedicated close-in positions rather than the tablet fallback.
 function getLandingPositions() {
+  if (getIsMobileLandscape()) {
+    return {
+      intro:   CAMERA_POSITIONS.LANDING_INTRO_MOBILE_LANDSCAPE,
+      landing: CAMERA_POSITIONS.LANDING_MOBILE_LANDSCAPE,
+      machine: CAMERA_POSITIONS.MACHINE_MOBILE_LANDSCAPE,
+    }
+  }
   if (getIsMobile()) {
     return {
       intro:   CAMERA_POSITIONS.LANDING_INTRO_MOBILE,
@@ -97,7 +110,11 @@ export function useSceneTransition() {
     }
     applyFov()
     window.addEventListener('resize', applyFov)
-    return () => window.removeEventListener('resize', applyFov)
+    window.addEventListener('orientationchange', applyFov)
+    return () => {
+      window.removeEventListener('resize', applyFov)
+      window.removeEventListener('orientationchange', applyFov)
+    }
   }, [camera])
 
   // Snap to the breakpoint-correct LANDING_INTRO on first mount so damp3

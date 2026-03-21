@@ -5,24 +5,34 @@ import useSceneStore from '../../store/useSceneStore'
 
 /**
  * Full-screen loading overlay shown while assets are being fetched.
- * Transitions to LANDING when:
- *   a) useProgress reports 100% + inactive, OR
- *   b) a 2.5 s timeout elapses (handles the "no GLBs yet" placeholder case)
+ *
+ * Dismissal is gated on TWO conditions being simultaneously true:
+ *   1. useProgress reports progress === 100 (all assets resident in memory)
+ *   2. isGpuReady === true (ShaderPrecompiler has compiled the full scene
+ *      graph and confirmed 5 rendered frames — GPU command queue flushed)
+ *
+ * This means the 3D canvas is guaranteed to show its first frame the instant
+ * the loading screen finishes fading, with no black-screen gap.
+ *
+ * Fallback: if isGpuReady never fires (e.g. no GLBs present, placeholder mode)
+ * a 5 s hard timeout dismisses the screen anyway.
  */
 export default function LoadingScreen() {
-  const { progress, active } = useProgress()
-  const scene = useSceneStore((s) => s.scene)
-  const setScene = useSceneStore((s) => s.setScene)
-  const overlayRef = useRef(null)
-  const barRef = useRef(null)
+  const { progress } = useProgress()
+  const scene      = useSceneStore((s) => s.scene)
+  const setScene   = useSceneStore((s) => s.setScene)
+  const isGpuReady = useSceneStore((s) => s.isGpuReady)
+
+  const overlayRef      = useRef(null)
+  const barRef          = useRef(null)
   const hasTransitioned = useRef(false)
-  const maxProgress = useRef(0)
+  const maxProgress     = useRef(0)
 
-  // Clamp progress so it never goes backwards
+  // Clamp so the bar never animates backwards on cache hits
   const clampedProgress = Math.max(maxProgress.current, progress)
-  maxProgress.current = clampedProgress
+  maxProgress.current   = clampedProgress
 
-  // Animate progress bar
+  // Animate progress bar width
   useEffect(() => {
     if (barRef.current) {
       gsap.to(barRef.current, { width: `${clampedProgress}%`, duration: 0.3, ease: 'power1.out' })
@@ -31,10 +41,7 @@ export default function LoadingScreen() {
 
   const doTransition = () => {
     if (hasTransitioned.current) return
-    if (!overlayRef.current) {
-      setScene('LANDING')
-      return
-    }
+    if (!overlayRef.current) { setScene('LANDING'); return }
     hasTransitioned.current = true
     gsap.to(overlayRef.current, {
       opacity: 0,
@@ -43,16 +50,16 @@ export default function LoadingScreen() {
     })
   }
 
-  // Case A: real assets finished loading
+  // Primary gate: dismiss only when BOTH assets AND GPU are ready.
+  // isGpuReady is set by ShaderPrecompiler after progress===100 + 5 frames.
   useEffect(() => {
-    if (!active && progress === 100) {
-      setTimeout(doTransition, 400)
-    }
-  }, [active, progress]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (isGpuReady) doTransition()
+  }, [isGpuReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Case B: timeout fallback for placeholder mode (no GLBs present)
+  // Hard fallback: covers placeholder mode (no GLBs) where isGpuReady may
+  // fire quickly or useProgress may never reach 100.
   useEffect(() => {
-    const id = setTimeout(doTransition, 2500)
+    const id = setTimeout(doTransition, 5000)
     return () => clearTimeout(id)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
