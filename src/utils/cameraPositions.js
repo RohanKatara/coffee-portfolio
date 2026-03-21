@@ -1,3 +1,11 @@
+// How far the scene <group> is shifted on each breakpoint.
+// Camera targets must be offset by the same Y so they still aim at scene content.
+export const SCENE_Y_OFFSET = {
+  desktop: 0,
+  tablet:  0,
+  mobile:  -2,    // shifts entire cafe down 2 units; counter anchors lower screen
+}
+
 export const CAMERA_POSITIONS = {
   LOADING: {
     position: { x: 0, y: 0.9, z: 4.5 },
@@ -32,21 +40,20 @@ export const CAMERA_POSITIONS = {
   },
 
   // ── Mobile (<768 px, portrait) ────────────────────────────────────────────
-  // Portrait aspect ratio (~9:16) collapses horizontal FOV to ~28°.
-  // Three compensations:
-  //   1. Camera pulled well back (z=6.5) so the barista fits vertically.
-  //   2. Camera shifted left (x=−0.4) to re-centre on the barista (x=0, z=−1).
-  //      Desktop scene is tuned for 16:9 which looks ~0.4 units right of centre
-  //      on portrait — the negative X correction undoes that drift.
-  //   3. FOV widened to 62° (applied in useSceneTransition) to reclaim
-  //      horizontal extent without moving the camera further.
+  // Portrait 9:16 at FOV=62° shows ~94° vertically. Rather than fighting the
+  // camera maths, the entire scene <group> is shifted down by SCENE_Y_OFFSET.mobile
+  // (−2 units) in App.jsx. Camera targets are offset by the SAME −2 so the
+  // look direction still aims at the barista/counter inside the shifted scene.
+  // This naturally creates a steeper downward look angle from camera eye-height
+  // (y=0.85) to the shifted scene, placing the counter in the lower third of the
+  // tall portrait viewport and eliminating the empty-floor void.
   LANDING_INTRO_MOBILE: {
-    position: { x: -0.4, y: 0.85, z: 5.2 },
-    target:   { x: 0,   y: 0.15, z: -0.8 },
+    position: { x: -0.4, y: 0.85, z: 5.0 },
+    target:   { x: 0,   y: -1.8, z: -0.8 },   // desktop y=0.2 − 2 offset
   },
   LANDING_MOBILE: {
-    position: { x: -0.4, y: 0.9, z: 6.5 },
-    target:   { x: 0,   y: 0.2,  z: -0.8 },
+    position: { x: -0.4, y: 0.9,  z: 6.5 },
+    target:   { x: 0,   y: -1.8, z: -0.8 },
   },
 
   // Transient state: 4-waypoint cinematic arc from Zone A (x≈0) to Zone B (x≈12).
@@ -78,8 +85,10 @@ export const CAMERA_POSITIONS = {
     target:   { x: 12.2, y: -0.1, z: -0.2 },
   },
   MACHINE_MOBILE: {
-    position: { x: 10.0, y: 0.3, z: 5.5 },
-    target:   { x: 12.2, y: -0.1, z: -0.2 },
+    // Scene is shifted −2 units on mobile; target shifted by same amount.
+    // desktop target y=−0.1 → mobile target y=−2.1
+    position: { x: 10.0, y: 0.2,  z: 5.5 },
+    target:   { x: 12.2, y: -2.1, z: -0.2 },
   },
 
   // Push low and tight: camera looks down at the drip-tray / group-head area.

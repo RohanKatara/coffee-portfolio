@@ -31,7 +31,8 @@ import CRMModal from './components/ui/CRMModal'
 import ContentEngineModal from './components/ui/ContentEngineModal'
 
 import useSceneStore from './store/useSceneStore'
-import { CAMERA_POSITIONS } from './utils/cameraPositions'
+import { CAMERA_POSITIONS, SCENE_Y_OFFSET } from './utils/cameraPositions'
+import { useBreakpoint } from './hooks/useBreakpoint'
 // ── TabletStand ───────────────────────────────────────────────────────────────
 function TabletStand(props) {
   const { scene } = useGLTF('/models/tablet_stand.glb')
@@ -342,6 +343,16 @@ function AnimatedEffects() {
   )
 }
 
+// Shifts the entire 3D scene down on mobile so the coffee counter anchors
+// the lower portion of the tall portrait viewport instead of floating near
+// the top. The camera targets in cameraPositions.js are offset by the same
+// amount so the look direction continues to aim at the correct scene content.
+function SceneOffsetGroup({ children }) {
+  const { isMobile } = useBreakpoint()
+  const y = isMobile ? SCENE_Y_OFFSET.mobile : 0
+  return <group position={[0, y, 0]}>{children}</group>
+}
+
 export default function App() {
   const [mocktalkOpen, setMocktalkOpen] = useState(false)
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
@@ -409,6 +420,12 @@ export default function App() {
 
           {/* Camera — useFrame-driven state transitions */}
           <SceneCamera />
+
+          {/* All scene geometry wrapped in a responsive Y-offset group.
+              On mobile, shifts everything down 2 units so the counter
+              anchors the lower screen instead of floating at the top.
+              Camera targets in cameraPositions.js are offset to match. */}
+          <SceneOffsetGroup>
 
           {/* Persistent lighting + floor + walls + counter */}
           <CafeEnvironment />
@@ -514,10 +531,12 @@ export default function App() {
           <Center position={[-4.50, -1.06, -1.36]}>
             <TreePot scale={1} />
           </Center>
-        </Suspense>
 
-        {/* Particle pour — conditionally mounted, no WebGL context risk */}
-        <PouringScene />
+          {/* Particle pour — conditionally mounted, no WebGL context risk */}
+          <PouringScene />
+
+          </SceneOffsetGroup>
+        </Suspense>
 
         {/* Post-processing — bloom ramps during the cinematic transition */}
         <AnimatedEffects />
