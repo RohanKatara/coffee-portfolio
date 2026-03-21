@@ -41,28 +41,33 @@ export const CAMERA_POSITIONS = {
   },
 
   // ── Mobile (<768 px, portrait) ────────────────────────────────────────────
-  // First-person "standing at the counter" framing.
+  // "Standing at the counter" — full-width first-person framing.
   //
-  // Ground truth from CafeEnvironment.jsx:
-  //   floor y = -1.5 · counter top y = -0.53 · counter front face z ≈ 0.36
-  //   character z ≈ 0 · barista chest y ≈ 0 · barista head y ≈ 0.5–0.7
+  // Two constraints must be satisfied simultaneously:
+  //   A) Neon sign (x=1.32, z=-2.55, ~1.8 units wide) fits in portrait FOV_x=37.7°
+  //      → at camera x=0, sign right edge ~x=2.2: atan2(2.2, z+2.55) < 18.87°
+  //      → requires z + 2.55 > 6.45  →  z > 3.9
   //
-  // Formula for "counter fills bottom of frame" with horizontal look, FOV_y=62°:
-  //   camZ − 0.36 = (camY + 0.53) / tan(31°)  →  camZ = 0.36 + (camY+0.53)/0.6009
-  //   With camY=0.5: camZ = 0.36 + 1.714 = 2.07 (use 2.5 for slight head room)
+  //   B) Floor (y=-1.5) falls BELOW the bottom of frame (hidden behind counter)
+  //      → floor angle from y=0.9 horizontal: atan2(-2.4, z-0.36) < -31°
+  //      → requires z - 0.36 < 2.4/tan(31°) = 3.99  →  z < 4.35
   //
-  // Result at camY=0.5, camZ=2.5:
-  //   floor (y=-1.5) is BELOW the bottom of frame — completely hidden ✓
-  //   counter front fills the bottom strip of screen ✓
-  //   barista chest (y≈0) appears at 68% from top, head (y≈0.5) at ~50% ✓
-  //   look direction is horizontal → no miniature/tilted feel ✓
+  // z = 4.0 satisfies BOTH: floor angle = -33.4° (hidden), sign fits in FOV.
+  // No scene group Y-offset needed — the floor hides itself at this geometry.
+  //
+  // Result at y=0.9, z=4.0, horizontal look:
+  //   floor angle -33.4° → below ±31° half-FOV → completely hidden ✓
+  //   counter top (y=-0.53) at 84% from top → counter fills bottom 16% ✓
+  //   neon sign right edge (x≈2.2) at 18.6° → just within FOV_x/2=18.87° ✓
+  //   barista chest (y≈0) at 69% from top, head (y≈0.5) at 58% from top ✓
+  //   horizontal look → no tilt, no miniature feel ✓
   LANDING_INTRO_MOBILE: {
-    position: { x: 0, y: 0.5, z: 2.0 },   // slightly closer for cinematic pull-back start
-    target:   { x: 0, y: 0.5, z: -0.3 },  // horizontal look at barista
+    position: { x: 0.2, y: 0.9, z: 3.5 },   // cinematic intro start (slightly closer)
+    target:   { x: 0.2, y: 0.9, z: -0.5 },  // horizontal look
   },
   LANDING_MOBILE: {
-    position: { x: 0, y: 0.5, z: 2.5 },   // resting position; counter fills bottom
-    target:   { x: 0, y: 0.5, z: -0.3 },
+    position: { x: 0, y: 0.9, z: 4.0 },     // resting — width + floor both solved at this Z
+    target:   { x: 0, y: 0.9, z: -0.5 },
   },
 
   // Transient state: 4-waypoint cinematic arc from Zone A (x≈0) to Zone B (x≈12).
@@ -94,12 +99,11 @@ export const CAMERA_POSITIONS = {
     target:   { x: 12.2, y: -0.1, z: -0.2 },
   },
   MACHINE_MOBILE: {
-    // Same counter-fills-bottom logic as Zone A.
-    // Camera at x=11.5 (directly in front of machine at x=12) so the
-    // horizontal angle to target (x=12.2) is only ~14° — well within the
-    // 18.85° half-FOV_x on portrait, keeping the machine centred in frame.
-    position: { x: 11.5, y: 0.5, z: 2.5 },
-    target:   { x: 12.2, y: 0.5, z: -0.2 },
+    // Same Z=4.0, Y=0.9 logic as Zone A — floor hidden, counter fills bottom.
+    // Camera at x=11.0 so machine (x=12) is 15.9° to the right, well within
+    // the 18.87° half-FOV_x, keeping the machine face centred in portrait view.
+    position: { x: 11.0, y: 0.9, z: 4.0 },
+    target:   { x: 12.2, y: 0.9, z: -0.2 },
   },
 
   // Push low and tight: camera looks down at the drip-tray / group-head area.
