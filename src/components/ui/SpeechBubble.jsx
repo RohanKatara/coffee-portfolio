@@ -43,10 +43,10 @@ export default function SpeechBubble() {
       <div className="float-ui">
 
         {/* Glassmorphism card — dark tinted so text pops against any 3D bg */}
-        <div style={{
+        <div data-speech-card style={{
           background: 'rgba(10, 5, 2, 0.52)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           border: '1px solid rgba(200, 127, 76, 0.22)',
           borderRadius: '18px',
           padding: '22px 32px 20px',

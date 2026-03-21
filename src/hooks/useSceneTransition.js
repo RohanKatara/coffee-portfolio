@@ -19,8 +19,10 @@ export const _lookAt = new Vector3()
 export const cameraLock = { active: false }
 
 // Lambda controls damp speed (exponential decay).
-// λ = 2.5  →  ~99 % arrival in ≈ 1.85 s at 60 fps — heavier cinematic glide.
-const CAM_LAMBDA = 2.5
+// λ = 3.5  →  ~99 % arrival in ≈ 1.32 s at 60 fps — snappy but still smooth.
+// Raised from 2.5 to reduce the long "creeping to final position" tail where
+// frame drops are most perceptible because the camera barely moves each frame.
+const CAM_LAMBDA = 3.5
 
 // Delta cap: never simulate more than one 30fps frame worth of movement in a
 // single tick. Without this, a GC pause or SpeechBubble backdrop-filter paint
@@ -45,7 +47,7 @@ const MAX_DELTA = 1 / 30
 // Frames the camera must stay within CONVERGE_THRESHOLD before we declare
 // it "arrived". This stops setTransitioning(false) landing on the same frame
 // as peak Zone B render cost — all deferred work fires on calmer frames after.
-const SETTLE_FRAMES = 6
+const SETTLE_FRAMES = 3
 
 export function useSceneTransition() {
   const camera      = useThree((s) => s.camera)

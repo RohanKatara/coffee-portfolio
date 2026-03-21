@@ -322,19 +322,22 @@ function AnimatedEffects() {
 
       {/* Bloom — high threshold so only the neon sign and pendant emissives
           glow; the rest of the scene is unaffected                          */}
+      {/* mipmapBlur removed — it generates up to 11 mip passes; the simpler
+          Kawase blur (default without mipmapBlur) is visually identical here
+          because our luminanceThreshold=0.85 limits bloom to bright emissives */}
       <Bloom
         ref={bloomRef}
         luminanceThreshold={0.85}
         luminanceSmoothing={0.1}
         intensity={1.2}
-        mipmapBlur
+        levels={4}
       />
 
-      {/* Vignette — darkens periphery, draws the eye to centre stage */}
-      <Vignette offset={0.5} darkness={0.5} />
-
-      {/* Colour grade */}
-      <BrightnessContrast brightness={-0.05} contrast={0.12} />
+      {/* Vignette + BrightnessContrast — disabled during camera pan.
+          Both are full-screen GPU passes. The camera is moving fast during
+          transitions so these subtle effects are invisible anyway. */}
+      <Vignette offset={0.5} darkness={0.5} enabled={!isTransitioning} />
+      <BrightnessContrast brightness={-0.05} contrast={0.12} enabled={!isTransitioning} />
     </EffectComposer>
   )
 }
@@ -370,7 +373,7 @@ export default function App() {
         // freeing the CPU thread for smooth DOM scrolling in the modal.
         // "always" resumes immediately when the modal closes.
         frameloop={anyModalOpen ? 'never' : 'always'}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0.5, 5] }}
         shadows
         gl={{ antialias: false, alpha: false }}

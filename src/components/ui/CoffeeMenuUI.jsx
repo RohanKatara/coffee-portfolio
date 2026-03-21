@@ -1,29 +1,46 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import useSceneStore from '../../store/useSceneStore'
 import projects from '../../data/projects'
+
+// Module-level flag so it survives unmounts caused by isTransitioning toggling.
+// First-ever MACHINE arrival → 0.8 s delay; every return from CUP → 0.4 s.
+let hasEnteredMachine = false
 
 /**
  * Zone B overlay: "Today's Specials" project list.
  * Styled from the Stitch-generated spec — dark espresso glassmorphism,
  * warm amber accents, Noto Serif typography, chalk-dash divider.
  *
+ * Kept out of the DOM while isTransitioning so the backdrop-filter never
+ * composites against a moving canvas (expensive even at opacity:0).
  * Fades in 0.8 s after first MACHINE arrival, 0.4 s on return from CUP.
  * Clicking a project row fades the panel out then calls startPour().
  */
 export default function CoffeeMenuUI() {
-  const scene     = useSceneStore((s) => s.scene)
-  const isPouring = useSceneStore((s) => s.isPouring)
-  const startPour = useSceneStore((s) => s.startPour)
+  const scene           = useSceneStore((s) => s.scene)
+  const isPouring       = useSceneStore((s) => s.isPouring)
+  const isTransitioning = useSceneStore((s) => s.isTransitioning)
+  const startPour       = useSceneStore((s) => s.startPour)
   const panelRef  = useRef(null)
-  const enteredRef = useRef(false)
+  // Delay mounting by 200 ms after the transition ends so the backdrop-filter
+  // compositor layer never lands on the same frame as the camera's arrival.
+  const [mountReady, setMountReady] = useState(false)
+
+  useEffect(() => {
+    if (!isTransitioning && scene === 'MACHINE' && !isPouring) {
+      const t = setTimeout(() => setMountReady(true), 200)
+      return () => clearTimeout(t)
+    }
+    setMountReady(false)
+  }, [isTransitioning, scene, isPouring])
 
   useEffect(() => {
     if (!panelRef.current) return
 
     if (scene === 'MACHINE') {
-      const delay = enteredRef.current ? 0.4 : 0.8
-      enteredRef.current = true
+      const delay = hasEnteredMachine ? 0.4 : 0.8
+      hasEnteredMachine = true
       gsap.fromTo(
         panelRef.current,
         { opacity: 0, y: 28 },
@@ -46,10 +63,9 @@ export default function CoffeeMenuUI() {
     })
   }
 
-  // Unmount as soon as a pour is triggered — the GSAP exit from handleProjectClick
-  // already ran (onComplete calls startPour), so opacity is already 0 at this point.
-  // For direct 3D-button clicks that bypass the menu, unmounting instantly is fine.
-  if (isPouring || scene !== 'MACHINE') return null
+  // Unmount during pan and for 200 ms after arrival so the backdrop-filter
+  // compositor layer never lands on the same frame as the camera's arrival.
+  if (!mountReady) return null
 
   return (
     <div
@@ -70,8 +86,8 @@ export default function CoffeeMenuUI() {
         border: '1px solid rgba(200, 127, 76, 0.2)',
         borderRadius: '8px',
         padding: '28px 36px 24px',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         boxShadow: [
           '0 0 40px rgba(200,127,76,0.10)',
           '0 8px 48px rgba(0,0,0,0.70)',

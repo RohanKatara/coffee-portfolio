@@ -535,7 +535,7 @@ export default function CafeEnvironment() {
         position={[0, -1.49, 0]}
         opacity={0.9}
         scale={10}
-        blur={3.5}
+        blur={2.0}
         far={4}
         frames={1}
         color="#0a0402"
