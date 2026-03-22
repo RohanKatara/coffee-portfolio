@@ -1,7 +1,9 @@
-import { useRef, useEffect, useMemo, Suspense } from 'react'
+import { useRef, useEffect, useMemo, Suspense, useLayoutEffect } from 'react'
 import { ContactShadows, Environment, useGLTF, Center } from '@react-three/drei'
-import { Box3, MeshStandardMaterial, Color, BoxGeometry, Matrix4 } from 'three'
+import { Box3, MeshStandardMaterial, Color, BoxGeometry, Matrix4, LinearFilter, LinearMipMapLinearFilter } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
+import { useThree } from '@react-three/fiber'
+import { getIsMobile } from '../../hooks/useBreakpoint'
 import ShelfProps from './ShelfProps'
 
 useGLTF.preload('/models/modern_floating_wooden_shelf.glb')
@@ -191,7 +193,43 @@ function BistroChair({ x, z, ry = 0 }) {
   )
 }
 
+// ── Mobile texture optimiser ──────────────────────────────────────────────────
+// Runs once after the scene graph is committed. On mobile: strips mipmaps from
+// every loaded texture (saves ~33 % VRAM per texture) and drops anisotropy to 1.
+// Mipmaps are unnecessary on mobile because the scene is viewed at a fixed
+// angle and the textures are never seen at steep grazing angles.
+function MobileTextureOptimiser() {
+  const { scene } = useThree()
+
+  useLayoutEffect(() => {
+    if (!getIsMobile()) return
+    const seen = new Set()
+    scene.traverse((node) => {
+      if (!node.isMesh || !node.material) return
+      const mats = Array.isArray(node.material) ? node.material : [node.material]
+      mats.forEach((mat) => {
+        const texSlots = [
+          'map', 'normalMap', 'roughnessMap', 'metalnessMap',
+          'emissiveMap', 'aoMap', 'envMap',
+        ]
+        texSlots.forEach((slot) => {
+          const tex = mat[slot]
+          if (!tex || seen.has(tex.uuid)) return
+          seen.add(tex.uuid)
+          tex.generateMipmaps = false
+          tex.minFilter       = LinearFilter
+          tex.anisotropy      = 1
+          tex.needsUpdate     = true
+        })
+      })
+    })
+  }, [scene])
+
+  return null
+}
+
 export default function CafeEnvironment() {
+  const isMobile = getIsMobile()
   // ── Merged geometry — computed once, never re-created ─────────────────────
   // Each group merges all meshes that share the same material, collapsing
   // N separate draw calls into 1. World-space transforms are baked into the
@@ -321,7 +359,7 @@ export default function CafeEnvironment() {
         distance={13}
         decay={1.3}
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
         shadow-camera-near={0.5}
         shadow-camera-far={13}
         shadow-bias={-0.0003}
@@ -405,7 +443,7 @@ export default function CafeEnvironment() {
         distance={12}
         decay={1.3}
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
         shadow-bias={-0.0003}
       />
 
@@ -540,7 +578,17 @@ export default function CafeEnvironment() {
         frames={1}
         color="#0a0402"
       />
-      <Environment preset="city" background={false} environmentIntensity={1.5} />
+      {/* IBL — skipped on mobile to save the HDR VRAM and avoid keeping the
+          parent Suspense in fallback state if the download stalls. The rich
+          explicit rig (spotlights + directional + ambient + point lights) is
+          fully sufficient for mobile visibility.                            */}
+      {!isMobile && (
+        <Environment preset="city" background={false} environmentIntensity={1.5} />
+      )}
+
+      {/* Strips mipmaps + drops anisotropy on every loaded texture (mobile only).
+          Must be inside Canvas; reads scene from useThree().                */}
+      <MobileTextureOptimiser />
     </>
   )
 }

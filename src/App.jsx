@@ -508,9 +508,12 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Image-based lighting — city preset gives glossy surfaces
-              realistic reflections without blowing out the warm tone    */}
-          <Environment preset="city" environmentIntensity={0.5} />
+          {/* IBL — skipped on mobile: the HDR download sits inside this
+              Suspense boundary and, if it stalls or fails, keeps the
+              entire scene in fallback={null} (blank screen). Mobile has
+              rich explicit lighting (spotlights + directional + ambient)
+              so IBL is a nice-to-have, not a requirement.               */}
+          {!isMobile && <Environment preset="city" environmentIntensity={0.5} />}
 
           {/* Warm ambient base — cream-white to unify the cafe palette */}
           <ambientLight intensity={0.4} color="#fff0dd" />
