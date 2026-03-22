@@ -10,14 +10,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- Preload the Draco WASM decoder from local /draco/ (no CDN dependency) -->
+    <!-- Preload the Draco WASM decoder from local /draco/ (no CDN dependency).
+         No crossorigin: DRACOLoader fetches WASM via same-origin fetch() inside
+         a Worker — adding crossorigin here creates a CORS cache-key mismatch on
+         iOS Safari and prevents the preloaded response from being reused.       -->
     <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="script" />
-    <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossorigin />
+    <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" />
 
-    <!-- Preload the hero GLBs — largest assets, start fetching before JS parses -->
-    <link rel="preload" href="/models/barista.glb" as="fetch" crossorigin />
-    <link rel="preload" href="/models/espresso_machine.glb" as="fetch" crossorigin />
-    <link rel="preload" href="/models/coffee_grinder.glb" as="fetch" crossorigin />
+    <!-- GLB preloads removed: Three.js FileLoader uses XHR, not the Fetch API.
+         <link rel="preload" as="fetch"> entries only warm the Fetch-API cache,
+         which XHR cannot read. On iOS Safari this causes a CORS cache-key mismatch
+         that makes the preloaded response unusable, then Three.js's XHR fires a
+         SECOND request without CORS headers — but the preloaded response is already
+         held in the CORS cache as an opaque entry, so Safari rejects the XHR response.
+         Removing the preloads lets XHR fetch the models cleanly without interference.
+         useGLTF.preload() in the component files still kicks off XHR downloads as
+         soon as the JS bundle executes. -->
   </head>
   <body>
     <div id="root"></div>

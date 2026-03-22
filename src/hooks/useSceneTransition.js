@@ -19,9 +19,11 @@ export const _lookAt = new Vector3()
 // damp3 loop doesn't fight the gizmo for camera ownership.
 export const cameraLock = { active: false }
 
-// Lambda controls damp speed (exponential decay).
-// λ = 6  →  ~99 % arrival in ≈ 0.77 s at 60 fps (faster on mobile low-fps).
-const CAM_LAMBDA = 6
+// smoothTime for maath's spring-damper damp3.
+// smoothTime = 0.3 → omega = 2/0.3 ≈ 6.67 → ~99 % arrival in ≈ 0.77 s at 60 fps.
+// NOTE: damp3 uses smoothTime (spring param), NOT an exponential lambda.
+// The old value of 6 gave omega = 2/6 = 0.33, which took ~17 s to settle.
+const CAM_LAMBDA = 0.3
 
 // Delta cap: never simulate more than one 30fps frame worth of movement in a
 // single tick. Without this, a GC pause or SpeechBubble backdrop-filter paint

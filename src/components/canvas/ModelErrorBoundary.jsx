@@ -14,11 +14,9 @@ export default class ModelErrorBoundary extends Component {
     return { hasError: true }
   }
 
-  componentDidCatch(error) {
-    // Only swallow loading errors; re-throw programming errors in dev
-    if (import.meta.env.DEV) {
-      console.warn('[ModelErrorBoundary] Model failed to load:', error.message)
-    }
+  componentDidCatch(error, info) {
+    // Always log so mobile production failures are visible in console
+    console.error('[ModelErrorBoundary] Model failed to load:', error.message, info?.componentStack ?? '')
   }
 
   render() {
