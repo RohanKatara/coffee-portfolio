@@ -48,7 +48,14 @@ export function useCharacterAnimation(actions, scene, onReady) {
   }
 
   useEffect(() => {
-    if (!actions || Object.keys(actions).length === 0) return
+    if (!actions || Object.keys(actions).length === 0) {
+      // No animation clips available (GLB exported without animations, or
+      // useAnimations returned empty on this frame). Reveal the model anyway
+      // so the character isn't permanently invisible — better to see a
+      // static pose than nothing at all.
+      onReady?.()
+      return
+    }
     if (hasStarted.current) return
     hasStarted.current = true
 
