@@ -535,11 +535,14 @@ export default function CafeEnvironment() {
       {/*   the bbox-snap in prepareShelf handles the exact offset.         */}
       {/*   Tune SHELF_SCALE (top of file) if shelves appear too big/small. */}
 
-      {/* Shelf 1 — bottom at y ≈ 0.18 → surface near y ≈ 0.22 */}
-      <WoodenShelfInstance x={-2.1} y={0.18} />
-
-      {/* Shelf 2 — bottom at y ≈ 1.74 → surface near y ≈ 1.78 */}
-      <WoodenShelfInstance x={-2.1} y={1.74} />
+      {/* Each shelf in its own Suspense — a missing GLB can't stall the
+          parent CafeEnvironment Suspense and hide the whole environment. */}
+      <Suspense fallback={null}>
+        <WoodenShelfInstance x={-2.1} y={0.18} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <WoodenShelfInstance x={-2.1} y={1.74} />
+      </Suspense>
 
       {/* ── SHELF PROPS (GLB) ───────────────────────────────────────────── */}
       {/*   coffee.glb · coffee_cupp.glb · coffee_cup.glb                  */}

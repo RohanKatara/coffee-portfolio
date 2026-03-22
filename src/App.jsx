@@ -509,164 +509,141 @@ export default function App() {
           }, false)
         }}
       >
-        <Suspense fallback={null}>
-          {/* IBL — skipped on mobile: the HDR download sits inside this
-              Suspense boundary and, if it stalls or fails, keeps the
-              entire scene in fallback={null} (blank screen). Mobile has
-              rich explicit lighting (spotlights + directional + ambient)
-              so IBL is a nice-to-have, not a requirement.               */}
-          {!isMobile && <Environment preset="city" environmentIntensity={0.5} />}
+        {/* ── Lights + camera: never suspend, mount immediately ──────────── */}
+        <ambientLight intensity={0.4} color="#fff0dd" />
+        {/* Mobile ambient fallback: MeshStandardMaterial renders black without
+            IBL or sufficient ambient. intensity=2.5 lifts all surfaces to their
+            base albedo so the scene is visible even without an environment map. */}
+        {isMobile && <ambientLight intensity={2.5} color="#fff8f0" />}
 
-          {/* Warm ambient base — cream-white to unify the cafe palette */}
-          <ambientLight intensity={0.4} color="#fff0dd" />
+        <directionalLight
+          ref={(el) => { dirLightRef.current = el }}
+          position={[5, 8, 5]}
+          intensity={1.5}
+          color="#ffce8a"
+          castShadow
+          shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
+        />
 
-          {/* ── DEBUG / Mobile lighting fallback ─────────────────────────
-              On mobile, IBL (Environment) is skipped to prevent the HDR
-              download from stalling the Suspense. MeshStandardMaterial
-              needs either IBL or strong ambient light to show any colour
-              at all — without it every PBR surface renders black and
-              blends into the dark canvas background.
-              intensity={2.5} lifts all surfaces to their base albedo.   */}
-          {isMobile && <ambientLight intensity={2.5} color="#fff8f0" />}
+        <SceneCamera />
+        <PerformanceManager />
 
-          {/* Main key light — warm window sunlight from upper-right      */}
-          <directionalLight
-            ref={(el) => { dirLightRef.current = el }}
-            position={[5, 8, 5]}
-            intensity={1.5}
-            color="#ffce8a"
-            castShadow
-            shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
-          />
+        {/* ── IBL in its own Suspense: HDR download can never block the scene */}
+        {!isMobile && (
+          <Suspense fallback={null}>
+            <Environment preset="city" environmentIntensity={0.5} />
+          </Suspense>
+        )}
 
-          {/* Freeze shadow maps after initial bake — no per-frame
-              shadow recalculation during the camera pan             */}
-          <BakeShadows />
+        <SceneOffsetGroup>
+          {/* ── Core scene: walls/floor/counter + character + machines ───────
+              BakeShadows lives here so it fires after geometry is loaded.
+              Each sub-component (Character, EspressoMachine, etc.) already
+              has its own inner Suspense+ErrorBoundary, so a single missing
+              GLB only hides that one object, not this whole boundary.       */}
+          <Suspense fallback={null}>
+            <CafeEnvironment />
+            <LandingScene />
+            <MachineScene />
+            <CupScene />
+            <ProjectButtons3D
+              onMocktalkClick={() => setMocktalkOpen(true)}
+              onKrishnaClick={() => setKrishnaOpen(true)}
+              onCrmClick={() => setCrmOpen(true)}
+              onContentClick={() => setContentOpen(true)}
+            />
+            <PouringScene />
+            <BakeShadows />
+          </Suspense>
 
-          {/* Camera — useFrame-driven state transitions */}
-          <SceneCamera />
+          {/* ── Decorative props: each isolated ──────────────────────────────
+              One Suspense per model so a single stalled/missing GLB (slow
+              mobile network, 404) cannot hold the entire scene hostage.     */}
 
-          {/* DPR + shadow governor: drops to 0.5 DPR and disables shadow
-              sampling the instant the camera starts moving, restores both
-              the moment it lands. Zero React re-renders — pure Zustand sub. */}
-          <PerformanceManager />
-
-          {/* All scene geometry wrapped in a responsive Y-offset group.
-              On mobile, shifts everything down 2 units so the counter
-              anchors the lower screen instead of floating at the top.
-              Camera targets in cameraPositions.js are offset to match. */}
-          <SceneOffsetGroup>
-
-          {/* Persistent lighting + floor + walls + counter */}
-          <CafeEnvironment />
-
-          {/* Scene groups (all stay mounted) */}
-          <LandingScene />
-          <MachineScene />
-          <CupScene />
-
-          {/* Diegetic dial buttons — reveal on MACHINE state entry */}
-          <ProjectButtons3D
-            onMocktalkClick={() => setMocktalkOpen(true)}
-            onKrishnaClick={() => setKrishnaOpen(true)}
-            onCrmClick={() => setCrmOpen(true)}
-            onContentClick={() => setContentOpen(true)}
-          />
-
-          {/* TabletStand — POS system on the counter, right of barista */}
-          {/* TabletStand — floor kiosk, front-right customer area */}
-          <Center position={[2.2, -0.4, 1.5]}>
-            <TabletStand scale={0.95} rotation={[0, Math.PI - 0.7, 0]} />
-          </Center>
-
-          {/* BonsaiTree */}
-          <Center position={[-2.7, -0.61, 0.6]}>
-            <BonsaiTree scale={1} />
-          </Center>
-
-          {/* Welcome Sign (Zone A) */}
-          <group position={[-2.16, -1.48, 0.26]}>
-            <Center>
-              <WelcomeSign scale={1.3} rotation={[0, Math.PI / 2, 0]} />
+          <Suspense fallback={null}>
+            <Center position={[2.2, -0.4, 1.5]}>
+              <TabletStand scale={0.95} rotation={[0, Math.PI - 0.7, 0]} />
             </Center>
-          </group>
+          </Suspense>
 
+          <Suspense fallback={null}>
+            <Center position={[-2.7, -0.61, 0.6]}>
+              <BonsaiTree scale={1} />
+            </Center>
+          </Suspense>
 
-          {/* NeonSign + warm spill light — the point light mimics the
-               orange glow that a real neon tube casts onto nearby surfaces.
-               Placed 0.4 units in front of the sign face (z=0.4) so the
-               light hits the counter top and character, not the wall.      */}
-          <Center position={[1.32, 0.84, -2.55]}>
-            <NeonSign scale={0.55} />
-          </Center>
+          <Suspense fallback={null}>
+            <group position={[-2.16, -1.48, 0.26]}>
+              <Center>
+                <WelcomeSign scale={1.3} rotation={[0, Math.PI / 2, 0]} />
+              </Center>
+            </group>
+          </Suspense>
+
+          {/* NeonSign gets its own Suspense; the point-light spill doesn't
+              suspend so it mounts immediately alongside the Suspense.       */}
+          <Suspense fallback={null}>
+            <Center position={[1.32, 0.84, -2.55]}>
+              <NeonSign scale={0.55} />
+            </Center>
+          </Suspense>
           <pointLight
-            position={[1.32, 0.84,-2.90]}
+            position={[1.32, 0.84, -2.90]}
             intensity={2.2}
             color="#ff6520"
             distance={3.5}
             decay={2}
           />
 
-          {/* BarStool — Zone B */}
-          <group position={[14.04, -1.0, 0.69]}>
-            <Center>
-              <BarStool scale={1.4} />
+          <Suspense fallback={null}>
+            <group position={[14.04, -1.0, 0.69]}>
+              <Center><BarStool scale={1.4} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[14.9, -1.0, 0.69]}>
+              <Center><BarStool scale={1.4} rotation={[0, -0.4, 0]} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[17.95, -0.7, -1.1]}>
+              <Center><Bookcase scale={1} rotation={[0, (20 * Math.PI) / 180, 0]} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[13.01, -0.40, -0.10]}>
+              <Center><BlackMug scale={1} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[12.98, -0.35, 0.29]}>
+              <Center><CeramicMug scale={0.1} rotation={[0, 0.6, 0]} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[12.55, -0.55, -0.05]}>
+              <Center><CoffeeModel scale={0.003} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <group position={[12.04, 0.94, -0.48]}>
+              <Center><CoffeeMenu scale={1} /></Center>
+            </group>
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <Center position={[-4.50, -1.06, -1.36]}>
+              <TreePot scale={1} />
             </Center>
-          </group>
+          </Suspense>
 
-          {/* BarStool 2 — Zone B */}
-          <group position={[14.9, -1.0, 0.69]}>
-            <Center>
-              <BarStool scale={1.4} rotation={[0, -0.4, 0]} />
-            </Center>
-          </group>
-
-          {/* Bookcase — Zone B */}
-          <group position={[17.95, -0.7, -1.1]}>
-            <Center>
-              <Bookcase scale={1} rotation={[0, (20 * Math.PI) / 180, 0]} />
-            </Center>
-          </group>
-
-          {/* BlackMug — Zone B */}
-          <group position={[13.01, -0.40, -0.10]}>
-            <Center>
-              <BlackMug scale={1} />
-            </Center>
-          </group>
-
-          {/* Second Mug */}
-          <group position={[12.98, -0.35, 0.29]}>
-            <Center>
-              <CeramicMug scale={0.1} rotation={[0, 0.6, 0]} />
-            </Center>
-          </group>
-
-
-          {/* Coffee Item */}
-          <group position={[12.55, -0.55, -0.05]}>
-            <Center>
-              <CoffeeModel scale={0.003} />
-            </Center>
-          </group>
-
-          {/* Coffee Menu */}
-          <group position={[12.04, 0.94, -0.48]}>
-            <Center>
-              <CoffeeMenu scale={1} />
-            </Center>
-          </group>
-
-          {/* TreePot — cafe floor plant */}
-          <Center position={[-4.50, -1.06, -1.36]}>
-            <TreePot scale={1} />
-          </Center>
-
-          {/* Particle pour — conditionally mounted, no WebGL context risk */}
-          <PouringScene />
-
-          </SceneOffsetGroup>
-        </Suspense>
+        </SceneOffsetGroup>
 
         {/* ── DEBUG: Red-box sanity test ─────────────────────────────────
             Placed OUTSIDE Suspense so it renders even while Suspense is
