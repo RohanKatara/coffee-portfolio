@@ -268,65 +268,72 @@ function ShaderPrecompiler() {
     // Phase 1: wait until all assets are loaded
     if (progressRef.current < 100) return
 
-    // Phase 2: compile shaders from BOTH camera positions, in BOTH lighting
-    // configurations (shadow on / shadow off), so every variant the camera
-    // transition will ever encounter is pre-warmed. Four compile passes total:
-    //   A-shadow, B-shadow, A-no-shadow, B-no-shadow
-    // Without all four, toggling dirLight.castShadow at runtime triggers an
-    // on-demand shader recompile that appears as a stutter mid-pan.
+    // Phase 2 — desktop only: compile shaders from BOTH camera positions in
+    // BOTH shadow variants so every permutation the pan will hit is pre-warmed.
+    //
+    // On mobile we skip this entirely. gl.compile() + ctx.finish() × 4 each
+    // block the JS thread for 100–500 ms — on iOS/WebKit the combined stall
+    // (potentially 2 s) triggers the browser's unresponsive-script guard and
+    // forces a WebGL context loss, leaving the canvas rendering only the
+    // clear colour with no geometry. The shader-stutter trade-off during the
+    // Zone A→B pan is acceptable on mobile; a blank scene is not.
     if (!compiledRef.current) {
       compiledRef.current = true
 
-      const savedPos  = camera.position.clone()
-      const savedQuat = camera.quaternion.clone()
-      const mb        = CAMERA_POSITIONS.MACHINE
+      if (!getIsMobile()) {
+        const savedPos  = camera.position.clone()
+        const savedQuat = camera.quaternion.clone()
+        const mb        = CAMERA_POSITIONS.MACHINE
+        const ctx       = gl.getContext()
 
-      // gl.getContext().finish() is the WebGL GPU fence: it blocks the JS
-      // thread until the GPU has truly finished processing all pending commands,
-      // including shader program compilation. Without this, gl.compile() only
-      // *submits* compilation work — the GPU may still be compiling for another
-      // 1-3 seconds, causing a black-screen stall when the canvas first renders.
-      const ctx = gl.getContext()
+        try {
+          // ── Shadow-ON variants (normal scene state) ──────────────────
+          gl.compile(scene, camera)
+          ctx.finish()                                                  // A-shadow ✓
 
-      // ── Shadow-ON variants (normal scene state) ────────────────────────
-      gl.compile(scene, camera)
-      ctx.finish()                                                      // A-shadow ✓
+          camera.position.set(mb.position.x, mb.position.y, mb.position.z)
+          camera.lookAt(mb.target.x, mb.target.y, mb.target.z)
+          camera.updateMatrixWorld()
+          gl.compile(scene, camera)
+          ctx.finish()                                                  // B-shadow ✓
 
-      camera.position.set(mb.position.x, mb.position.y, mb.position.z)
-      camera.lookAt(mb.target.x, mb.target.y, mb.target.z)
-      camera.updateMatrixWorld()
-      gl.compile(scene, camera)
-      ctx.finish()                                                      // B-shadow ✓
+          // ── Shadow-OFF variants (used during the camera pan) ──────────
+          if (dirLightRef.current) {
+            dirLightRef.current.castShadow = false
 
-      // ── Shadow-OFF variants (used during the camera pan) ──────────────
-      if (dirLightRef.current) {
-        dirLightRef.current.castShadow = false
+            gl.compile(scene, camera)
+            ctx.finish()                                                // B-no-shadow ✓
 
-        gl.compile(scene, camera)
-        ctx.finish()                                                    // B-no-shadow ✓
+            camera.position.copy(savedPos)
+            camera.quaternion.copy(savedQuat)
+            camera.updateMatrixWorld()
+            gl.compile(scene, camera)
+            ctx.finish()                                                // A-no-shadow ✓
 
-        camera.position.copy(savedPos)
-        camera.quaternion.copy(savedQuat)
-        camera.updateMatrixWorld()
-        gl.compile(scene, camera)
-        ctx.finish()                                                    // A-no-shadow ✓
-
-        dirLightRef.current.castShadow = true   // restore
-      } else {
-        // dirLight not yet mounted — still restore camera
-        camera.position.copy(savedPos)
-        camera.quaternion.copy(savedQuat)
-        camera.updateMatrixWorld()
+            dirLightRef.current.castShadow = true // restore
+          } else {
+            camera.position.copy(savedPos)
+            camera.quaternion.copy(savedQuat)
+            camera.updateMatrixWorld()
+          }
+        } catch (_) {
+          // Restore camera if compile threw (e.g. context already lost)
+          camera.position.copy(savedPos)
+          camera.quaternion.copy(savedQuat)
+          camera.updateMatrixWorld()
+          if (dirLightRef.current) dirLightRef.current.castShadow = true
+        }
       }
     }
 
-    // Phase 3: count 90 rendered frames after compilation so R3F has had
-    // time to run a full render loop with compiled shaders before we signal
-    // ready. 90 frames ≈ 1500 ms at 60 fps — covers devices where ctx.finish()
-    // is non-blocking (mobile, Safari/WebKit) and the GPU driver compiles
-    // shaders asynchronously in the background after finish() returns.
+    // Phase 3: count rendered frames then signal ready.
+    // Desktop: 90 frames (≈1500 ms @ 60 fps) — lets async driver compilation
+    // finish in the background for the four pre-warmed shader variants.
+    // Mobile: 10 frames — shader pre-compile was skipped, just need one full
+    // render cycle to confirm the WebGL pipeline is stable before revealing.
     frameCountRef.current += 1
-    if (frameCountRef.current >= 90) {
+    const targetFrames = getIsMobile() ? 10 : 90
+    if (frameCountRef.current >= targetFrames) {
       firedRef.current = true
       useSceneStore.getState().setGpuReady()
     }
