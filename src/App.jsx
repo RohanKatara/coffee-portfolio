@@ -7,8 +7,9 @@ import { EffectComposer, SMAA, Bloom, Vignette, BrightnessContrast } from '@reac
 import { ACESFilmicToneMapping } from 'three'
 import gsap from 'gsap'
 
-// Draco decoder path for compressed GLB models
-useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
+// Draco decoder served locally — no CDN dependency (CDN fails on restricted
+// mobile networks, CORS errors, DNS timeouts → every Draco GLB silently fails)
+useGLTF.setDecoderPath('/draco/')
 
 // Kick off all GLB downloads immediately — before any component mounts.
 // Models that ARE used inside Canvas (EspressoMachine, Character, etc.) call
