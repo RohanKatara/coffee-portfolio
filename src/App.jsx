@@ -23,7 +23,10 @@ useGLTF.preload('/models/ceramic_mug.glb')
 useGLTF.preload('/models/welcome_sign_restaurant.glb')
 useGLTF.preload('/models/coffee_menu.glb')
 useGLTF.preload('/models/neon_sign.glb')
-useGLTF.preload('/models/plant.glb')
+// plant.glb removed — file does not exist in public/models (was tree_pot.glb).
+// A stale preload for a non-existent file registers an unresolvable entry in
+// THREE.js's DefaultLoadingManager, causing useProgress to stall below 100%
+// and forcing the LoadingScreen to rely on its 15-second fallback timer.
 
 // Shared ref for the key directional light.
 // Accessed by both ShaderPrecompiler (pre-warm no-shadow variant) and
@@ -645,20 +648,6 @@ export default function App() {
 
         </SceneOffsetGroup>
 
-        {/* ── DEBUG: Red-box sanity test ─────────────────────────────────
-            Placed OUTSIDE Suspense so it renders even while Suspense is
-            in fallback={null} mode (i.e. a model/asset is still loading).
-            Uses meshBasicMaterial — zero lighting dependency.
-            Mobile camera on LANDING is at [0.5, 0.9, 4.2] looking toward
-            [0.5, 0.9, -0.5], so [0.5, 0.9, 0] is dead-centre of frame.
-            VISIBLE RED BOX  → WebGL works; issue is lighting or Suspense.
-            NO RED BOX        → WebGL context lost or camera is wrong.    */}
-        {isMobile && (
-          <mesh position={[0.5, 0.9, 0]}>
-            <boxGeometry args={[0.6, 0.6, 0.6]} />
-            <meshBasicMaterial color="red" />
-          </mesh>
-        )}
 
         {/* Post-processing — bloom ramps during the cinematic transition */}
         <AnimatedEffects />

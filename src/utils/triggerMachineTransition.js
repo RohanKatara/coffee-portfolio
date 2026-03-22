@@ -5,12 +5,15 @@ import gsap from 'gsap'
  * Called by the SpeechBubble "Yes, please!" button.
  *
  * Sequence:
- *   0ms   — SpeechBubble fades out (0.35 s)
- *   300ms — scene advances to MACHINE; damp3 camera glide begins immediately
+ *   0 ms  — backdrop-filter removed (avoids compositor hit during animation)
+ *   0 ms  — SpeechBubble fades out over 0.35 s
+ *   50 ms — setScene('MACHINE'); damp3 camera glide starts immediately
  *
- * Previously targeted MACHINE_TRANSITION (waypoint arc). That state is no
- * longer needed — the damp3 loop in useSceneTransition handles the cinematic
- * glide as a single smooth interpolation.
+ * Uses a native setTimeout for the 50 ms delay rather than gsap.delayedCall.
+ * On mobile, when the main thread is under load (GPU uploads, GC), GSAP's
+ * RAF-based ticker can skip ticks and fire late. A native timer fires as soon
+ * as the thread is free — typically within 16 ms of the specified delay —
+ * which ensures the scene state advances even on a busy mobile frame.
  */
 export function triggerMachineTransition(setScene) {
   const el = document.querySelector('[data-speech-bubble]')
@@ -27,5 +30,6 @@ export function triggerMachineTransition(setScene) {
     }
     gsap.to(el, { opacity: 0, y: -20, duration: 0.35, ease: 'power2.in' })
   }
-  gsap.delayedCall(0.05, () => setScene('MACHINE'))
+  // Native setTimeout: fires reliably on mobile regardless of GSAP ticker state.
+  setTimeout(() => setScene('MACHINE'), 50)
 }
