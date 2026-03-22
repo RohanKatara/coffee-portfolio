@@ -51,7 +51,7 @@ import ContentEngineModal from './components/ui/ContentEngineModal'
 
 import useSceneStore from './store/useSceneStore'
 import { CAMERA_POSITIONS, SCENE_Y_OFFSET } from './utils/cameraPositions'
-import { useBreakpoint } from './hooks/useBreakpoint'
+import { useBreakpoint, getIsMobile } from './hooks/useBreakpoint'
 // ── TabletStand ───────────────────────────────────────────────────────────────
 function TabletStand(props) {
   const { scene } = useGLTF('/models/tablet_stand.glb')
@@ -354,7 +354,8 @@ function PerformanceManager() {
   const setDpr = useThree((s) => s.setDpr)
 
   useEffect(() => {
-    const deviceDpr = Math.min(window.devicePixelRatio ?? 1, 1.5)
+    const maxDpr    = getIsMobile() ? 1 : 1.5
+    const deviceDpr = Math.min(window.devicePixelRatio ?? 1, maxDpr)
 
     return useSceneStore.subscribe(
       (s) => s.isTransitioning,
@@ -379,6 +380,7 @@ function PerformanceManager() {
 // instance inside useFrame (reads store state, no React re-renders per frame).
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
+  const { isMobile }    = useBreakpoint()
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
   const isPouring       = useSceneStore((s) => s.isPouring)
   const bloomRef = useRef()
@@ -386,6 +388,7 @@ function AnimatedEffects() {
   const obj      = useRef({ val: 1.2 })
 
   useEffect(() => {
+    if (isMobile) return
     gsap.killTweensOf(obj.current)
     // isPouring: espresso stream glows brightest.
     // Resting: default ambient neon glow.
@@ -394,13 +397,14 @@ function AnimatedEffects() {
     const duration = isPouring ? 0.4 : 0.8
     const ease     = isPouring ? 'power2.out' : 'power2.inOut'
     gsap.to(obj.current, { val: target, duration, ease })
-  }, [isPouring])
+  }, [isPouring, isMobile])
 
   // All effect mutations are imperative — zero React state changes per frame.
   // During camera transitions: disable Bloom (8 Kawase passes) and SMAA (2
   // passes) entirely. The camera is moving fast so these are imperceptible;
   // cutting them frees ~10 full-screen GPU passes per frame on desktop.
   useFrame(() => {
+    if (isMobile) return
     const transitioning = useSceneStore.getState().isTransitioning
     if (bloomRef.current) {
       bloomRef.current.enabled   = !transitioning
@@ -410,6 +414,10 @@ function AnimatedEffects() {
       smaaRef.current.enabled = !transitioning
     }
   })
+
+  // No post-processing on mobile — EffectComposer off-screen buffers are the
+  // single biggest VRAM hog; removing them is the #1 crash-prevention measure.
+  if (isMobile) return null
 
   return (
     <EffectComposer multisampling={0} disableNormalPass>
@@ -444,6 +452,7 @@ function SceneOffsetGroup({ children }) {
 }
 
 export default function App() {
+  const { isMobile } = useBreakpoint()
   const [mocktalkOpen, setMocktalkOpen] = useState(false)
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
@@ -474,7 +483,7 @@ export default function App() {
         // freeing the CPU thread for smooth DOM scrolling in the modal.
         // "always" resumes immediately when the modal closes.
         frameloop={anyModalOpen ? 'never' : 'always'}
-        dpr={[1, 1.5]}
+        dpr={isMobile ? 1 : [1, 1.5]}
         camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0.5, 5] }}
         shadows
         gl={{ antialias: false, alpha: false }}
@@ -506,7 +515,7 @@ export default function App() {
             intensity={1.5}
             color="#ffce8a"
             castShadow
-            shadow-mapSize={[1024, 1024]}
+            shadow-mapSize={isMobile ? [512, 512] : [1024, 1024]}
           />
 
           {/* Freeze shadow maps after initial bake — no per-frame
