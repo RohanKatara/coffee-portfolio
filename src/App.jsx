@@ -464,6 +464,8 @@ export default function App() {
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
   const [contentOpen, setContentOpen]   = useState(false)
+  // ── Debug: WebGL context-loss detection ───────────────────────────────────
+  const [contextLost, setContextLost]   = useState(false)
   // Any modal open → pause the 3D scene entirely so the 2D overlay gets
   // 100% of the browser's resources for smooth scrolling.
   const anyModalOpen = mocktalkOpen || krishnaOpen || crmOpen || contentOpen
@@ -497,14 +499,14 @@ export default function App() {
         style={{ background: '#1a0e08' }}
         onCreated={({ gl }) => {
           gl.shadowMap.type    = PCFSoftShadowMap
-          // ACESFilmic compresses highlights so bright neon/lamps never
-          // blow out, and lifts the dark teal walls into a richer grade
           gl.toneMapping         = ACESFilmicToneMapping
           gl.toneMappingExposure = 1.05
-          // Match the WebGL clear color to the CSS canvas background so
-          // any gap between loading-screen fade and first rendered frame
-          // shows cafe-dark (#1a0e08) instead of pure black.
           gl.setClearColor('#1a0e08', 1)
+          // ── Debug: surface context loss as a visible overlay ──────────
+          gl.domElement.addEventListener('webglcontextlost', (e) => {
+            e.preventDefault()
+            setContextLost(true)
+          }, false)
         }}
       >
         <Suspense fallback={null}>
@@ -517,6 +519,15 @@ export default function App() {
 
           {/* Warm ambient base — cream-white to unify the cafe palette */}
           <ambientLight intensity={0.4} color="#fff0dd" />
+
+          {/* ── DEBUG / Mobile lighting fallback ─────────────────────────
+              On mobile, IBL (Environment) is skipped to prevent the HDR
+              download from stalling the Suspense. MeshStandardMaterial
+              needs either IBL or strong ambient light to show any colour
+              at all — without it every PBR surface renders black and
+              blends into the dark canvas background.
+              intensity={2.5} lifts all surfaces to their base albedo.   */}
+          {isMobile && <ambientLight intensity={2.5} color="#fff8f0" />}
 
           {/* Main key light — warm window sunlight from upper-right      */}
           <directionalLight
@@ -657,6 +668,21 @@ export default function App() {
           </SceneOffsetGroup>
         </Suspense>
 
+        {/* ── DEBUG: Red-box sanity test ─────────────────────────────────
+            Placed OUTSIDE Suspense so it renders even while Suspense is
+            in fallback={null} mode (i.e. a model/asset is still loading).
+            Uses meshBasicMaterial — zero lighting dependency.
+            Mobile camera on LANDING is at [0.5, 0.9, 4.2] looking toward
+            [0.5, 0.9, -0.5], so [0.5, 0.9, 0] is dead-centre of frame.
+            VISIBLE RED BOX  → WebGL works; issue is lighting or Suspense.
+            NO RED BOX        → WebGL context lost or camera is wrong.    */}
+        {isMobile && (
+          <mesh position={[0.5, 0.9, 0]}>
+            <boxGeometry args={[0.6, 0.6, 0.6]} />
+            <meshBasicMaterial color="red" />
+          </mesh>
+        )}
+
         {/* Post-processing — bloom ramps during the cinematic transition */}
         <AnimatedEffects />
 
@@ -669,6 +695,28 @@ export default function App() {
 
       </Canvas>
       </div>
+
+      {/* ── DEBUG: WebGL context-loss banner ─────────────────────────────
+          Shown if the GPU driver kills the WebGL context (VRAM exhausted,
+          iOS watchdog, etc.). Bright red so it's unmissable on device.   */}
+      {contextLost && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(180,0,0,0.92)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontFamily: 'monospace', padding: '2rem',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+            ⚠ WEBGL CONTEXT LOST
+          </p>
+          <p style={{ fontSize: '0.9rem', opacity: 0.85 }}>
+            The GPU ran out of memory and killed the WebGL context.
+            More VRAM cuts needed.
+          </p>
+        </div>
+      )}
 
       {/* ── HTML Overlays (above canvas, z-50 covers the invisible Canvas) */}
       <LoadingScreen />
