@@ -20,8 +20,8 @@ export const _lookAt = new Vector3()
 export const cameraLock = { active: false }
 
 // Lambda controls damp speed (exponential decay).
-// λ = 4.5  →  ~99 % arrival in ≈ 1.02 s at 60 fps.
-const CAM_LAMBDA = 4.5
+// λ = 6  →  ~99 % arrival in ≈ 0.77 s at 60 fps (faster on mobile low-fps).
+const CAM_LAMBDA = 6
 
 // Delta cap: never simulate more than one 30fps frame worth of movement in a
 // single tick. Without this, a GC pause or SpeechBubble backdrop-filter paint
