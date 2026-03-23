@@ -48,16 +48,12 @@ export default function CoffeeMenuUI({ onAboutOpen }) {
         { opacity: 1, y: 0, duration: 0.75, delay, ease: 'power3.out' },
       )
       if (headerRef.current) {
-        gsap.fromTo(
-          headerRef.current,
-          { opacity: 0, y: -16 },
-          { opacity: 1, y: 0, duration: 0.65, delay, ease: 'power3.out' },
-        )
+        gsap.from(headerRef.current, { opacity: 0, y: -16, duration: 0.65, delay, ease: 'power3.out' })
       }
     } else {
       gsap.to(panelRef.current, { opacity: 0, y: -18, duration: 0.35, ease: 'power2.in' })
       if (headerRef.current) {
-        gsap.to(headerRef.current, { opacity: 0, y: -12, duration: 0.35, ease: 'power2.in' })
+        gsap.to(headerRef.current, { opacity: 0, y: -12, duration: 0.35, ease: 'power2.in', onComplete: () => { if (headerRef.current) headerRef.current.style.opacity = '' } })
       }
     }
   }, [scene])
@@ -85,7 +81,7 @@ export default function CoffeeMenuUI({ onAboutOpen }) {
         ref={headerRef}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0,
-          zIndex: 40, opacity: 0,
+          zIndex: 40,
           display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
           padding: '14px 24px',
           background: 'linear-gradient(to bottom, rgba(10,6,3,0.72) 0%, transparent 100%)',
