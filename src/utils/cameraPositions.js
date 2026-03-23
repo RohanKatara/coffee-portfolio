@@ -61,37 +61,27 @@ export const CAMERA_POSITIONS = {
   },
 
   // ── Mobile (<768 px, portrait) ────────────────────────────────────────────
-  // "Standing at the counter" — full-width first-person framing.
+  // Mirrors the desktop framing: slight downward tilt (target.y = 0.2) so the
+  // barista is centred in the portrait viewport rather than appearing in the
+  // bottom third.  z=4.5 pulls back to the same depth as the desktop LANDING
+  // position; the wider FOV_MOBILE (65° vs desktop 45°) ensures the scene
+  // still fills the narrow portrait width.
   //
-  // Two constraints must be satisfied simultaneously:
-  //   A) Neon sign (x=1.32, z=-2.55, ~1.8 units wide) fits in portrait FOV_x=37.7°
-  //      → at camera x=0, sign right edge ~x=2.2: atan2(2.2, z+2.55) < 18.87°
-  //      → requires z + 2.55 > 6.45  →  z > 3.9
-  //
-  //   B) Floor (y=-1.5) falls BELOW the bottom of frame (hidden behind counter)
-  //      → floor angle from y=0.9 horizontal: atan2(-2.4, z-0.36) < -31°
-  //      → requires z - 0.36 < 2.4/tan(31°) = 3.99  →  z < 4.35
-  //
-  // z = 4.0 satisfies BOTH: floor angle = -33.4° (hidden), sign fits in FOV.
-  // No scene group Y-offset needed — the floor hides itself at this geometry.
-  //
-  // Result at y=0.9, z=4.0, horizontal look:
-  //   floor angle -33.4° → below ±31° half-FOV → completely hidden ✓
-  //   counter top (y=-0.53) at 84% from top → counter fills bottom 16% ✓
-  //   neon sign right edge (x≈2.2) at 18.6° → just within FOV_x/2=18.87° ✓
-  //   barista chest (y≈0) at 69% from top, head (y≈0.5) at 58% from top ✓
-  //   horizontal look → no tilt, no miniature feel ✓
+  // Neon sign (right edge x≈2.2) at z=4.5+2.55=7.05 → angle = atan2(1.7,7.05)
+  //   = 13.6° < half-FOV_x ≈ 19° ✓ (sign fits in frame)
+  // Floor (y=-1.5) is visible at the very bottom of the frame (same as desktop)
+  //   but the dark floor colour blends into the background and is not distracting.
   LANDING_INTRO_MOBILE: {
-    // z=4.0 satisfies Constraint A (neon sign fits) even at this closer Z.
-    // x=0.5 centres the composition between barista (x=0) and neon sign (x=1.32).
-    position: { x: 0.5, y: 0.9, z: 4.0 },
-    target:   { x: 0.5, y: 0.9, z: -0.5 },
+    // Cinematic start: closer than LANDING (z=3.8), same tilt.
+    // x=0.5 centres composition between barista (x=0) and neon sign (x=1.32).
+    position: { x: 0.5, y: 0.9, z: 3.8 },
+    target:   { x: 0.5, y: 0.2, z: -0.5 },
   },
   LANDING_MOBILE: {
-    // Pull-back to z=4.2 gives 5.5° margin on Constraint A and 1.0° on Constraint B.
-    // Horizontal look (target.y = camera.y = 0.9) — strictly no downward tilt.
-    position: { x: 0.5, y: 0.9, z: 4.2 },
-    target:   { x: 0.5, y: 0.9, z: -0.5 },
+    // Pulled back to z=4.5 (matches desktop z) for the resting view.
+    // Downward tilt matches desktop: target.y=0.2 centres the barista.
+    position: { x: 0.5, y: 0.9, z: 4.5 },
+    target:   { x: 0.5, y: 0.2, z: -0.8 },
   },
 
   // Transient state: 4-waypoint cinematic arc from Zone A (x≈0) to Zone B (x≈12).
@@ -123,11 +113,12 @@ export const CAMERA_POSITIONS = {
     target:   { x: 12.2, y: -0.1, z: -0.2 },
   },
   MACHINE_MOBILE: {
-    // x=11.5 centres on the machine face (x=12) with matching 0.5-unit offset logic as Zone A.
-    // z=4.2 gives 5.5°+ margin on Constraint A and 1.0° on Constraint B.
-    // Horizontal look (target.y = camera.y = 0.9) — same eye-level framing as Zone A.
+    // x=11.5 centres on the machine face (x=12) with 0.5-unit offset.
+    // z=4.2 keeps the machine in frame.
+    // target.y=0.2 adds a slight downward tilt matching LANDING_MOBILE so the
+    // machine body (at y≈-0.5 to +1.5) is centred rather than appearing low.
     position: { x: 11.5, y: 0.9, z: 4.2 },
-    target:   { x: 12.0, y: 0.9, z: -0.2 },
+    target:   { x: 12.0, y: 0.2, z: -0.2 },
   },
   MACHINE_MOBILE_LANDSCAPE: {
     // Same floor/counter logic as LANDING_MOBILE_LANDSCAPE — y=0.6, z=2.8.
