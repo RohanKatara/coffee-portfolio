@@ -17,12 +17,13 @@ let hasEnteredMachine = false
  * Fades in 0.8 s after first MACHINE arrival, 0.4 s on return from CUP.
  * Clicking a project row fades the panel out then calls startPour().
  */
-export default function CoffeeMenuUI() {
+export default function CoffeeMenuUI({ onAboutOpen }) {
   const scene           = useSceneStore((s) => s.scene)
   const isPouring       = useSceneStore((s) => s.isPouring)
   const isTransitioning = useSceneStore((s) => s.isTransitioning)
   const startPour       = useSceneStore((s) => s.startPour)
   const panelRef  = useRef(null)
+  const headerRef = useRef(null)
   // Delay mounting by 200 ms after the transition ends so the backdrop-filter
   // compositor layer never lands on the same frame as the camera's arrival.
   const [mountReady, setMountReady] = useState(false)
@@ -46,8 +47,18 @@ export default function CoffeeMenuUI() {
         { opacity: 0, y: 28 },
         { opacity: 1, y: 0, duration: 0.75, delay, ease: 'power3.out' },
       )
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: -16 },
+          { opacity: 1, y: 0, duration: 0.65, delay, ease: 'power3.out' },
+        )
+      }
     } else {
       gsap.to(panelRef.current, { opacity: 0, y: -18, duration: 0.35, ease: 'power2.in' })
+      if (headerRef.current) {
+        gsap.to(headerRef.current, { opacity: 0, y: -12, duration: 0.35, ease: 'power2.in' })
+      }
     }
   }, [scene])
 
@@ -68,6 +79,50 @@ export default function CoffeeMenuUI() {
   if (!mountReady) return null
 
   return (
+    <>
+      {/* ── Zone B header bar — fades in with the panel ───────────────────── */}
+      <div
+        ref={headerRef}
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0,
+          zIndex: 40, opacity: 0,
+          display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+          padding: '14px 24px',
+          background: 'linear-gradient(to bottom, rgba(10,6,3,0.72) 0%, transparent 100%)',
+          pointerEvents: 'auto',
+        }}
+      >
+        <button
+          onClick={onAboutOpen}
+          style={{
+            background: 'rgba(200,127,76,0.10)',
+            border: '1px solid rgba(200,127,76,0.30)',
+            borderRadius: '6px',
+            color: '#c87f4c',
+            padding: '7px 20px',
+            cursor: 'pointer',
+            fontSize: '0.78rem',
+            fontFamily: 'Noto Serif, Georgia, serif',
+            letterSpacing: '0.08em',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            transition: 'border-color 0.2s, color 0.2s, background 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.65)'
+            e.currentTarget.style.color = '#e8a96a'
+            e.currentTarget.style.background = 'rgba(200,127,76,0.18)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.30)'
+            e.currentTarget.style.color = '#c87f4c'
+            e.currentTarget.style.background = 'rgba(200,127,76,0.10)'
+          }}
+        >
+          About Me
+        </button>
+      </div>
+
     <div
       ref={panelRef}
       className="absolute bottom-[4%] left-1/2 -translate-x-1/2 z-40 opacity-0"
@@ -171,5 +226,6 @@ export default function CoffeeMenuUI() {
         }} />
       </div>
     </div>
+    </>
   )
 }

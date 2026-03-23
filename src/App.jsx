@@ -52,6 +52,8 @@ import MocktalkModal from './components/ui/MocktalkModal'
 import KrishnaModal from './components/ui/KrishnaModal'
 import CRMModal from './components/ui/CRMModal'
 import ContentEngineModal from './components/ui/ContentEngineModal'
+import CoffeeMenuUI from './components/ui/CoffeeMenuUI'
+import AboutModal from './components/ui/AboutModal'
 
 import useSceneStore from './store/useSceneStore'
 import { CAMERA_POSITIONS, SCENE_Y_OFFSET } from './utils/cameraPositions'
@@ -486,11 +488,12 @@ export default function App() {
   const [krishnaOpen, setKrishnaOpen]   = useState(false)
   const [crmOpen,     setCrmOpen]       = useState(false)
   const [contentOpen, setContentOpen]   = useState(false)
+  const [isAboutOpen, setIsAboutOpen]   = useState(false)
   // ── Debug: WebGL context-loss detection ───────────────────────────────────
   const [contextLost, setContextLost]   = useState(false)
   // Any modal open → pause the 3D scene entirely so the 2D overlay gets
   // 100% of the browser's resources for smooth scrolling.
-  const anyModalOpen = mocktalkOpen || krishnaOpen || crmOpen || contentOpen
+  const anyModalOpen = mocktalkOpen || krishnaOpen || crmOpen || contentOpen || isAboutOpen
 
   return (
     <div className="relative w-full h-full">
@@ -707,10 +710,12 @@ export default function App() {
       <LoadingScreen />
       <SpeechBubble />
       <ProjectDetail />
+      <CoffeeMenuUI onAboutOpen={() => setIsAboutOpen(true)} />
       {mocktalkOpen && <MocktalkModal onClose={() => setMocktalkOpen(false)} />}
       {krishnaOpen  && <KrishnaModal  onClose={() => setKrishnaOpen(false)}  />}
       {crmOpen      && <CRMModal           onClose={() => setCrmOpen(false)}      />}
       {contentOpen  && <ContentEngineModal onClose={() => setContentOpen(false)} />}
+      {isAboutOpen  && <AboutModal         onClose={() => setIsAboutOpen(false)} />}
     </div>
   )
 }
