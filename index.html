@@ -8,7 +8,11 @@
     <title>Coffee Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Non-blocking font load: loads as a print stylesheet (zero render impact),
+         then switches to 'all' media once downloaded so it never blocks first paint.
+         The canvas and loading screen render immediately while the font fetches. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" /></noscript>
 
     <!-- Preload the Draco WASM decoder from local /draco/ (no CDN dependency).
          No crossorigin: DRACOLoader fetches WASM via same-origin fetch() inside

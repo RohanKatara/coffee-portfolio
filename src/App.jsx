@@ -331,12 +331,16 @@ function ShaderPrecompiler() {
     }
 
     // Phase 3: count rendered frames then signal ready.
-    // Desktop: 90 frames (≈1500 ms @ 60 fps) — lets async driver compilation
-    // finish in the background for the four pre-warmed shader variants.
-    // Mobile: 10 frames — shader pre-compile was skipped, just need one full
-    // render cycle to confirm the WebGL pipeline is stable before revealing.
+    // ctx.finish() in Phase 2 already flushed the GPU pipeline synchronously, so
+    // all four shader variants are compiled before we even reach this counter.
+    // We count a small number of rendered frames purely to let the GPU driver
+    // finish any background PSO (pipeline-state-object) work that happens lazily
+    // after the first draw call.  20 frames ≈ 333 ms @ 60 fps — ample time for
+    // modern drivers (D3D12/Metal/Vulkan via ANGLE) to settle.  The old value of
+    // 90 frames (1 500 ms) was overly conservative and added unnecessary loading
+    // time on every visit.  Mobile stays at 5 frames (shader compile is skipped).
     frameCountRef.current += 1
-    const targetFrames = getIsMobile() ? 10 : 90
+    const targetFrames = getIsMobile() ? 5 : 20
     if (frameCountRef.current >= targetFrames) {
       firedRef.current = true
       useSceneStore.getState().setGpuReady()
