@@ -395,39 +395,52 @@ function PerformanceManager() {
 // instance inside useFrame (reads store state, no React re-renders per frame).
 // disableNormalPass saves a G-buffer pass we don't need for these effects.
 function AnimatedEffects() {
-  const { isMobile }    = useBreakpoint()
-  const isTransitioning = useSceneStore((s) => s.isTransitioning)
-  const isPouring       = useSceneStore((s) => s.isPouring)
-  const bloomRef = useRef()
-  const smaaRef  = useRef()
-  const obj      = useRef({ val: 1.2 })
+  const { isMobile } = useBreakpoint()
+  const bloomRef  = useRef()
+  const smaaRef   = useRef()
+  const vigRef    = useRef()
+  const bcRef     = useRef()
+  const obj       = useRef({ val: 1.2 })
+  // Track last-seen isPouring so we can detect changes inside useFrame
+  // without subscribing to React state (which would re-render this component).
+  const lastPouring = useRef(null)
 
-  useEffect(() => {
-    if (isMobile) return
-    gsap.killTweensOf(obj.current)
-    // isPouring: espresso stream glows brightest.
-    // Resting: default ambient neon glow.
-    // No intensity ramp during transition — bloom is off while moving anyway.
-    const target   = isPouring ? 1.8 : 1.2
-    const duration = isPouring ? 0.4 : 0.8
-    const ease     = isPouring ? 'power2.out' : 'power2.inOut'
-    gsap.to(obj.current, { val: target, duration, ease })
-  }, [isPouring, isMobile])
-
-  // All effect mutations are imperative — zero React state changes per frame.
-  // During camera transitions: disable Bloom (8 Kawase passes) and SMAA (2
-  // passes) entirely. The camera is moving fast so these are imperceptible;
-  // cutting them frees ~10 full-screen GPU passes per frame on desktop.
+  // All effect mutations are fully imperative — AnimatedEffects never
+  // re-renders after initial mount.  Bloom/SMAA/Vignette/BrightnessContrast
+  // are all controlled via refs here.
+  //
+  // WHY this matters for transition smoothness:
+  //   The old code subscribed to isTransitioning via useSceneStore() and passed
+  //   enabled={!isTransitioning} as a React prop to Vignette + BrightnessContrast.
+  //   Every time isTransitioning changed, React re-rendered AnimatedEffects and
+  //   @react-three/postprocessing rebuilt its entire pass chain — tearing down
+  //   and reconstructing WebGL pipeline-state objects mid-frame.  That rebuild
+  //   was the "pause" at the start and end of every Zone A→B transition.
+  //   Bloom + SMAA already used refs and were fine; Vignette and
+  //   BrightnessContrast were the two missed effects.
   useFrame(() => {
     if (isMobile) return
-    const transitioning = useSceneStore.getState().isTransitioning
+    const { isTransitioning, isPouring } = useSceneStore.getState()
+
+    // Detect isPouring change and start GSAP intensity tween — replaces the
+    // old useEffect so isPouring no longer triggers a React re-render here.
+    if (isPouring !== lastPouring.current) {
+      lastPouring.current = isPouring
+      gsap.killTweensOf(obj.current)
+      const target   = isPouring ? 1.8 : 1.2
+      const duration = isPouring ? 0.4 : 0.8
+      const ease     = isPouring ? 'power2.out' : 'power2.inOut'
+      gsap.to(obj.current, { val: target, duration, ease })
+    }
+
+    const enabled = !isTransitioning
     if (bloomRef.current) {
-      bloomRef.current.enabled   = !transitioning
+      bloomRef.current.enabled   = enabled
       bloomRef.current.intensity = obj.current.val
     }
-    if (smaaRef.current) {
-      smaaRef.current.enabled = !transitioning
-    }
+    if (smaaRef.current) smaaRef.current.enabled = enabled
+    if (vigRef.current)  vigRef.current.enabled  = enabled
+    if (bcRef.current)   bcRef.current.enabled   = enabled
   })
 
   // No post-processing on mobile — EffectComposer off-screen buffers are the
@@ -449,9 +462,10 @@ function AnimatedEffects() {
         levels={4}
       />
 
-      {/* Vignette + BrightnessContrast — full-screen passes, off during pan. */}
-      <Vignette offset={0.5} darkness={0.5} enabled={!isTransitioning} />
-      <BrightnessContrast brightness={-0.05} contrast={0.12} enabled={!isTransitioning} />
+      {/* Vignette + BrightnessContrast — controlled imperatively via refs above;
+          no enabled prop here so props never change and React never re-renders. */}
+      <Vignette ref={vigRef} offset={0.5} darkness={0.5} />
+      <BrightnessContrast ref={bcRef} brightness={-0.05} contrast={0.12} />
     </EffectComposer>
   )
 }
