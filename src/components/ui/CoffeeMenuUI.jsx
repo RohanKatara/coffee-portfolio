@@ -95,28 +95,31 @@ export default function CoffeeMenuUI({ onAboutOpen }) {
         <button
           onClick={onAboutOpen}
           style={{
-            background: 'rgba(200,127,76,0.10)',
-            border: '1px solid rgba(200,127,76,0.30)',
+            background: 'rgba(14, 9, 4, 0.82)',
+            border: '1px solid rgba(200,127,76,0.55)',
             borderRadius: '6px',
-            color: '#c87f4c',
+            color: '#e8a96a',
             padding: '7px 20px',
             cursor: 'pointer',
             fontSize: '0.78rem',
             fontFamily: 'Noto Serif, Georgia, serif',
             letterSpacing: '0.08em',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            transition: 'border-color 0.2s, color 0.2s, background 0.2s',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.5)',
+            transition: 'border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.65)'
-            e.currentTarget.style.color = '#e8a96a'
-            e.currentTarget.style.background = 'rgba(200,127,76,0.18)'
+            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.90)'
+            e.currentTarget.style.color = '#f5c07a'
+            e.currentTarget.style.background = 'rgba(200,127,76,0.20)'
+            e.currentTarget.style.boxShadow = '0 0 16px rgba(200,127,76,0.30)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.30)'
-            e.currentTarget.style.color = '#c87f4c'
-            e.currentTarget.style.background = 'rgba(200,127,76,0.10)'
+            e.currentTarget.style.borderColor = 'rgba(200,127,76,0.55)'
+            e.currentTarget.style.color = '#e8a96a'
+            e.currentTarget.style.background = 'rgba(14, 9, 4, 0.82)'
+            e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.5)'
           }}
         >
           About Me
