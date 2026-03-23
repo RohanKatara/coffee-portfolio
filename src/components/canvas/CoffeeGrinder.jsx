@@ -13,9 +13,16 @@ function CoffeeGrinderModel({ position }) {
   const grinderModel = useGLTF('/models/coffee_grinder.glb')
   useEffect(() => {
     grinderModel.scene.traverse((child) => {
+      // Disable frustum culling on every node — Draco bounding boxes can be
+      // stale/zero until first GPU draw, causing Three.js to cull the mesh.
+      child.frustumCulled = false
       if (child.isMesh) {
         child.castShadow    = true
         child.receiveShadow = true
+        if (child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material]
+          mats.forEach((m) => { m.needsUpdate = true })
+        }
       }
     })
   }, [grinderModel.scene])
@@ -29,6 +36,7 @@ function CoffeeGrinderModel({ position }) {
       ]}
       scale={GRINDER_SCALE}
       rotation={GRINDER_ROTATION}
+      frustumCulled={false}
     />
   )
 }

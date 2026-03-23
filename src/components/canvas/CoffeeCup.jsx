@@ -38,9 +38,14 @@ function CoffeeCupModel({ position }) {
   const [clone, liftY] = useMemo(() => {
     const c = scene.clone(true)
     c.traverse(node => {
+      node.frustumCulled = false
       if (!node.isMesh) return
       node.castShadow    = true
       node.receiveShadow = true
+      if (node.material) {
+        const mats = Array.isArray(node.material) ? node.material : [node.material]
+        mats.forEach((m) => { m.needsUpdate = true })
+      }
     })
     c.updateMatrixWorld(true)
     const box = new Box3().setFromObject(c)
@@ -49,7 +54,7 @@ function CoffeeCupModel({ position }) {
 
   return (
     <group position={[position[0], position[1] + liftY, position[2]]}>
-      <primitive object={clone} />
+      <primitive object={clone} frustumCulled={false} />
     </group>
   )
 }
