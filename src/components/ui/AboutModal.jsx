@@ -251,13 +251,13 @@ export default function AboutModal({ onClose }) {
                   Hey! I&rsquo;m <span style={{ color: '#d2e7dc', fontWeight: 600 }}>Rohan Katara</span>, a recent B.Tech Computer Engineering graduate based in Ahmedabad, India. I firmly believe the web was never meant to be a stack of static, boring documents—it should be a living, breathing, interactive experience.
                 </p>
                 <p>
-                  That&rsquo;s exactly why you are standing in a 3D cafe right now instead of scrolling through a standard PDF resume. When I am not obsessively tweaking the grind size on my coffee beans to pull a god-tier extraction from my espresso, I am applying that exact same perfectionism to my code.
+                  That&rsquo;s exactly why you are standing in a 3D cafe right now instead of scrolling through a standard PDF resume. When I am not obsessively tweaking the grind size on my coffee beans to pull a god tier extraction from my espresso, I am applying that exact same perfectionism to my code.
                 </p>
                 <p>
                   My true passion lies in the <span className="about-font-headline" style={{ fontStyle: 'italic', color: '#d2e7dc' }}>intersection of engineering and creativity</span>—whether that means architecting immersive web environments, tinkering with the latest Generative AI models, or building tools that actually feel alive.
                 </p>
                 <p>
-                  I thrive on taking complex, cutting-edge technology and serving it up in a way that is intuitive and engaging. If my code is compiling, the servers are happy, and I&rsquo;ve already had way too much caffeine for one day, you can probably catch me holding an angle in a Valorant match.
+                  I thrive on taking complex, cutting edge technology and serving it up in a way that is intuitive and engaging. If my code is compiling, the servers are happy, and I&rsquo;ve already had way too much caffeine for one day, you can probably catch me holding an angle in a Valorant match.
                 </p>
               </div>
 
@@ -274,7 +274,7 @@ export default function AboutModal({ onClose }) {
                   <span className="about-material-icon" style={{ color: '#ffb887' }}>terminal</span>
                   <div>
                     <p style={{ fontSize: '10px', textTransform: 'uppercase', color: '#6b7280', fontWeight: 700 }}>Stack</p>
-                    <p style={{ fontSize: '0.75rem', color: '#d2e7dc' }}>Full-Stack / AI</p>
+                    <p style={{ fontSize: '0.75rem', color: '#d2e7dc' }}>Full Stack / AI</p>
                   </div>
                 </div>
               </div>
