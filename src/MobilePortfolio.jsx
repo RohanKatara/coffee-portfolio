@@ -149,7 +149,7 @@ export default function MobilePortfolio() {
   return (
     <div
       className="font-body"
-      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '150px' }}
+      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '96px' }}
     >
       {/* Atmospheric light leaks */}
       <div
@@ -469,12 +469,7 @@ export default function MobilePortfolio() {
               Let&apos;s build something.
             </h2>
             <a
-              className="while-tap-spring px-8 py-4 font-headline font-bold text-lg rounded-full transition-all duration-300 inline-block"
-              style={{
-                backgroundColor: '#e5e2e1',
-                color: '#0e0e0e',
-                boxShadow: '0 0 40px rgba(255,255,255,0.1)',
-              }}
+              className="while-tap-spring border border-white/20 text-white px-8 py-4 rounded-full hover:bg-white/10 transition-colors font-headline font-bold text-lg inline-block"
               href="mailto:hello@rohankatara.com"
             >
               Initialize Contact
@@ -555,38 +550,6 @@ export default function MobilePortfolio() {
         document.body
       )}
 
-      {/* ── Bottom Navigation (mobile only) ──────────────────────────────── */}
-      <nav
-        className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex justify-around items-center px-4 h-16 rounded-full border border-white/10 backdrop-blur-xl"
-        style={{
-          width: '90%',
-          maxWidth: '28rem',
-          backgroundColor: 'rgba(14,14,14,0.9)',
-          boxShadow: '0 0 30px rgba(6,182,212,0.15)',
-        }}
-      >
-        <a
-          className="flex items-center justify-center rounded-full w-12 h-12 active:scale-90 duration-200"
-          style={{ background: 'linear-gradient(to top right, #4cd7f6, #06b6d4)', color: '#003640' }}
-          href="#"
-        >
-          <span className="material-symbols-outlined">terminal</span>
-        </a>
-        {[
-          { icon: 'person_search', href: '#bio' },
-          { icon: 'layers', href: '#works' },
-          { icon: 'send', href: '#contact' },
-        ].map(({ icon, href }) => (
-          <a
-            key={href}
-            className="flex items-center justify-center w-12 h-12 transition-all active:scale-90 duration-200"
-            style={{ color: '#bcc9cd' }}
-            href={href}
-          >
-            <span className="material-symbols-outlined">{icon}</span>
-          </a>
-        ))}
-      </nav>
     </div>
   )
 }
