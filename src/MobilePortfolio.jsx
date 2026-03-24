@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import './mobile.css'
+import MocktalkModal from './components/ui/MocktalkModal'
+import KrishnaModal from './components/ui/KrishnaModal'
+import CRMModal from './components/ui/CRMModal'
+import ContentEngineModal from './components/ui/ContentEngineModal'
 
 const PROJECTS = [
   {
@@ -76,8 +81,11 @@ const TERMINAL_ITEMS = [
   },
 ]
 
+const PROJECT_IDS = ['mocktalk', 'krishna', 'crm', 'contentengine']
+
 export default function MobilePortfolio() {
   const [openTerminal, setOpenTerminal] = useState(null)
+  const [activeProject, setActiveProject] = useState(null)
 
   // index.css locks overflow:hidden + height:100% on html/body/#root for the 3D
   // scene. Override with inline styles (higher specificity) to enable scrolling.
@@ -275,8 +283,9 @@ export default function MobilePortfolio() {
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
-                className="project-card snap-center while-tap-spring project-card-glow group relative flex flex-col rounded-2xl overflow-hidden border border-white/5 transition-all duration-500"
-                style={{ minWidth: '85vw', backgroundColor: '#1c1b1b' }}
+                className="project-card snap-center while-tap-spring project-card-glow group relative flex flex-col rounded-2xl overflow-hidden border border-white/5 transition-all duration-500 cursor-pointer"
+                style={{ minWidth: '85vw', backgroundColor: '#1c1b1b', touchAction: 'manipulation' }}
+                onClick={() => setActiveProject(PROJECT_IDS[i])}
               >
                 <div
                   className="aspect-[3/4] md:aspect-video overflow-hidden"
@@ -303,20 +312,19 @@ export default function MobilePortfolio() {
                   <p className="leading-relaxed text-gray-300 line-clamp-3">
                     {project.desc}
                   </p>
-                  <div className="mt-auto flex gap-4">
-                    <span
-                      className="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform"
-                      style={{ color: project.tagColor }}
-                    >
-                      terminal
-                    </span>
-                    <span
-                      className="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform"
-                      style={{ color: project.tagColor }}
-                    >
-                      open_in_new
-                    </span>
-                  </div>
+                  <button
+                    className="mt-auto flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-mono font-bold border transition-all duration-200 active:scale-95"
+                    style={{
+                      color: project.tagColor,
+                      borderColor: project.tagBorder,
+                      backgroundColor: project.tagBg,
+                      touchAction: 'manipulation',
+                    }}
+                    onClick={(e) => { e.stopPropagation(); setActiveProject(PROJECT_IDS[i]) }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
+                    View Details
+                  </button>
                 </div>
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -366,6 +374,58 @@ export default function MobilePortfolio() {
 
         </div>{/* end gap-40 wrapper */}
       </main>
+
+      {/* ── Project Modals (portalled to body so #root overflow/stacking never clips them) */}
+      {activeProject && createPortal(
+        <>
+          {activeProject === 'mocktalk'      && <MocktalkModal      onClose={() => setActiveProject(null)} />}
+          {activeProject === 'krishna'       && <KrishnaModal       onClose={() => setActiveProject(null)} />}
+          {activeProject === 'crm'           && <CRMModal           onClose={() => setActiveProject(null)} />}
+          {activeProject === 'contentengine' && <ContentEngineModal onClose={() => setActiveProject(null)} />}
+
+          {/* Back button — above the modal (z-index 1001 > modal's 1000) */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1001,
+              display: 'flex',
+              alignItems: 'center',
+              padding: '12px 16px',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              backgroundColor: 'rgba(10,10,10,0.75)',
+              borderBottom: '1px solid rgba(255,255,255,0.07)',
+            }}
+          >
+            <button
+              onClick={() => setActiveProject(null)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#4cd7f6',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '6px 8px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                touchAction: 'manipulation',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>chevron_left</span>
+              Back
+            </button>
+          </div>
+        </>,
+        document.body
+      )}
 
       {/* ── Bottom Navigation (mobile only) ──────────────────────────────── */}
       <nav
