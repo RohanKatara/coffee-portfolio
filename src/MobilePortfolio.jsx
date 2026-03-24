@@ -320,7 +320,7 @@ export default function MobilePortfolio() {
         <section className="w-full flex flex-col pt-10" id="works" style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}>
 
           {/* Title wrapper */}
-          <div className="px-6 mb-8">
+          <div style={{ paddingLeft: '24px', paddingRight: '24px', marginBottom: '32px' }}>
             <h2 className="text-4xl font-bold tracking-tighter text-white">Selected Works</h2>
           </div>
 
