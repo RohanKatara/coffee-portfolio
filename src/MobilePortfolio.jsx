@@ -470,7 +470,9 @@ export default function MobilePortfolio() {
             </h2>
             <a
               className="while-tap-spring border border-white/20 text-white px-8 py-4 rounded-full hover:bg-white/10 transition-colors font-headline font-bold text-lg inline-block"
-              href="mailto:rohankatara3@gmail.com"
+              href="https://mail.google.com/mail/?view=cm&to=rohankatara3@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               Initialize Contact
             </a>
