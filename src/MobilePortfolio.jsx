@@ -400,14 +400,20 @@ export default function MobilePortfolio() {
               Initialize Contact
             </a>
             <div className="flex gap-8">
-              {['GitHub', 'LinkedIn', 'Twitter'].map((link) => (
+              {[
+                { label: 'GitHub',   href: 'https://github.com/RohanKatara' },
+                { label: 'LinkedIn', href: 'https://www.linkedin.com/in/rohan-katara-5895952b6' },
+                { label: 'Twitter',  href: 'https://x.com/Rohan2Katara' },
+              ].map(({ label, href }) => (
                 <a
-                  key={link}
+                  key={label}
                   className="font-mono text-sm transition-colors hover:text-[#4cd7f6]"
                   style={{ color: '#bcc9cd' }}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {link}
+                  {label}
                 </a>
               ))}
             </div>
