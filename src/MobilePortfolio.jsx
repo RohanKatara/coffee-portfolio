@@ -317,18 +317,15 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
-        <section
-          className="overflow-hidden"
-          style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
-          id="works"
-        >
-          <div className="max-w-6xl mx-auto pt-14 px-6">
-            <h2 className="font-headline text-4xl font-bold tracking-tighter mb-8">
-              Selected Works
-            </h2>
+        <section className="w-full flex flex-col pt-10" id="works" style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}>
+
+          {/* Title wrapper */}
+          <div className="px-6 mb-8">
+            <h2 className="text-4xl font-bold tracking-tighter text-white">Selected Works</h2>
           </div>
 
-          <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pt-6 pb-24 gap-6 md:gap-12">
+          {/* Carousel */}
+          <div className="flex flex-row overflow-x-auto snap-x snap-mandatory px-6 gap-6 pb-24 [&::-webkit-scrollbar]:hidden">
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
