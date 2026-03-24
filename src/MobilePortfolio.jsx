@@ -322,12 +322,10 @@ export default function MobilePortfolio() {
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto pt-14">
-            <div className="flex flex-col gap-3 mb-10 px-6">
-              <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter">
-                Selected Works
-              </h2>
-            </div>
+          <div className="max-w-6xl mx-auto pt-14 px-6">
+            <h2 className="font-headline text-4xl font-bold tracking-tighter mb-8">
+              Selected Works
+            </h2>
           </div>
 
           <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pt-6 pb-24 gap-6 md:gap-12">
@@ -348,7 +346,7 @@ export default function MobilePortfolio() {
                     src={project.img}
                   />
                 </div>
-                <div className="p-6 flex flex-col gap-3">
+                <div className="flex flex-col gap-3" style={{ padding: '20px' }}>
                   <span
                     className="self-start px-3 py-1 rounded-full text-[10px] font-mono font-bold border"
                     style={{
@@ -390,11 +388,11 @@ export default function MobilePortfolio() {
 
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
-          className="px-5 flex flex-col items-center justify-center text-center"
+          className="px-6 flex flex-col items-center justify-center text-center"
           id="contact"
         >
           <div className="flex flex-col items-center gap-8 mt-10">
-            <h2 className="font-headline text-4xl md:text-7xl font-bold tracking-tighter leading-tight">
+            <h2 className="font-headline text-4xl font-bold tracking-tighter leading-tight">
               Let&apos;s build something.
             </h2>
             <a
