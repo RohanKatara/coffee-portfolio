@@ -50,7 +50,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /about_rohan',
     content: (
-      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
+      <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
         Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> — an
         engineer focused on bridging the gap between high-performance computing and intuitive
         human-centric interfaces. I firmly believe the web was never meant to be a stack of static,
@@ -61,7 +61,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /what_i_build',
     content: (
-      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
+      <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
         My true passion lies in the intersection of engineering and creativity—whether that means
         architecting immersive web environments, exploring the latest in low-latency neural
         processing, or building tools that feel as responsive as biological reflexes.
@@ -71,7 +71,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /off_the_clock',
     content: (
-      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
+      <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
         When I am not obsessively tweaking the grind size of my morning espresso to hit that perfect
         1:2 ratio, you&apos;ll find me deploying code. And if the deployment pipeline is green,
         you&apos;ll likely catch me holding an angle in a{' '}
@@ -300,10 +300,9 @@ export default function MobilePortfolio() {
                           transition={{ duration: 0.35, ease: [0.175, 0.885, 0.32, 1.1] }}
                           className="overflow-hidden"
                         >
-                          <div className="px-6 pb-6 pt-2">
+                          <div style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '8px', paddingBottom: '24px' }}>
                             <div
-                              className="h-px w-full mb-4"
-                              style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                              style={{ height: '1px', width: '100%', marginBottom: '16px', backgroundColor: 'rgba(255,255,255,0.05)' }}
                             />
                             {item.content}
                           </div>
