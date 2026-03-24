@@ -155,8 +155,8 @@ export default function MobilePortfolio() {
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header
-        className="fixed top-0 w-full z-50 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-6 py-4"
-        style={{ backgroundColor: 'rgba(19,19,19,0.8)' }}
+        className="fixed top-0 w-full z-50 backdrop-blur-md border-b border-white/5 flex justify-between items-center py-4"
+        style={{ backgroundColor: 'rgba(19,19,19,0.8)', paddingLeft: '24px', paddingRight: '24px' }}
       >
         <div className="text-xl font-headline font-bold tracking-tighter" style={{ color: '#e5e2e1' }}>
           Portfolio
@@ -253,14 +253,8 @@ export default function MobilePortfolio() {
             </p>
           </div>
 
-          <div className="absolute bottom-12 z-10 flex flex-col items-center gap-4">
+          <div className="absolute bottom-12 z-10 flex flex-col items-center">
             <div className="w-px h-16 bg-gradient-to-b from-[#4cd7f6] to-transparent" />
-            <span
-              className="text-[10px] font-label uppercase tracking-[0.3em] opacity-50"
-              style={{ color: '#869397' }}
-            >
-              Scroll
-            </span>
           </div>
         </section>
 
