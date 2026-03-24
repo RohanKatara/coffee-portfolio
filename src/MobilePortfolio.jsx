@@ -181,7 +181,7 @@ export default function MobilePortfolio() {
         <div className="flex flex-col gap-20 w-full">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 relative overflow-hidden">
+        <section className="min-h-screen flex flex-col justify-start items-center px-6 pt-[20vh] relative overflow-hidden">
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
             style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
@@ -208,7 +208,7 @@ export default function MobilePortfolio() {
             Software Engineer &amp; AI Builder.
           </p>
 
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
+          <div className="mt-auto mb-10 flex flex-col items-center gap-4">
             <div className="w-px h-16 bg-gradient-to-b from-[#4cd7f6] to-transparent" />
             <span
               className="text-[10px] font-label uppercase tracking-[0.3em] opacity-50"
