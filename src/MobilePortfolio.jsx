@@ -248,9 +248,9 @@ export default function MobilePortfolio() {
                     </button>
                     <div className="terminal-content">
                       <div>
-                        <div className="px-5 pt-1 pb-5">
+                        <div className="px-6 pt-4 pb-6">
                           <div
-                            className="h-px w-full mb-4"
+                            className="h-px w-full mb-5"
                             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                           />
                           {item.content}
