@@ -396,7 +396,7 @@ export default function MobilePortfolio() {
 
           {/* Title wrapper */}
           <div style={{ paddingLeft: '24px', paddingRight: '24px', marginBottom: '32px' }}>
-            <h2 className="font-headline text-4xl font-bold tracking-tighter">Selected Works</h2>
+            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '2.25rem', fontWeight: '700', letterSpacing: '-0.04em' }}>Selected Works</h2>
           </div>
 
           {/* Carousel */}
