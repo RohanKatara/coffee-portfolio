@@ -265,7 +265,7 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="px-5 max-w-5xl mx-auto w-full" id="bio">
+        <section className="max-w-5xl mx-auto w-full" style={{ paddingLeft: '24px', paddingRight: '24px' }} id="bio">
           <div className="flex flex-col md:flex-row gap-10 md:gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
               <h2 className="font-headline text-4xl font-bold tracking-tighter mb-10">System_Bio</h2>
@@ -285,7 +285,8 @@ export default function MobilePortfolio() {
                     }}
                   >
                     <button
-                      className="while-tap-spring w-full text-left px-4 py-4 flex items-center gap-3 font-mono text-sm md:text-base"
+                      className="while-tap-spring w-full text-left flex items-center gap-3 font-mono text-sm md:text-base"
+                      style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}
                       onClick={() => toggleTerminal(i)}
                     >
                       <span className="font-bold shrink-0" style={{ color: '#06b6d4' }}>{'>'}</span>
@@ -325,7 +326,7 @@ export default function MobilePortfolio() {
           </div>
 
           {/* Carousel */}
-          <div className="flex flex-row overflow-x-auto snap-x snap-mandatory px-6 gap-6 pb-24 [&::-webkit-scrollbar]:hidden">
+          <div className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-6 pb-24 [&::-webkit-scrollbar]:hidden" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
@@ -385,7 +386,8 @@ export default function MobilePortfolio() {
 
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
-          className="px-6 flex flex-col items-center justify-center text-center"
+          className="flex flex-col items-center justify-center text-center"
+          style={{ paddingLeft: '24px', paddingRight: '24px' }}
           id="contact"
         >
           <div className="flex flex-col items-center gap-8 mt-10">
