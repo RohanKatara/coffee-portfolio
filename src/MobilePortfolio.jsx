@@ -84,9 +84,17 @@ const TERMINAL_ITEMS = [
 
 const PROJECT_IDS = ['mocktalk', 'krishna', 'crm', 'contentengine']
 
+const NAV_LINKS = [
+  { label: 'Home',    href: '#'        },
+  { label: 'Bio',     href: '#bio'     },
+  { label: 'Works',   href: '#works'   },
+  { label: 'Contact', href: '#contact' },
+]
+
 export default function MobilePortfolio() {
   const [openTerminal, setOpenTerminal] = useState(null)
   const [activeProject, setActiveProject] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // index.css locks overflow:hidden + height:100% on html/body/#root for the 3D
   // scene. Override with inline styles (higher specificity) to enable scrolling.
@@ -161,11 +169,12 @@ export default function MobilePortfolio() {
         <div className="text-xl font-headline font-bold tracking-tighter" style={{ color: '#e5e2e1' }}>
           Portfolio
         </div>
+        {/* Desktop nav */}
         <nav className="hidden md:flex gap-8 items-center">
-          {['Home', 'Bio', 'Works', 'Contact'].map((label, i) => (
+          {NAV_LINKS.map(({ label, href }, i) => (
             <a
               key={label}
-              href={i === 0 ? '#' : `#${label.toLowerCase()}`}
+              href={href}
               className="font-headline text-sm uppercase tracking-widest transition-colors duration-300"
               style={{ color: i === 0 ? '#4cd7f6' : '#bcc9cd' }}
             >
@@ -173,10 +182,81 @@ export default function MobilePortfolio() {
             </a>
           ))}
         </nav>
-        <button className="md:hidden active:scale-95 transition-transform" style={{ color: '#4cd7f6' }}>
-          <span className="material-symbols-outlined">menu</span>
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden active:scale-95 transition-transform"
+          style={{ color: '#4cd7f6' }}
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Toggle navigation"
+        >
+          <span className="material-symbols-outlined">{menuOpen ? 'close' : 'menu'}</span>
         </button>
       </header>
+
+      {/* ── Mobile Nav Drawer ────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.nav
+              className="fixed top-0 right-0 bottom-0 z-40 flex flex-col"
+              style={{
+                width: '72vw',
+                maxWidth: '300px',
+                backgroundColor: 'rgba(13,13,13,0.97)',
+                backdropFilter: 'blur(20px)',
+                borderLeft: '1px solid rgba(255,255,255,0.07)',
+                paddingTop: '80px',
+                paddingLeft: '32px',
+                paddingRight: '32px',
+                paddingBottom: '40px',
+              }}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              <div style={{ marginBottom: '8px' }}>
+                <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#4cd7f6', fontFamily: 'monospace' }}>
+                  NAVIGATION
+                </span>
+              </div>
+              <div
+                style={{ height: '1px', backgroundColor: 'rgba(76,215,246,0.2)', marginBottom: '32px' }}
+              />
+              {NAV_LINKS.map(({ label, href }, i) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: 'block',
+                    fontFamily: 'var(--font-headline, sans-serif)',
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    letterSpacing: '-0.03em',
+                    color: i === 0 ? '#4cd7f6' : '#e5e2e1',
+                    marginBottom: '24px',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  {label}
+                </a>
+              ))}
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
 
       <main>
         <div className="flex flex-col gap-20 w-full">
@@ -316,7 +396,7 @@ export default function MobilePortfolio() {
 
           {/* Title wrapper */}
           <div style={{ paddingLeft: '24px', paddingRight: '24px', marginBottom: '32px' }}>
-            <h2 className="text-4xl font-bold tracking-tighter text-white">Selected Works</h2>
+            <h2 className="font-headline text-4xl font-bold tracking-tighter">Selected Works</h2>
           </div>
 
           {/* Carousel */}
