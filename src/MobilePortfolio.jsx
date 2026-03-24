@@ -44,7 +44,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /about_rohan',
     content: (
-      <p className="payload-text text-lg leading-relaxed" style={{ color: '#bcc9cd' }}>
+      <p className="payload-text text-base leading-relaxed text-gray-300">
         Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> — an
         engineer focused on bridging the gap between high-performance computing and intuitive
         human-centric interfaces. I firmly believe the web was never meant to be a stack of static,
@@ -55,7 +55,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /what_i_build',
     content: (
-      <p className="payload-text text-lg leading-relaxed" style={{ color: '#bcc9cd' }}>
+      <p className="payload-text text-base leading-relaxed text-gray-300">
         My true passion lies in the intersection of engineering and creativity—whether that means
         architecting immersive web environments, exploring the latest in low-latency neural
         processing, or building tools that feel as responsive as biological reflexes.
@@ -65,7 +65,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /off_the_clock',
     content: (
-      <p className="payload-text text-lg leading-relaxed" style={{ color: '#bcc9cd' }}>
+      <p className="payload-text text-base leading-relaxed text-gray-300">
         When I am not obsessively tweaking the grind size of my morning espresso to hit that perfect
         1:2 ratio, you&apos;ll find me deploying code. And if the deployment pipeline is green,
         you&apos;ll likely catch me holding an angle in a{' '}
@@ -240,9 +240,9 @@ export default function MobilePortfolio() {
                     </button>
                     <div className="terminal-content">
                       <div>
-                        <div className="px-6 pb-8 pt-2">
+                        <div className="px-6 pt-3 pb-5">
                           <div
-                            className="h-px w-full mb-6"
+                            className="h-px w-full mb-4"
                             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                           />
                           {item.content}
@@ -288,21 +288,19 @@ export default function MobilePortfolio() {
                     src={project.img}
                   />
                 </div>
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="font-headline text-2xl font-bold">{project.title}</h3>
-                    <span
-                      className="px-3 py-1 rounded-full text-[10px] font-label font-bold border"
-                      style={{
-                        color: project.tagColor,
-                        backgroundColor: project.tagBg,
-                        borderColor: project.tagBorder,
-                      }}
-                    >
-                      {project.tag}
-                    </span>
-                  </div>
-                  <p className="mb-8 line-clamp-3" style={{ color: '#bcc9cd' }}>
+                <div className="p-8 flex flex-col gap-4">
+                  <span
+                    className="self-start px-3 py-1 rounded-full text-[10px] font-mono font-bold border"
+                    style={{
+                      color: project.tagColor,
+                      backgroundColor: project.tagBg,
+                      borderColor: project.tagBorder,
+                    }}
+                  >
+                    {project.tag}
+                  </span>
+                  <h3 className="font-headline text-2xl font-bold tracking-tighter">{project.title}</h3>
+                  <p className="leading-relaxed text-gray-300 line-clamp-3">
                     {project.desc}
                   </p>
                   <div className="mt-auto flex gap-4">
@@ -339,28 +337,30 @@ export default function MobilePortfolio() {
           <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter mb-12">
             Let&apos;s build something.
           </h2>
-          <a
-            className="while-tap-spring px-12 py-5 font-headline font-bold text-lg rounded-xl transition-all duration-300 inline-block"
-            style={{
-              backgroundColor: '#e5e2e1',
-              color: '#0e0e0e',
-              boxShadow: '0 0 40px rgba(255,255,255,0.1)',
-            }}
-            href="mailto:hello@rohankatara.com"
-          >
-            Initialize Contact
-          </a>
-          <div className="mt-16 flex gap-8">
-            {['GitHub', 'LinkedIn', 'Twitter'].map((link) => (
-              <a
-                key={link}
-                className="transition-colors hover:text-[#4cd7f6]"
-                style={{ color: '#bcc9cd' }}
-                href="#"
-              >
-                {link}
-              </a>
-            ))}
+          <div className="flex flex-col items-center gap-8 mt-8">
+            <a
+              className="while-tap-spring px-12 py-5 font-headline font-bold text-lg rounded-xl transition-all duration-300 inline-block"
+              style={{
+                backgroundColor: '#e5e2e1',
+                color: '#0e0e0e',
+                boxShadow: '0 0 40px rgba(255,255,255,0.1)',
+              }}
+              href="mailto:hello@rohankatara.com"
+            >
+              Initialize Contact
+            </a>
+            <div className="flex gap-8">
+              {['GitHub', 'LinkedIn', 'Twitter'].map((link) => (
+                <a
+                  key={link}
+                  className="font-mono text-sm transition-colors hover:text-[#4cd7f6]"
+                  style={{ color: '#bcc9cd' }}
+                  href="#"
+                >
+                  {link}
+                </a>
+              ))}
+            </div>
           </div>
         </section>
 
