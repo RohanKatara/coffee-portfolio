@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { createPortal } from 'react-dom'
 import './mobile.css'
 import MocktalkModal from './components/ui/MocktalkModal'
@@ -50,7 +50,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /about_rohan',
     content: (
-      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
+      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
         Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> — an
         engineer focused on bridging the gap between high-performance computing and intuitive
         human-centric interfaces. I firmly believe the web was never meant to be a stack of static,
@@ -61,7 +61,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /what_i_build',
     content: (
-      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
+      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
         My true passion lies in the intersection of engineering and creativity—whether that means
         architecting immersive web environments, exploring the latest in low-latency neural
         processing, or building tools that feel as responsive as biological reflexes.
@@ -71,7 +71,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /off_the_clock',
     content: (
-      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
+      <p className="leading-relaxed text-gray-300 text-sm md:text-base">
         When I am not obsessively tweaking the grind size of my morning espresso to hit that perfect
         1:2 ratio, you&apos;ll find me deploying code. And if the deployment pipeline is green,
         you&apos;ll likely catch me holding an angle in a{' '}
@@ -265,11 +265,11 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="px-5 max-w-5xl mx-auto w-full overflow-x-hidden" id="bio">
+        <section className="px-5 max-w-5xl mx-auto w-full" id="bio">
           <div className="flex flex-col md:flex-row gap-10 md:gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-3">System_Bio</h2>
-              <div className="h-1 w-12 mb-8" style={{ backgroundColor: '#4cd7f6' }} />
+              <h2 className="font-headline text-4xl font-bold tracking-tighter mb-10">System_Bio</h2>
+              <div className="h-1 w-12" style={{ backgroundColor: '#4cd7f6' }} />
             </div>
 
             <div className="w-full md:w-2/3 flex flex-col gap-3">
@@ -278,30 +278,38 @@ export default function MobilePortfolio() {
                 return (
                   <div
                     key={i}
-                    className={`terminal-item glass-card rounded-xl overflow-hidden border transition-all duration-300${isActive ? ' active' : ''}`}
+                    className="glass-card rounded-xl border transition-colors duration-300"
                     style={{
                       borderColor: isActive ? 'rgba(6,182,212,0.5)' : 'rgba(255,255,255,0.05)',
                       boxShadow: isActive ? '0 0 20px rgba(6,182,212,0.1)' : 'none',
                     }}
                   >
                     <button
-                      className="while-tap-spring w-full text-left px-5 py-4 flex items-center gap-3 font-mono text-sm md:text-base"
+                      className="while-tap-spring w-full text-left px-4 py-4 flex items-center gap-3 font-mono text-sm md:text-base"
                       onClick={() => toggleTerminal(i)}
                     >
                       <span className="font-bold shrink-0" style={{ color: '#06b6d4' }}>{'>'}</span>
                       <span className="min-w-0 break-words" style={{ color: 'rgba(229,226,225,0.9)' }}>{item.cmd}</span>
                     </button>
-                    <div className="terminal-content">
-                      <div>
-                        <div className="px-6 pt-4 pb-6">
-                          <div
-                            className="h-px w-full mb-5"
-                            style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                          />
-                          {item.content}
-                        </div>
-                      </div>
-                    </div>
+                    <AnimatePresence initial={false}>
+                      {isActive && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.35, ease: [0.175, 0.885, 0.32, 1.1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-6 pb-6 pt-2">
+                            <div
+                              className="h-px w-full mb-4"
+                              style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                            />
+                            {item.content}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )
               })}
