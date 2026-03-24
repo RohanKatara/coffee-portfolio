@@ -170,7 +170,7 @@ export default function MobilePortfolio() {
       </header>
 
       <main>
-        <div className="flex flex-col gap-40 w-full">
+        <div className="flex flex-col gap-20 w-full">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 relative overflow-hidden">
@@ -211,13 +211,11 @@ export default function MobilePortfolio() {
           </div>
         </section>
 
-        <div className="h-40 w-full flex-shrink-0" />
-
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
         <section className="px-6 max-w-5xl mx-auto w-full" id="bio">
           <div className="flex flex-col md:flex-row gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-10">System_Bio</h2>
+              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-6">System_Bio</h2>
               <div className="h-1 w-12" style={{ backgroundColor: '#4cd7f6' }} />
             </div>
 
@@ -258,8 +256,6 @@ export default function MobilePortfolio() {
           </div>
         </section>
 
-        <div className="h-40 w-full flex-shrink-0" />
-
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
         <section
           className="overflow-hidden"
@@ -267,7 +263,7 @@ export default function MobilePortfolio() {
           id="works"
         >
           <div className="max-w-6xl mx-auto px-6 pt-16 mb-16">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-10">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-6">
               Selected Works
             </h2>
             <p className="font-body" style={{ color: '#bcc9cd' }}>
@@ -334,8 +330,6 @@ export default function MobilePortfolio() {
             <div className="min-w-[5vw] shrink-0" />
           </div>
         </section>
-
-        <div className="h-40 w-full flex-shrink-0" />
 
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
