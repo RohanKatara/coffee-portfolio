@@ -170,8 +170,10 @@ export default function MobilePortfolio() {
       </header>
 
       <main>
+        <div className="flex flex-col gap-40 w-full">
+
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 pb-32 relative overflow-hidden">
+        <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 relative overflow-hidden">
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
             style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
@@ -209,8 +211,10 @@ export default function MobilePortfolio() {
           </div>
         </section>
 
+        <div className="h-40 w-full flex-shrink-0" />
+
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="py-32 px-6 max-w-5xl mx-auto" id="bio">
+        <section className="px-6 max-w-5xl mx-auto w-full" id="bio">
           <div className="flex flex-col md:flex-row gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
               <h2 className="font-headline text-3xl font-bold tracking-tighter mb-10">System_Bio</h2>
@@ -254,13 +258,15 @@ export default function MobilePortfolio() {
           </div>
         </section>
 
+        <div className="h-40 w-full flex-shrink-0" />
+
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
         <section
-          className="py-32 overflow-hidden"
+          className="overflow-hidden"
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto px-6 mb-16">
+          <div className="max-w-6xl mx-auto px-6 pt-16 mb-16">
             <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-10">
               Selected Works
             </h2>
@@ -329,9 +335,11 @@ export default function MobilePortfolio() {
           </div>
         </section>
 
+        <div className="h-40 w-full flex-shrink-0" />
+
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
-          className="py-32 px-6 flex flex-col items-center justify-center text-center"
+          className="px-6 flex flex-col items-center justify-center text-center"
           id="contact"
         >
           <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter mb-12">
@@ -361,6 +369,8 @@ export default function MobilePortfolio() {
             ))}
           </div>
         </section>
+
+        </div>{/* end gap-40 wrapper */}
       </main>
 
       {/* ── Bottom Navigation (mobile only) ──────────────────────────────── */}
