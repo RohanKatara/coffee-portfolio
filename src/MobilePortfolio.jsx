@@ -262,79 +262,151 @@ export default function MobilePortfolio() {
         <div className="flex flex-col gap-20 w-full">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="relative flex flex-col items-center justify-center min-h-[100dvh] w-full px-6 overflow-hidden">
+        <section className="relative flex flex-col items-center justify-center min-h-[100dvh] w-full overflow-hidden" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
 
-          {/* Data grid base layer */}
-          <div
-            className="absolute inset-0 z-0 opacity-20"
-            style={{
-              backgroundImage:
-                'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-              backgroundSize: '32px 32px',
-            }}
-          />
+          {/* Dot grid */}
+          <div className="absolute inset-0 z-0" style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+            opacity: 0.6,
+          }} />
 
-          {/* Breathing orb 1 — cyan, top-left */}
-          <motion.div
-            className="absolute z-0 rounded-full"
-            style={{
-              width: 256,
-              height: 256,
-              top: '10%',
-              left: '-10%',
-              backgroundColor: 'rgba(6,182,212,0.2)',
-              filter: 'blur(100px)',
-            }}
-            animate={{ y: [0, -30, 0], x: [0, 20, 0], scale: [1, 1.1, 1] }}
+          {/* Center radial spotlight */}
+          <div className="absolute inset-0 z-0" style={{
+            background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6,182,212,0.08) 0%, rgba(124,58,237,0.05) 50%, transparent 100%)',
+          }} />
+
+          {/* Orb 1 — cyan top-left */}
+          <motion.div className="absolute z-0 rounded-full" style={{
+            width: 320, height: 320, top: '5%', left: '-15%',
+            backgroundColor: 'rgba(6,182,212,0.18)', filter: 'blur(90px)',
+          }}
+            animate={{ y: [0, -40, 0], x: [0, 25, 0], scale: [1, 1.12, 1] }}
             transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
           />
 
-          {/* Breathing orb 2 — violet, bottom-right */}
-          <motion.div
-            className="absolute z-0 rounded-full"
-            style={{
-              width: 256,
-              height: 256,
-              bottom: '10%',
-              right: '-10%',
-              backgroundColor: 'rgba(124,58,237,0.2)',
-              filter: 'blur(100px)',
-            }}
-            animate={{ y: [0, 30, 0], x: [0, -20, 0], scale: [1, 1.15, 1] }}
+          {/* Orb 2 — violet bottom-right */}
+          <motion.div className="absolute z-0 rounded-full" style={{
+            width: 360, height: 360, bottom: '5%', right: '-15%',
+            backgroundColor: 'rgba(124,58,237,0.18)', filter: 'blur(90px)',
+          }}
+            animate={{ y: [0, 35, 0], x: [0, -20, 0], scale: [1, 1.15, 1] }}
             transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
           />
 
-          {/* Main content — above background layers */}
-          <div className="relative z-10 flex flex-col items-center">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
-              style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
+          {/* Orb 3 — small cyan accent, bottom-left */}
+          <motion.div className="absolute z-0 rounded-full" style={{
+            width: 180, height: 180, bottom: '20%', left: '-5%',
+            backgroundColor: 'rgba(6,182,212,0.12)', filter: 'blur(60px)',
+          }}
+            animate={{ y: [0, -20, 0], scale: [1, 1.08, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* Horizontal scan line — top */}
+          <div className="absolute z-0 w-full" style={{
+            top: '30%', height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(76,215,246,0.12) 30%, rgba(76,215,246,0.12) 70%, transparent 100%)',
+          }} />
+          {/* Horizontal scan line — bottom */}
+          <div className="absolute z-0 w-full" style={{
+            top: '70%', height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(208,188,255,0.1) 30%, rgba(208,188,255,0.1) 70%, transparent 100%)',
+          }} />
+
+          {/* ── Main content ── */}
+          <div className="relative z-10 flex flex-col items-center w-full">
+
+            {/* Terminal status line */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{ fontFamily: 'monospace', fontSize: '11px', color: 'rgba(76,215,246,0.6)', letterSpacing: '0.15em', marginBottom: '20px' }}
             >
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: '#4cd7f6' }}
-              />
-              <span
-                className="text-[10px] font-label font-bold uppercase tracking-widest"
-                style={{ color: '#4cd7f6' }}
-              >
+              <span style={{ color: 'rgba(76,215,246,0.4)' }}>{'>'}</span>
+              {' '}system.init<span style={{ color: '#4cd7f6' }}>()</span>
+              <span style={{ display: 'inline-block', width: '8px', height: '13px', backgroundColor: '#4cd7f6', marginLeft: '4px', opacity: 0.8, verticalAlign: 'middle', animation: 'floatBob 1s step-end infinite' }} />
+            </motion.div>
+
+            {/* Availability pill */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="inline-flex items-center gap-2 rounded-full border"
+              style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)', padding: '6px 16px', marginBottom: '28px' }}
+            >
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#4cd7f6' }} />
+              <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.15em', color: '#4cd7f6', fontFamily: 'monospace' }}>
                 AVAILABLE FOR NEW OPPORTUNITIES
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-headline text-5xl font-bold tracking-tighter text-center mb-6 neon-glow-cyan">
-              Rohan Katara
-            </h1>
-            <p
-              className="font-body text-xl md:text-2xl max-w-2xl text-center mb-12 opacity-80"
-              style={{ color: '#bcc9cd' }}
+            {/* Name */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="font-headline font-bold tracking-tighter text-center neon-glow-cyan"
+              style={{ fontSize: '3.5rem', lineHeight: 1.05, marginBottom: '16px' }}
             >
-              Software Engineer &amp; AI Builder.
-            </p>
+              Rohan Katara
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              style={{ fontSize: '1.1rem', color: '#bcc9cd', textAlign: 'center', marginBottom: '12px', opacity: 0.85 }}
+            >
+              Software Engineer &amp; AI Builder
+            </motion.p>
+
+            {/* Descriptor line */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              style={{ fontFamily: 'monospace', fontSize: '12px', color: 'rgba(76,215,246,0.5)', marginBottom: '36px', letterSpacing: '0.05em' }}
+            >
+              // crafting AI-powered digital experiences
+            </motion.p>
+
+            {/* Tech stack chips */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.55 }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}
+            >
+              {['React', 'Three.js', 'Python', 'LLMs', 'Node.js'].map((tech, i) => (
+                <motion.span
+                  key={tech}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.35, delay: 0.6 + i * 0.07 }}
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    padding: '4px 12px',
+                    borderRadius: '100px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                    color: 'rgba(229,226,225,0.7)',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {tech}
+                </motion.span>
+              ))}
+            </motion.div>
           </div>
 
+          {/* Scroll indicator */}
           <div className="absolute bottom-12 z-10 flex flex-col items-center">
-            <div className="w-px h-16 bg-gradient-to-b from-[#4cd7f6] to-transparent" />
+            <div className="w-px h-16" style={{ background: 'linear-gradient(to bottom, #4cd7f6, transparent)' }} />
           </div>
         </section>
 
