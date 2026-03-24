@@ -132,7 +132,7 @@ export default function MobilePortfolio() {
   return (
     <div
       className="font-body"
-      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh' }}
+      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '150px' }}
     >
       {/* Atmospheric light leaks */}
       <div
@@ -171,7 +171,7 @@ export default function MobilePortfolio() {
 
       <main>
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 relative overflow-hidden">
+        <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-20 pb-32 relative overflow-hidden">
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
             style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
@@ -210,10 +210,10 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="py-24 px-6 max-w-5xl mx-auto" id="bio">
+        <section className="py-32 px-6 max-w-5xl mx-auto" id="bio">
           <div className="flex flex-col md:flex-row gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-2">System_Bio</h2>
+              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-10">System_Bio</h2>
               <div className="h-1 w-12" style={{ backgroundColor: '#4cd7f6' }} />
             </div>
 
@@ -256,12 +256,12 @@ export default function MobilePortfolio() {
 
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
         <section
-          className="py-24 overflow-hidden"
+          className="py-32 overflow-hidden"
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto px-6 mb-12">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-4">
+          <div className="max-w-6xl mx-auto px-6 mb-16">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-10">
               Selected Works
             </h2>
             <p className="font-body" style={{ color: '#bcc9cd' }}>
