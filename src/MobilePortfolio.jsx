@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
 import './mobile.css'
 import MocktalkModal from './components/ui/MocktalkModal'
@@ -182,33 +183,77 @@ export default function MobilePortfolio() {
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative flex flex-col items-center justify-center min-h-[100dvh] w-full px-6 overflow-hidden">
+
+          {/* Data grid base layer */}
           <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
-            style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
-          >
-            <span
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: '#4cd7f6' }}
-            />
-            <span
-              className="text-[10px] font-label font-bold uppercase tracking-widest"
-              style={{ color: '#4cd7f6' }}
+            className="absolute inset-0 z-0 opacity-20"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+            }}
+          />
+
+          {/* Breathing orb 1 — cyan, top-left */}
+          <motion.div
+            className="absolute z-0 rounded-full"
+            style={{
+              width: 256,
+              height: 256,
+              top: '10%',
+              left: '-10%',
+              backgroundColor: 'rgba(6,182,212,0.2)',
+              filter: 'blur(100px)',
+            }}
+            animate={{ y: [0, -30, 0], x: [0, 20, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* Breathing orb 2 — violet, bottom-right */}
+          <motion.div
+            className="absolute z-0 rounded-full"
+            style={{
+              width: 256,
+              height: 256,
+              bottom: '10%',
+              right: '-10%',
+              backgroundColor: 'rgba(124,58,237,0.2)',
+              filter: 'blur(100px)',
+            }}
+            animate={{ y: [0, 30, 0], x: [0, -20, 0], scale: [1, 1.15, 1] }}
+            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* Main content — above background layers */}
+          <div className="relative z-10 flex flex-col items-center">
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
+              style={{ borderColor: 'rgba(76,215,246,0.3)', backgroundColor: 'rgba(76,215,246,0.05)' }}
             >
-              AVAILABLE FOR NEW OPPORTUNITIES
-            </span>
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ backgroundColor: '#4cd7f6' }}
+              />
+              <span
+                className="text-[10px] font-label font-bold uppercase tracking-widest"
+                style={{ color: '#4cd7f6' }}
+              >
+                AVAILABLE FOR NEW OPPORTUNITIES
+              </span>
+            </div>
+
+            <h1 className="font-headline text-5xl font-bold tracking-tighter text-center mb-6 neon-glow-cyan">
+              Rohan Katara
+            </h1>
+            <p
+              className="font-body text-xl md:text-2xl max-w-2xl text-center mb-12 opacity-80"
+              style={{ color: '#bcc9cd' }}
+            >
+              Software Engineer &amp; AI Builder.
+            </p>
           </div>
 
-          <h1 className="font-headline text-5xl font-bold tracking-tighter text-center mb-6 neon-glow-cyan">
-            Rohan Katara
-          </h1>
-          <p
-            className="font-body text-xl md:text-2xl max-w-2xl text-center mb-12 opacity-80"
-            style={{ color: '#bcc9cd' }}
-          >
-            Software Engineer &amp; AI Builder.
-          </p>
-
-          <div className="absolute bottom-12 flex flex-col items-center gap-4">
+          <div className="absolute bottom-12 z-10 flex flex-col items-center gap-4">
             <div className="w-px h-16 bg-gradient-to-b from-[#4cd7f6] to-transparent" />
             <span
               className="text-[10px] font-label uppercase tracking-[0.3em] opacity-50"
