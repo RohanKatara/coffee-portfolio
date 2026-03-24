@@ -333,7 +333,7 @@ export default function MobilePortfolio() {
             </div>
           </div>
 
-          <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pb-24 gap-6 md:gap-12">
+          <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pt-6 pb-24 gap-6 md:gap-12">
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
