@@ -49,7 +49,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /about_rohan',
     content: (
-      <p className="payload-text text-base leading-relaxed text-gray-300">
+      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
         Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> — an
         engineer focused on bridging the gap between high-performance computing and intuitive
         human-centric interfaces. I firmly believe the web was never meant to be a stack of static,
@@ -60,7 +60,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /what_i_build',
     content: (
-      <p className="payload-text text-base leading-relaxed text-gray-300">
+      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
         My true passion lies in the intersection of engineering and creativity—whether that means
         architecting immersive web environments, exploring the latest in low-latency neural
         processing, or building tools that feel as responsive as biological reflexes.
@@ -70,7 +70,7 @@ const TERMINAL_ITEMS = [
   {
     cmd: 'open /off_the_clock',
     content: (
-      <p className="payload-text text-base leading-relaxed text-gray-300">
+      <p className="payload-text text-sm leading-relaxed text-gray-300 break-words">
         When I am not obsessively tweaking the grind size of my morning espresso to hit that perfect
         1:2 ratio, you&apos;ll find me deploying code. And if the deployment pipeline is green,
         you&apos;ll likely catch me holding an angle in a{' '}
@@ -220,11 +220,11 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="px-6 max-w-5xl mx-auto w-full" id="bio">
-          <div className="flex flex-col md:flex-row gap-12 items-start">
+        <section className="px-5 max-w-5xl mx-auto w-full overflow-x-hidden" id="bio">
+          <div className="flex flex-col md:flex-row gap-10 md:gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-8">System_Bio</h2>
-              <div className="h-1 w-12" style={{ backgroundColor: '#4cd7f6' }} />
+              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-3">System_Bio</h2>
+              <div className="h-1 w-12 mb-8" style={{ backgroundColor: '#4cd7f6' }} />
             </div>
 
             <div className="w-full md:w-2/3 flex flex-col gap-3">
@@ -240,15 +240,15 @@ export default function MobilePortfolio() {
                     }}
                   >
                     <button
-                      className="while-tap-spring w-full text-left p-6 flex items-center gap-4 font-mono text-sm md:text-base"
+                      className="while-tap-spring w-full text-left px-5 py-4 flex items-center gap-3 font-mono text-sm md:text-base"
                       onClick={() => toggleTerminal(i)}
                     >
-                      <span className="font-bold" style={{ color: '#06b6d4' }}>{'>'}</span>
-                      <span style={{ color: 'rgba(229,226,225,0.9)' }}>{item.cmd}</span>
+                      <span className="font-bold shrink-0" style={{ color: '#06b6d4' }}>{'>'}</span>
+                      <span className="min-w-0 break-words" style={{ color: 'rgba(229,226,225,0.9)' }}>{item.cmd}</span>
                     </button>
                     <div className="terminal-content">
                       <div>
-                        <div className="p-6">
+                        <div className="px-5 pt-1 pb-5">
                           <div
                             className="h-px w-full mb-4"
                             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
@@ -270,11 +270,11 @@ export default function MobilePortfolio() {
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto px-6 pt-16 mb-8">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-3">
+          <div className="max-w-6xl mx-auto px-5 pt-14 mb-8">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-2">
               Selected Works
             </h2>
-            <p className="font-body" style={{ color: '#bcc9cd' }}>
+            <p className="font-body text-sm" style={{ color: '#bcc9cd' }}>
               Current versions of experimental deployments.
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function MobilePortfolio() {
                     src={project.img}
                   />
                 </div>
-                <div className="p-8 flex flex-col gap-4">
+                <div className="p-6 flex flex-col gap-3">
                   <span
                     className="self-start px-3 py-1 rounded-full text-[10px] font-mono font-bold border"
                     style={{
@@ -308,8 +308,8 @@ export default function MobilePortfolio() {
                   >
                     {project.tag}
                   </span>
-                  <h3 className="font-headline text-2xl font-bold tracking-tighter">{project.title}</h3>
-                  <p className="leading-relaxed text-gray-300 line-clamp-3">
+                  <h3 className="font-headline text-2xl font-bold tracking-tighter mt-1">{project.title}</h3>
+                  <p className="text-sm leading-relaxed text-gray-400 mt-1">
                     {project.desc}
                   </p>
                   <button
@@ -339,11 +339,11 @@ export default function MobilePortfolio() {
 
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
-          className="px-6 flex flex-col items-center justify-center text-center"
+          className="px-5 flex flex-col items-center justify-center text-center"
           id="contact"
         >
           <div className="flex flex-col items-center gap-8 mt-10">
-            <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter">
+            <h2 className="font-headline text-4xl md:text-7xl font-bold tracking-tighter leading-tight">
               Let&apos;s build something.
             </h2>
             <a
