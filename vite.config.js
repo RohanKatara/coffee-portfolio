@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+  base: '/coffee-portfolio/',
   plugins: [react(), tailwindcss()],
   assetsInclude: ['**/*.glb', '**/*.gltf', '**/*.hdr'],
   build: {
