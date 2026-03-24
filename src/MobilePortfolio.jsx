@@ -16,6 +16,7 @@ const PROJECTS = [
     tagBorder: 'rgba(76,215,246,0.2)',
     desc: 'A high-intensity behavioral interview simulator powered by low-latency neural processing. Real-time feedback loops for professional growth.',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDCXpd1DVCXx7ek92AsiIi-KK58y_Ejb1l0W6Mhca30QdGWU-6_-36f474fsNLDN6ERqDAVPJL8D0Lx1z8DyrnWSP-ZmRg0x4hCeNEQsHlkDHT0eS0Vp6yJfi1J6DnaW-KwOkQs0ETjtWxT-POrwgH-zGzReetZ1lfSe_W-ngoOOaXF_Wlp26RzQF6arJY_O0caEpI3IyfNm3ppxPC2F4Yj3e5p6Q9mbZ_LgYnf9fi2Ik4iHMt9EBxtDkpJoIaPZUPMdyKtILuZSD4',
+    alt: 'MockTalk AI Behavioral Interview Simulator by Rohan Katara — real-time feedback dashboard',
   },
   {
     title: 'Krishna.AI',
@@ -25,6 +26,7 @@ const PROJECTS = [
     tagBorder: 'rgba(208,188,255,0.2)',
     desc: 'Ancient wisdom for modern problems. A digital space for reflection and ethical alignment through specialized Large Language Models.',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCIBTadpuLNymDrkLRfnRipa7HW8H-8w5c5iioQVCIL0V55lk_Qh-YdU-0oHHMRHrMprwFG5xAXlJ1HLwdZA8RlU0X8YkyazKCv2X7GzsjQKGDLX-1w9M0Biht4PZyyO-gARIIx_-6cAkwBzxZ9npfIrfOSQbfSqbkT3jFbrKvIl97hAFcVmyW1HCsgHHqeNqLxe3w0y0c7af6KNq5iBuQOpqsg_kqk-REKcpEU2GUCA23WhontnjUA0KL4DgejXGN5LZR7D7TNNng',
+    alt: 'Krishna.AI — LLM-powered spiritual guidance and ethical alignment interface by Rohan Katara',
   },
   {
     title: 'AI Lead Gatekeeper',
@@ -34,6 +36,7 @@ const PROJECTS = [
     tagBorder: 'rgba(76,215,246,0.2)',
     desc: 'An intelligent autonomous agent that intercepts, qualifies, and routes leads directly into the CRM using natural language processing.',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAdLdWMAMNXr1AN8UiJqPFz-a49BBJ0RRoh5iPGz1UM0s_WK07cEE-lhzn8PlLklFy937aNralaxUk53QwE6ejAG1MOKLOqco-7ZMvxCgdrU6kX_1e34PbezAX3RCdldZ3bMi3XtsSLCx6H4hOdVhbK3Ynge1-2WNqiUDtVOE0PphOz89vY_HaOTsZC-hgGQcqyC5ztdDNAwsxgAmMu8O52eN8mK4ukLONw-M0hER5hFfKvh1sHYwETf2EJleo4ZcloftMt2PD7LFc',
+    alt: 'AI Lead Gatekeeper CRM Automation Agent — autonomous lead qualification pipeline by Rohan Katara',
   },
   {
     title: 'Content Bot',
@@ -43,6 +46,7 @@ const PROJECTS = [
     tagBorder: 'rgba(208,188,255,0.2)',
     desc: 'A fully automated content generation and distribution pipeline leveraging LLMs to scale digital presence.',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDy2QWfN4ciZ_0Z8W-MsPZeLmxeSnd88loPR942dEm-pptI0aYy2ms80Fs8XT9NrnTh09o7vOhLaMrDjq8r-oSNuII_nCRCxQGFZdmhjhPm95zPa8gAKtIx2W5cz4Q53lYDDNfVaHVE3hvGse0ZR1sMzWV4dhbv68IuYfmwCDwRP4bxlhaZR96Beo5baGaJVIua45iOsiDoU9lVHpEpVF-zAcO9NKFGfdSKrMUoN5eVByObmTauQw2zJ6c74GGl_jyUfgnPSpeSHgo',
+    alt: 'Content Bot Generative AI Automated Content Pipeline Dashboard — LLM content distribution by Rohan Katara',
   },
 ]
 
@@ -548,7 +552,7 @@ export default function MobilePortfolio() {
                   style={{ backgroundColor: '#353534' }}
                 >
                   <img
-                    alt={`${project.title} Project Cover`}
+                    alt={project.alt}
                     className="project-card-image w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                     src={project.img}
                   />
