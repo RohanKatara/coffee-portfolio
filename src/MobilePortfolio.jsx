@@ -322,13 +322,15 @@ export default function MobilePortfolio() {
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto px-5 pt-14 mb-8">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-2">
-              Selected Works
-            </h2>
-            <p className="font-body text-sm" style={{ color: '#bcc9cd' }}>
-              Current versions of experimental deployments.
-            </p>
+          <div className="max-w-6xl mx-auto pt-14">
+            <div className="flex flex-col gap-3 mb-10 px-6">
+              <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter">
+                Selected Works
+              </h2>
+              <p className="font-body text-sm text-gray-400">
+                Current versions of experimental deployments.
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pb-24 gap-6 md:gap-12">
