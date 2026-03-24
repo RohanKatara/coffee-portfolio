@@ -51,9 +51,9 @@ const TERMINAL_ITEMS = [
     cmd: 'open /about_rohan',
     content: (
       <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
-        Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> — an
-        engineer focused on bridging the gap between high-performance computing and intuitive
-        human-centric interfaces. I firmly believe the web was never meant to be a stack of static,
+        Hey! I&apos;m <span className="font-bold" style={{ color: '#4cd7f6' }}>Rohan Katara</span> an
+        engineer focused on bridging the gap between high performance computing and intuitive
+        human centric interfaces. I firmly believe the web was never meant to be a stack of static,
         boring documents. It&apos;s a living, breathing canvas.
       </p>
     ),
@@ -62,8 +62,8 @@ const TERMINAL_ITEMS = [
     cmd: 'open /what_i_build',
     content: (
       <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
-        My true passion lies in the intersection of engineering and creativity—whether that means
-        architecting immersive web environments, exploring the latest in low-latency neural
+        My true passion lies in the intersection of engineering and creativity whether that means
+        architecting immersive web environments, exploring the latest in low latency neural
         processing, or building tools that feel as responsive as biological reflexes.
       </p>
     ),
@@ -74,8 +74,7 @@ const TERMINAL_ITEMS = [
       <p style={{ lineHeight: '1.75', color: 'rgba(209,213,219,1)', fontSize: '0.875rem', margin: 0 }}>
         When I am not obsessively tweaking the grind size of my morning espresso to hit that perfect
         1:2 ratio, you&apos;ll find me deploying code. And if the deployment pipeline is green,
-        you&apos;ll likely catch me holding an angle in a{' '}
-        <span className="italic" style={{ color: '#d0bcff' }}>Valorant</span> match, applying the
+        you&apos;ll likely catch me holding an angle in a Valorant match, applying the
         same tactical precision to the screen as I do to my architecture.
       </p>
     ),
