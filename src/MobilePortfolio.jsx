@@ -223,11 +223,11 @@ export default function MobilePortfolio() {
         <section className="px-6 max-w-5xl mx-auto w-full" id="bio">
           <div className="flex flex-col md:flex-row gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-6">System_Bio</h2>
+              <h2 className="font-headline text-3xl font-bold tracking-tighter mb-8">System_Bio</h2>
               <div className="h-1 w-12" style={{ backgroundColor: '#4cd7f6' }} />
             </div>
 
-            <div className="w-full md:w-2/3 space-y-4">
+            <div className="w-full md:w-2/3 flex flex-col gap-3">
               {TERMINAL_ITEMS.map((item, i) => {
                 const isActive = openTerminal === i
                 return (
@@ -248,7 +248,7 @@ export default function MobilePortfolio() {
                     </button>
                     <div className="terminal-content">
                       <div>
-                        <div className="px-6 pt-3 pb-5">
+                        <div className="p-6">
                           <div
                             className="h-px w-full mb-4"
                             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
@@ -270,8 +270,8 @@ export default function MobilePortfolio() {
           style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}
           id="works"
         >
-          <div className="max-w-6xl mx-auto px-6 pt-16 mb-16">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-6">
+          <div className="max-w-6xl mx-auto px-6 pt-16 mb-8">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter mb-3">
               Selected Works
             </h2>
             <p className="font-body" style={{ color: '#bcc9cd' }}>
@@ -279,7 +279,7 @@ export default function MobilePortfolio() {
             </p>
           </div>
 
-          <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 gap-6 md:gap-12">
+          <div className="flex flex-row flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar px-6 pb-24 gap-6 md:gap-12">
             {PROJECTS.map((project, i) => (
               <div
                 key={i}
@@ -342,12 +342,12 @@ export default function MobilePortfolio() {
           className="px-6 flex flex-col items-center justify-center text-center"
           id="contact"
         >
-          <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter mb-12">
-            Let&apos;s build something.
-          </h2>
-          <div className="flex flex-col items-center gap-8 mt-8">
+          <div className="flex flex-col items-center gap-8 mt-10">
+            <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter">
+              Let&apos;s build something.
+            </h2>
             <a
-              className="while-tap-spring px-12 py-5 font-headline font-bold text-lg rounded-xl transition-all duration-300 inline-block"
+              className="while-tap-spring px-8 py-4 font-headline font-bold text-lg rounded-full transition-all duration-300 inline-block"
               style={{
                 backgroundColor: '#e5e2e1',
                 color: '#0e0e0e',
