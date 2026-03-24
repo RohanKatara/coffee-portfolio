@@ -149,16 +149,30 @@ export default function MobilePortfolio() {
   return (
     <div
       className="font-body"
-      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '96px' }}
+      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '96px', position: 'relative' }}
     >
-      {/* Atmospheric light leaks */}
-      <div
-        className="light-leak"
-        style={{ width: 500, height: 500, top: -80, left: -80, backgroundColor: '#06b6d4' }}
+      {/* ── Global persistent dot grid (fixed, covers full scroll height) ── */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }} />
+      {/* ── Global floating orbs (fixed so they persist while scrolling) ── */}
+      <motion.div style={{
+        position: 'fixed', zIndex: 0, pointerEvents: 'none',
+        width: 500, height: 500, top: '-10%', left: '-15%', borderRadius: '50%',
+        backgroundColor: 'rgba(6,182,212,0.07)', filter: 'blur(120px)',
+      }}
+        animate={{ y: [0, -40, 0], x: [0, 30, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
-      <div
-        className="light-leak"
-        style={{ width: 600, height: 600, bottom: 0, right: -80, backgroundColor: '#571bc1' }}
+      <motion.div style={{
+        position: 'fixed', zIndex: 0, pointerEvents: 'none',
+        width: 600, height: 600, bottom: '-10%', right: '-20%', borderRadius: '50%',
+        backgroundColor: 'rgba(124,58,237,0.07)', filter: 'blur(130px)',
+      }}
+        animate={{ y: [0, 40, 0], x: [0, -30, 0] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
@@ -258,7 +272,7 @@ export default function MobilePortfolio() {
         )}
       </AnimatePresence>
 
-      <main>
+      <main style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex flex-col gap-20 w-full">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
@@ -411,7 +425,30 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="max-w-5xl mx-auto w-full" style={{ paddingLeft: '24px', paddingRight: '24px' }} id="bio">
+        <section className="relative w-full overflow-hidden" id="bio">
+          {/* Bio section background */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(6,182,212,0.03) 40%, rgba(124,58,237,0.03) 100%)',
+          }} />
+          {/* Cyan glow — left edge */}
+          <div style={{
+            position: 'absolute', left: '-80px', top: '20%', width: '300px', height: '300px',
+            borderRadius: '50%', backgroundColor: 'rgba(6,182,212,0.06)', filter: 'blur(80px)', pointerEvents: 'none',
+          }} />
+          {/* Section label */}
+          <div style={{
+            position: 'absolute', top: '12px', right: '24px',
+            fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.2em',
+            color: 'rgba(76,215,246,0.25)', pointerEvents: 'none',
+          }}>01 // BIO</div>
+          {/* Scan line */}
+          <div style={{
+            position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(76,215,246,0.06) 40%, rgba(76,215,246,0.06) 60%, transparent)',
+          }} />
+
+          <div className="relative max-w-5xl mx-auto w-full" style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '8px', paddingBottom: '8px' }}>
           <div className="flex flex-col md:flex-row gap-10 md:gap-12 items-start">
             <div className="w-full md:w-1/3 md:sticky md:top-32">
               <h2 className="font-headline text-4xl font-bold tracking-tighter mb-10">System_Bio</h2>
@@ -461,13 +498,40 @@ export default function MobilePortfolio() {
               })}
             </div>
           </div>
+          </div>
         </section>
 
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
-        <section className="w-full flex flex-col pt-10" id="works" style={{ backgroundColor: 'rgba(14,14,14,0.5)' }}>
+        <section className="relative w-full flex flex-col pt-10 overflow-hidden" id="works" style={{ backgroundColor: 'rgba(10,10,10,0.6)' }}>
+
+          {/* Works background */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'linear-gradient(180deg, rgba(124,58,237,0.04) 0%, transparent 50%, rgba(6,182,212,0.03) 100%)',
+          }} />
+          {/* Violet glow — right edge */}
+          <div style={{
+            position: 'absolute', right: '-60px', top: '10%', width: '280px', height: '280px',
+            borderRadius: '50%', backgroundColor: 'rgba(124,58,237,0.08)', filter: 'blur(80px)', pointerEvents: 'none',
+          }} />
+          {/* Scan lines */}
+          <div style={{
+            position: 'absolute', top: '35%', left: 0, right: 0, height: '1px', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(208,188,255,0.07) 40%, rgba(208,188,255,0.07) 60%, transparent)',
+          }} />
+          <div style={{
+            position: 'absolute', top: '75%', left: 0, right: 0, height: '1px', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(76,215,246,0.06) 40%, rgba(76,215,246,0.06) 60%, transparent)',
+          }} />
+          {/* Section label */}
+          <div style={{
+            position: 'absolute', top: '12px', right: '24px',
+            fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.2em',
+            color: 'rgba(208,188,255,0.25)', pointerEvents: 'none',
+          }}>02 // WORKS</div>
 
           {/* Title wrapper */}
-          <div style={{ paddingLeft: '24px', paddingRight: '24px', marginBottom: '32px' }}>
+          <div style={{ position: 'relative', paddingLeft: '24px', paddingRight: '24px', marginBottom: '32px' }}>
             <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '2.25rem', fontWeight: '700', letterSpacing: '-0.04em' }}>Selected Works</h2>
           </div>
 
@@ -532,11 +596,38 @@ export default function MobilePortfolio() {
 
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
-          className="flex flex-col items-center justify-center text-center"
+          className="relative flex flex-col items-center justify-center text-center overflow-hidden"
           style={{ paddingLeft: '24px', paddingRight: '24px' }}
           id="contact"
         >
-          <div className="flex flex-col items-center gap-8 mt-10">
+          {/* Contact background */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse 90% 70% at 50% 60%, rgba(6,182,212,0.07) 0%, rgba(124,58,237,0.05) 50%, transparent 100%)',
+          }} />
+          {/* Large glow behind heading */}
+          <div style={{
+            position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
+            width: '400px', height: '400px', borderRadius: '50%',
+            backgroundColor: 'rgba(76,215,246,0.05)', filter: 'blur(100px)', pointerEvents: 'none',
+          }} />
+          {/* Scan lines */}
+          <div style={{
+            position: 'absolute', top: '25%', left: 0, right: 0, height: '1px', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(76,215,246,0.08) 30%, rgba(76,215,246,0.08) 70%, transparent)',
+          }} />
+          <div style={{
+            position: 'absolute', top: '80%', left: 0, right: 0, height: '1px', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(208,188,255,0.07) 30%, rgba(208,188,255,0.07) 70%, transparent)',
+          }} />
+          {/* Section label */}
+          <div style={{
+            position: 'absolute', top: '12px', right: '24px',
+            fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.2em',
+            color: 'rgba(76,215,246,0.25)', pointerEvents: 'none',
+          }}>03 // CONTACT</div>
+
+          <div className="relative flex flex-col items-center gap-8 mt-10">
             <h2 className="font-headline text-4xl font-bold tracking-tighter leading-tight">
               Let&apos;s build something.
             </h2>
