@@ -149,7 +149,7 @@ export default function MobilePortfolio() {
   return (
     <div
       className="font-body"
-      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '96px', position: 'relative' }}
+      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '0', position: 'relative' }}
     >
       {/* ── Global persistent dot grid (fixed, covers full scroll height) ── */}
       <div style={{
@@ -395,7 +395,7 @@ export default function MobilePortfolio() {
               transition={{ duration: 0.6, delay: 0.55 }}
               style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}
             >
-              {['React', 'Three.js', 'Python', 'LLMs', 'Node.js'].map((tech, i) => (
+              {['React', 'Three.js', 'Python', 'GenAI', 'LLMs', 'Node.js'].map((tech, i) => (
                 <motion.span
                   key={tech}
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -662,6 +662,30 @@ export default function MobilePortfolio() {
 
         </div>{/* end gap-40 wrapper */}
       </main>
+
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer style={{ position: 'relative', overflow: 'hidden', paddingTop: '40px', paddingBottom: '32px', paddingLeft: '24px', paddingRight: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        {/* Background glow */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 100% 120% at 50% 100%, rgba(6,182,212,0.06) 0%, rgba(124,58,237,0.04) 60%, transparent 100%)' }} />
+        {/* Scan line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(76,215,246,0.15) 30%, rgba(76,215,246,0.15) 70%, transparent)' }} />
+
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          {/* Terminal signature */}
+          <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'rgba(76,215,246,0.4)', letterSpacing: '0.15em' }}>
+            <span style={{ color: 'rgba(76,215,246,0.25)' }}>{'>'}</span> rohan.katara<span style={{ color: '#4cd7f6' }}>.exe</span> —— all rights reserved
+          </div>
+          {/* Dot divider */}
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: i === 1 ? '#4cd7f6' : 'rgba(255,255,255,0.15)' }} />
+            ))}
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>
+            © 2025 — built with React + Three.js
+          </div>
+        </div>
+      </footer>
 
       {/* ── Project Modals (portalled to body so #root overflow/stacking never clips them) */}
       {activeProject && createPortal(
