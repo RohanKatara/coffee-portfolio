@@ -360,7 +360,7 @@ export default function MobilePortfolio() {
                     {project.tag}
                   </span>
                   <h3 className="font-headline text-2xl font-bold tracking-tighter mt-1">{project.title}</h3>
-                  <p className="text-sm leading-relaxed text-gray-400 mt-1">
+                  <p className="text-sm leading-relaxed text-gray-400 mt-3 mb-3">
                     {project.desc}
                   </p>
                   <button
