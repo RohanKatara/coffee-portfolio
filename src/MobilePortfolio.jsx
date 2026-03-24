@@ -159,7 +159,7 @@ export default function MobilePortfolio() {
         style={{ backgroundColor: 'rgba(19,19,19,0.8)' }}
       >
         <div className="text-xl font-headline font-bold tracking-tighter" style={{ color: '#e5e2e1' }}>
-          Rohan Katara
+          Portfolio
         </div>
         <nav className="hidden md:flex gap-8 items-center">
           {['Home', 'Bio', 'Works', 'Contact'].map((label, i) => (
@@ -327,9 +327,6 @@ export default function MobilePortfolio() {
               <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-tighter">
                 Selected Works
               </h2>
-              <p className="font-body text-sm text-gray-400">
-                Current versions of experimental deployments.
-              </p>
             </div>
           </div>
 
@@ -347,7 +344,7 @@ export default function MobilePortfolio() {
                 >
                   <img
                     alt={`${project.title} Project Cover`}
-                    className="project-card-image w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 opacity-60"
+                    className="project-card-image w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                     src={project.img}
                   />
                 </div>
