@@ -98,6 +98,12 @@ export default function MobilePortfolio() {
   const [openTerminal, setOpenTerminal] = useState(null)
   const [activeProject, setActiveProject] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showDesktopNotice, setShowDesktopNotice] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDesktopNotice(false), 7000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // index.css locks overflow:hidden + height:100% on html/body/#root for the 3D
   // scene. Override with inline styles (higher specificity) to enable scrolling.
@@ -154,6 +160,50 @@ export default function MobilePortfolio() {
       className="font-body"
       style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '0', position: 'relative' }}
     >
+      {/* ── Desktop notice toast ── */}
+      <AnimatePresence>
+        {showDesktopNotice && (
+          <motion.div
+            key="desktop-notice"
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 20, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="fixed top-0 left-0 right-0 z-[100] flex justify-center px-4 pointer-events-none mt-4"
+          >
+            <div
+              className="pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3"
+              style={{
+                background: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(76, 215, 246, 0.15)',
+                boxShadow: '0 0 20px rgba(76, 215, 246, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              <span
+                className="text-sm"
+                style={{ color: '#4cd7f6', textShadow: '0 0 10px rgba(6,182,212,0.4)' }}
+              >
+                &#9733;
+              </span>
+              <span className="text-sm font-medium" style={{ color: '#bcc9cd' }}>
+                Tip: Visit this site on a PC to experience the full interactive 3D cafe!
+              </span>
+              <button
+                onClick={() => setShowDesktopNotice(false)}
+                className="ml-1 transition-colors text-xs leading-none"
+                style={{ color: 'rgba(188, 201, 205, 0.4)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#4cd7f6')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(188, 201, 205, 0.4)')}
+                aria-label="Dismiss"
+              >
+                &#10005;
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Global persistent dot grid (fixed, covers full scroll height) ── */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
