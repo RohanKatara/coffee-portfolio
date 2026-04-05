@@ -158,7 +158,11 @@ export default function MobilePortfolio() {
   return (
     <div
       className="font-body"
-      style={{ backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '0', position: 'relative' }}
+      style={{
+        backgroundColor: '#050505', color: '#e5e2e1', minHeight: '100vh', paddingBottom: '0', position: 'relative',
+        backgroundImage: 'radial-gradient(ellipse at 15% 25%, rgba(6,182,212,0.045) 0%, transparent 50%), radial-gradient(ellipse at 85% 75%, rgba(124,58,237,0.045) 0%, transparent 50%), radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)',
+        backgroundSize: '100% 100%, 100% 100%, 28px 28px',
+      }}
     >
       {/* ── Desktop notice toast ── */}
       <AnimatePresence>
@@ -174,8 +178,7 @@ export default function MobilePortfolio() {
             <div
               className="pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3"
               style={{
-                background: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(12px)',
+                background: 'rgba(0, 0, 0, 0.95)',
                 border: '1px solid rgba(76, 215, 246, 0.15)',
                 boxShadow: '0 0 20px rgba(76, 215, 246, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4)',
               }}
@@ -204,34 +207,12 @@ export default function MobilePortfolio() {
         )}
       </AnimatePresence>
 
-      {/* ── Global persistent dot grid (fixed, covers full scroll height) ── */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }} />
-      {/* ── Global floating orbs (fixed so they persist while scrolling) ── */}
-      <motion.div style={{
-        position: 'fixed', zIndex: 0, pointerEvents: 'none',
-        width: 500, height: 500, top: '-10%', left: '-15%', borderRadius: '50%',
-        backgroundColor: 'rgba(6,182,212,0.07)', filter: 'blur(120px)',
-      }}
-        animate={{ y: [0, -40, 0], x: [0, 30, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div style={{
-        position: 'fixed', zIndex: 0, pointerEvents: 'none',
-        width: 600, height: 600, bottom: '-10%', right: '-20%', borderRadius: '50%',
-        backgroundColor: 'rgba(124,58,237,0.07)', filter: 'blur(130px)',
-      }}
-        animate={{ y: [0, 40, 0], x: [0, -30, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      {/* ── Global ambient background (scrolls with content — no fixed compositing cost) ── */}
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header
-        className="fixed top-0 w-full z-50 backdrop-blur-md border-b border-white/5 flex justify-between items-center py-4"
-        style={{ backgroundColor: 'rgba(19,19,19,0.8)', paddingLeft: '24px', paddingRight: '24px' }}
+        className="fixed top-0 w-full z-50 border-b border-white/5 flex justify-between items-center py-4"
+        style={{ backgroundColor: 'rgba(19,19,19,0.97)', paddingLeft: '24px', paddingRight: '24px' }}
       >
         <div className="text-xl font-headline font-bold tracking-tighter" style={{ color: '#e5e2e1' }}>
           Portfolio
@@ -279,8 +260,7 @@ export default function MobilePortfolio() {
               style={{
                 width: '72vw',
                 maxWidth: '300px',
-                backgroundColor: 'rgba(13,13,13,0.97)',
-                backdropFilter: 'blur(20px)',
+                backgroundColor: 'rgba(13,13,13,0.98)',
                 borderLeft: '1px solid rgba(255,255,255,0.07)',
                 paddingTop: '80px',
                 paddingLeft: '32px',
@@ -331,44 +311,28 @@ export default function MobilePortfolio() {
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative flex flex-col items-center justify-center min-h-[100dvh] w-full overflow-hidden" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
 
-          {/* Dot grid */}
-          <div className="absolute inset-0 z-0" style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-            opacity: 0.6,
-          }} />
-
           {/* Center radial spotlight */}
           <div className="absolute inset-0 z-0" style={{
             background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6,182,212,0.08) 0%, rgba(124,58,237,0.05) 50%, transparent 100%)',
           }} />
 
-          {/* Orb 1 — cyan top-left */}
-          <motion.div className="absolute z-0 rounded-full" style={{
+          {/* Orb 1 — cyan top-left (static radial gradient, no blur filter) */}
+          <div className="absolute z-0 rounded-full" style={{
             width: 320, height: 320, top: '5%', left: '-15%',
-            backgroundColor: 'rgba(6,182,212,0.18)', filter: 'blur(90px)',
-          }}
-            animate={{ y: [0, -40, 0], x: [0, 25, 0], scale: [1, 1.12, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          />
+            background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%)',
+          }} />
 
           {/* Orb 2 — violet bottom-right */}
-          <motion.div className="absolute z-0 rounded-full" style={{
+          <div className="absolute z-0 rounded-full" style={{
             width: 360, height: 360, bottom: '5%', right: '-15%',
-            backgroundColor: 'rgba(124,58,237,0.18)', filter: 'blur(90px)',
-          }}
-            animate={{ y: [0, 35, 0], x: [0, -20, 0], scale: [1, 1.15, 1] }}
-            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
-          />
+            background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%)',
+          }} />
 
           {/* Orb 3 — small cyan accent, bottom-left */}
-          <motion.div className="absolute z-0 rounded-full" style={{
+          <div className="absolute z-0 rounded-full" style={{
             width: 180, height: 180, bottom: '20%', left: '-5%',
-            backgroundColor: 'rgba(6,182,212,0.12)', filter: 'blur(60px)',
-          }}
-            animate={{ y: [0, -20, 0], scale: [1, 1.08, 1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          />
+            background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
+          }} />
 
           {/* Horizontal scan line — top */}
           <div className="absolute z-0 w-full" style={{
@@ -478,16 +442,16 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Bio — Terminal Accordion ──────────────────────────────────────── */}
-        <section className="relative w-full overflow-hidden" id="bio">
+        <section className="relative w-full overflow-hidden" id="bio" style={{ contain: 'content' }}>
           {/* Bio section background */}
           <div style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
             background: 'linear-gradient(180deg, transparent 0%, rgba(6,182,212,0.03) 40%, rgba(124,58,237,0.03) 100%)',
           }} />
-          {/* Cyan glow — left edge */}
+          {/* Cyan glow — left edge (radial gradient, no blur filter) */}
           <div style={{
             position: 'absolute', left: '-80px', top: '20%', width: '300px', height: '300px',
-            borderRadius: '50%', backgroundColor: 'rgba(6,182,212,0.06)', filter: 'blur(80px)', pointerEvents: 'none',
+            borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)', pointerEvents: 'none',
           }} />
           {/* Section label */}
           <div style={{
@@ -555,17 +519,17 @@ export default function MobilePortfolio() {
         </section>
 
         {/* ── Selected Works — Horizontal Scroll Strip ─────────────────────── */}
-        <section className="relative w-full flex flex-col pt-10 overflow-hidden" id="works" style={{ backgroundColor: 'rgba(10,10,10,0.6)' }}>
+        <section className="relative w-full flex flex-col pt-10 overflow-hidden" id="works" style={{ backgroundColor: 'rgba(10,10,10,0.6)', contain: 'content' }}>
 
           {/* Works background */}
           <div style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
             background: 'linear-gradient(180deg, rgba(124,58,237,0.04) 0%, transparent 50%, rgba(6,182,212,0.03) 100%)',
           }} />
-          {/* Violet glow — right edge */}
+          {/* Violet glow — right edge (radial gradient, no blur filter) */}
           <div style={{
             position: 'absolute', right: '-60px', top: '10%', width: '280px', height: '280px',
-            borderRadius: '50%', backgroundColor: 'rgba(124,58,237,0.08)', filter: 'blur(80px)', pointerEvents: 'none',
+            borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)', pointerEvents: 'none',
           }} />
           {/* Scan lines */}
           <div style={{
@@ -605,6 +569,8 @@ export default function MobilePortfolio() {
                     alt={project.alt}
                     className="project-card-image w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                     src={project.img}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="flex flex-col gap-3" style={{ padding: '20px' }}>
@@ -650,7 +616,7 @@ export default function MobilePortfolio() {
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
           className="relative flex flex-col items-center justify-center text-center overflow-hidden"
-          style={{ paddingLeft: '24px', paddingRight: '24px' }}
+          style={{ paddingLeft: '24px', paddingRight: '24px', contain: 'content' }}
           id="contact"
         >
           {/* Contact background */}
@@ -658,11 +624,11 @@ export default function MobilePortfolio() {
             position: 'absolute', inset: 0, pointerEvents: 'none',
             background: 'radial-gradient(ellipse 90% 70% at 50% 60%, rgba(6,182,212,0.07) 0%, rgba(124,58,237,0.05) 50%, transparent 100%)',
           }} />
-          {/* Large glow behind heading */}
+          {/* Large glow behind heading (radial gradient, no blur filter) */}
           <div style={{
             position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
             width: '400px', height: '400px', borderRadius: '50%',
-            backgroundColor: 'rgba(76,215,246,0.05)', filter: 'blur(100px)', pointerEvents: 'none',
+            background: 'radial-gradient(circle, rgba(76,215,246,0.05) 0%, transparent 70%)', pointerEvents: 'none',
           }} />
           {/* Scan lines */}
           <div style={{
@@ -759,9 +725,7 @@ export default function MobilePortfolio() {
               display: 'flex',
               alignItems: 'center',
               padding: '12px 16px',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              backgroundColor: 'rgba(10,10,10,0.75)',
+              backgroundColor: 'rgba(10,10,10,0.97)',
               borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
           >
