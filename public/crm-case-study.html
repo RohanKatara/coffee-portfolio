@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<html class="scroll-smooth" lang="en"><head>
+<html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Intelligent CRM &amp; Lead Qualification Pipeline | Case Study</title>
+<title>Automate Pro: AI Lead Gatekeeper</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -13,214 +13,217 @@
         darkMode: "class",
         theme: {
           extend: {
-            colors: {
-              "tertiary-fixed-dim": "#74db9d",
-              "tertiary-fixed": "#91f8b8",
-              "surface": "#f7f9fb",
-              "on-tertiary-fixed-variant": "#00522f",
-              "on-surface-variant": "#43474e",
-              "surface-container-low": "#f2f4f6",
-              "on-primary-fixed-variant": "#2d476f",
-              "on-secondary-container": "#5b6577",
-              "primary": "#002045",
-              "tertiary": "#002713",
-              "on-error-container": "#93000a",
-              "surface-container": "#eceef0",
-              "surface-container-highest": "#e0e3e5",
-              "secondary": "#555f70",
-              "on-primary-fixed": "#001b3c",
-              "on-primary": "#ffffff",
-              "error-container": "#ffdad6",
-              "on-tertiary-container": "#4bb278",
-              "on-primary-container": "#86a0cd",
-              "surface-tint": "#455f88",
-              "surface-variant": "#e0e3e5",
-              "secondary-fixed-dim": "#bdc7db",
-              "surface-dim": "#d8dadc",
-              "outline-variant": "#c4c6cf",
-              "inverse-on-surface": "#eff1f3",
-              "primary-fixed-dim": "#adc7f7",
-              "outline": "#74777f",
-              "on-background": "#191c1e",
-              "primary-container": "#1a365d",
-              "surface-bright": "#f7f9fb",
-              "secondary-fixed": "#d9e3f8",
-              "on-secondary": "#ffffff",
-              "surface-container-high": "#e6e8ea",
-              "on-secondary-fixed": "#121c2b",
-              "error": "#ba1a1a",
-              "on-secondary-fixed-variant": "#3e4758",
-              "on-tertiary": "#ffffff",
-              "primary-fixed": "#d6e3ff",
-              "on-tertiary-fixed": "#002110",
-              "background": "#f7f9fb",
-              "inverse-surface": "#2d3133",
-              "on-surface": "#191c1e",
-              "on-error": "#ffffff",
-              "secondary-container": "#d9e3f8",
-              "inverse-primary": "#adc7f7",
-              "tertiary-container": "#003f23",
-              "surface-container-lowest": "#ffffff"
+            "colors": {
+                    "surface": "#10131a",
+                    "inverse-primary": "#842bd2",
+                    "on-tertiary-fixed": "#281900",
+                    "outline": "#988d9f",
+                    "on-background": "#e1e2eb",
+                    "on-tertiary": "#432c00",
+                    "surface-container-highest": "#32353c",
+                    "inverse-on-surface": "#2e3037",
+                    "on-secondary-fixed": "#001f25",
+                    "surface-tint": "#ddb7ff",
+                    "surface-bright": "#363940",
+                    "surface-container": "#1d2026",
+                    "secondary": "#5de6ff",
+                    "primary-container": "#b76dff",
+                    "tertiary-fixed-dim": "#fabc4e",
+                    "on-tertiary-container": "#3a2600",
+                    "surface-dim": "#10131a",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "background": "#10131a",
+                    "outline-variant": "#4d4354",
+                    "tertiary-fixed": "#ffdead",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#f0dbff",
+                    "on-surface": "#e1e2eb",
+                    "on-primary": "#490080",
+                    "on-surface-variant": "#cfc2d6",
+                    "on-secondary": "#00363e",
+                    "inverse-surface": "#e1e2eb",
+                    "surface-container-high": "#272a31",
+                    "primary-fixed-dim": "#ddb7ff",
+                    "primary": "#ddb7ff",
+                    "on-secondary-fixed-variant": "#004e5a",
+                    "tertiary": "#fabc4e",
+                    "on-primary-fixed": "#2c0051",
+                    "secondary-container": "#00cbe6",
+                    "surface-container-lowest": "#0b0e14",
+                    "secondary-fixed": "#a2eeff",
+                    "on-primary-container": "#400071",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#191c22",
+                    "on-primary-fixed-variant": "#6900b3",
+                    "surface-variant": "#32353c",
+                    "on-error": "#690005",
+                    "secondary-fixed-dim": "#2fd9f4",
+                    "on-secondary-container": "#00515d",
+                    "tertiary-container": "#bd871a"
             },
-            fontFamily: {
-              "headline": ["Manrope"],
-              "body": ["Inter"],
-              "label": ["Inter"]
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
             },
-            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
           },
         },
       }
     </script>
 <style>
-      .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      }
-      .glass-effect {
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-      }
-      .blue-gradient-text {
-        background: linear-gradient(to right, #002045, #1a365d);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      /* ── Custom scrollbar — webkit ──────────────────────────────────── */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #64748b;
-        border-radius: 8px;
-        border: 2px solid transparent;
-        background-clip: padding-box;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #0f172a;
-        background-clip: padding-box;
-      }
-
-      /* ── Firefox fallback ───────────────────────────────────────────── */
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #64748b transparent;
-      }
+        body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(50, 53, 60, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .text-glow-primary {
+            text-shadow: 0 0 20px rgba(221, 183, 255, 0.4);
+        }
+        .luminous-shadow-primary {
+            box-shadow: 0 10px 40px -10px rgba(221, 183, 255, 0.15);
+        }
+        .luminous-shadow-secondary {
+            box-shadow: 0 10px 40px -10px rgba(93, 230, 255, 0.15);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
     </style>
 </head>
-<body class="bg-surface font-body text-on-surface antialiased">
-<!-- TopNavBar -->
-<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
-<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-<div class="flex items-center gap-8">
-<span class="text-xl font-bold tracking-tight text-blue-900 dark:text-blue-50 font-headline">Intelligent CRM</span>
-<div class="hidden md:flex gap-6">
-<a class="text-blue-700 dark:text-blue-400 font-semibold border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">Impact</a>
+<body class="text-on-background bg-surface selection:bg-primary/30">
+<!-- Ambient Background Texture -->
+<div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+<div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute top-[20%] -right-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-[100px]"></div>
 </div>
+<main class="relative z-10">
+<!-- 1. Hero Section -->
+<section class="min-h-[819px] flex flex-col items-center justify-center text-center px-6 py-24">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-outline-variant/30 bg-surface-container-low/50 mb-8">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Intelligent Pipeline v2.0</span>
 </div>
-</div>
-<div class="bg-slate-100 dark:bg-slate-800 h-[1px] w-full absolute bottom-0"></div>
-</nav>
-<main class="pt-24 pb-20">
-<!-- Hero Section -->
-<header class="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center md:text-left">
-<div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-xs font-bold tracking-widest uppercase mb-6">
-<span class="material-symbols-outlined text-[14px]">architecture</span>
-                Case Study: Q4 Infrastructure
-            </div>
-<h1 class="text-5xl md:text-7xl font-extrabold font-headline tracking-tight text-primary leading-tight mb-4">
-                Intelligent CRM &amp; <br/>Lead Qualification Pipeline
+<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 max-w-4xl bg-gradient-to-br from-primary via-primary-fixed to-secondary bg-clip-text text-transparent text-glow-primary leading-[1.1]">
+                Automate Pro: AI Lead Gatekeeper
             </h1>
-<p class="text-xl md:text-2xl text-on-secondary-fixed-variant max-w-2xl font-light leading-relaxed">
-                Automating Sales Routing &amp; Client Management with enterprise-grade precision.
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 leading-relaxed">
+                An automated pipeline that uses LLMs to instantly score, qualify, and route agency leads, saving <span class="text-secondary font-semibold">20+ hours a week</span>.
             </p>
-</header>
-<!-- About Section (Architectural Grid) -->
-<section class="max-w-7xl mx-auto px-6 mb-32">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-<div class="lg:col-span-5 space-y-8">
-<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
-<div class="p-3 bg-secondary-container rounded-lg text-on-secondary-container">
-<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button class="px-8 py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-lg luminous-shadow-primary hover:brightness-110 transition-all duration-300 transform hover:scale-[1.02] active:scale-95">
+                    Try the Demo
+                </button>
+<button class="px-8 py-4 bg-transparent border border-outline-variant/40 text-on-surface font-semibold rounded-lg hover:bg-surface-container-high transition-all duration-300">
+                    View Architecture
+                </button>
 </div>
-<div>
-<h3 class="text-lg font-bold font-headline text-primary mb-2">Automated Architecture</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                Architected an automated lead qualification pipeline utilizing Make.com to seamlessly integrate Google Forms, OpenAI, Gmail, and Slack.
-                            </p>
-</div>
-</div>
-<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
-<div class="p-3 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-lg">
-<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
-</div>
-<div>
-<h3 class="text-lg font-bold font-headline text-primary mb-2">Intelligent Routing</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                Engineered an intelligent routing system leveraging OpenAI's API to analyze incoming client queries in real-time, instantly categorizing leads by intent and budget.
-                            </p>
-</div>
-</div>
-</div>
-<div class="lg:col-span-2 hidden lg:flex flex-col items-center justify-center">
-<div class="w-[1px] h-full bg-gradient-to-b from-transparent via-outline-variant to-transparent opacity-30"></div>
-</div>
-<div class="lg:col-span-5 space-y-8">
-<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
-<div class="p-3 bg-secondary-container rounded-lg text-on-secondary-container">
-<span class="material-symbols-outlined" data-icon="mark_email_read">mark_email_read</span>
-</div>
-<div>
-<h3 class="text-lg font-bold font-headline text-primary mb-2">Eliminated Manual Sorting</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                Streamlined client relationship management by automating personalized email follow-ups for standard inquiries, entirely eliminating manual inbox sorting.
-                            </p>
-</div>
-</div>
-<div class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow duration-300">
-<div class="p-3 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-lg">
-<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
-</div>
-<div>
-<h3 class="text-lg font-bold font-headline text-primary mb-2">Priority VIP Mechanism</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                Developed a priority alert mechanism using custom Slack webhooks to instantly notify the team of high-ticket VIP clients, drastically optimizing response time.
-                            </p>
-</div>
-</div>
-</div>
-</div>
-<!-- Success Metrics Ticker -->
-<div class="mt-20 flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
-<div class="text-center">
-<span class="block text-4xl font-extrabold font-headline text-primary">94%</span>
-<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Auto-Categorized</span>
-</div>
-<div class="text-center">
-<span class="block text-4xl font-extrabold font-headline text-primary">&lt; 2m</span>
-<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Response Time</span>
-</div>
-<div class="text-center">
-<span class="block text-4xl font-extrabold font-headline text-primary">12.5k</span>
-<span class="text-xs font-bold uppercase tracking-widest text-on-tertiary-container">Leads Processed</span>
+<!-- Hero Image/Visual Element -->
+<div class="mt-20 w-full max-w-5xl mx-auto px-4">
+<div class="aspect-[16/9] rounded-2xl overflow-hidden border border-outline-variant/20 luminous-shadow-primary relative group">
+<img class="w-full h-full object-cover grayscale-[0.2] brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="abstract high-tech visualization of digital data nodes and glowing neural network connections in deep violet and cyan light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADVHaWwUd22eXt1ILGfRr7yulfkwlwOVQr5gDHPQtfPkW6WobdIVbJclm58A0S0aFgwLW4ZgefKoGZCQIJmll5yW9-KylyjCALWNohItL-JIxlmCKK3MfB8Z4x3sngmV_7VXDtOfWhkPLr7ollvLp4SJyjxjlvaJuZ9s02x8SWa3BCTk43wLYuMOg7qVEeCnkxvF0nmazfzIEr3ccitfubhCiGIoBWvwKX2PDZMwOpsyquewOlsy0ftkMfW-E43vy6SBBOuluNzx8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
 </div>
 </div>
 </section>
-<!-- App Showcase Window -->
-<!-- Final Quote/Closing Section -->
+<!-- 2. Architecture & Flow Section -->
+<section class="py-24 px-8 max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold text-on-surface mb-4">The Intelligent Lifecycle</h2>
+<div class="h-1 w-20 bg-secondary mx-auto rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="glass-panel p-8 rounded-xl border border-outline-variant/20 hover:border-primary/40 transition-colors group">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="web_traffic">web_traffic</span>
+</div>
+<h3 class="text-xl font-bold mb-3 text-on-surface">1. Capture</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        Custom React frontend captures high-value prospect data through dynamic forms and behavioral tracking.
+                    </p>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-8 rounded-xl border border-outline-variant/20 hover:border-secondary/40 transition-colors group">
+<div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-6 group-hover:bg-secondary/20 transition-colors">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h3 class="text-xl font-bold mb-3 text-on-surface">2. AI Scoring</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        Google Gemini 1.5 Pro analyzes project scope, budget, and urgency to assign a lead quality score out of 10.
+                    </p>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-8 rounded-xl border border-outline-variant/20 hover:border-primary-container/40 transition-colors group">
+<div class="w-12 h-12 rounded-lg bg-primary-container/10 flex items-center justify-center mb-6 group-hover:bg-primary-container/20 transition-colors">
+<span class="material-symbols-outlined text-primary-container text-3xl" data-icon="account_tree">account_tree</span>
+</div>
+<h3 class="text-xl font-bold mb-3 text-on-surface">3. Auto-Routing</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        n8n routes VIPs instantly to Slack and directs low-budget leads to a segmented Google Sheets waitlist for nurturing.
+                    </p>
+</div>
+</div>
+</section>
+<!-- 3. Tech Stack Display -->
+<section class="py-16 px-8 bg-surface-container-lowest/50">
+<div class="max-w-5xl mx-auto flex flex-col items-center">
+<span class="text-xs font-label uppercase tracking-widest text-outline mb-10">Powering the engine</span>
+<div class="flex flex-wrap justify-center gap-4 md:gap-8">
+<!-- Badges -->
+<div class="px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container-high/40 flex items-center gap-3 hover:border-secondary transition-all cursor-default">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-sm font-medium">React</span>
+</div>
+<div class="px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container-high/40 flex items-center gap-3 hover:border-primary transition-all cursor-default">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-sm font-medium">n8n</span>
+</div>
+<div class="px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container-high/40 flex items-center gap-3 hover:border-tertiary transition-all cursor-default">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="text-sm font-medium">Gemini 1.5 Pro</span>
+</div>
+<div class="px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container-high/40 flex items-center gap-3 hover:border-secondary transition-all cursor-default">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-sm font-medium">Slack API</span>
+</div>
+<div class="px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container-high/40 flex items-center gap-3 hover:border-primary-container transition-all cursor-default">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="text-sm font-medium">Google Sheets</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Demo Area -->
+<section class="py-24 px-8 max-w-7xl mx-auto">
+<div class="relative rounded-3xl overflow-hidden border-2 border-primary/20 bg-surface-container-low group luminous-shadow-primary">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+<div class="relative z-10 min-h-[500px] flex flex-col items-center justify-center p-12 text-center">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-highest/60 flex items-center justify-center mb-8 border border-outline-variant/20 backdrop-blur-xl">
+<span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+<h2 class="text-3xl md:text-5xl font-bold text-on-surface mb-6">Live Interactive Demo</h2>
+<p class="text-on-surface-variant max-w-xl mx-auto mb-10 text-lg">
+                        Experience the precision of the LLM scoring engine. Submit a test lead and watch the routing logic execute in real-time.
+                    </p>
+<button class="px-10 py-5 bg-surface text-primary border border-primary/50 font-bold rounded-xl hover:bg-primary hover:text-on-primary transition-all duration-300 flex items-center gap-3">
+                        Launch Sandbox
+                        <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</div>
+<!-- Subtle Decorative Elements -->
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary opacity-30"></div>
+<div class="absolute bottom-4 right-6 text-[10px] font-mono text-outline/40 uppercase tracking-[0.3em]">System.Status: Ready</div>
+</div>
+</section>
 </main>
 <!-- Footer -->
-<footer class="w-full py-12 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-4">
-<span class="text-slate-900 dark:text-slate-100 font-label text-xs uppercase tracking-widest font-medium">
-                © 2024 Intelligent CRM. Built on Architectural Ledger Principles.
-            </span>
-<div class="flex gap-8">
-<a class="font-label text-xs uppercase tracking-widest font-medium text-slate-500 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all" href="https://www.linkedin.com/in/rohan-katara-5895952b6/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-</div>
-</div>
-</footer>
 </body></html>

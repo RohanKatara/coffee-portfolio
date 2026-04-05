@@ -54,7 +54,7 @@ export default function CRMModal({ onClose }) {
       >
         <iframe
           src="/crm-case-study.html"
-          title="Intelligent CRM Case Study"
+          title="Automate Pro: AI Lead Gatekeeper"
           style={{
             width: '100%',
             height: '100%',

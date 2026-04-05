@@ -24,13 +24,13 @@ const projects = [
   },
   {
     id: 2,
-    name: 'CRM Pipeline',
-    title: 'Intelligent CRM & Lead Qualification Pipeline',
+    name: 'Automate Pro',
+    title: 'Automate Pro: AI Lead Gatekeeper',
     description: [
-      'Architected an automated lead qualification pipeline utilizing Make.com to seamlessly integrate Google Forms, OpenAI, Gmail, and Slack.',
-      'Engineered an intelligent routing system leveraging OpenAI\'s API to analyze incoming client queries in real-time, instantly categorizing leads by intent and budget.',
-      'Streamlined client relationship management by automating personalized email follow-ups for standard inquiries, entirely eliminating manual inbox sorting.',
-      'Developed a priority alert mechanism using custom Slack webhooks to instantly notify the team of high-ticket VIP clients, drastically optimizing the speed-to-lead response time.',
+      'Built an automated pipeline using n8n and Google Gemini 1.5 Pro to instantly score, qualify, and route agency leads — saving 20+ hours a week of manual filtering.',
+      'Engineered an LLM scoring engine that analyzes project scope, budget signals, and urgency to assign each lead a quality score out of 10 in real-time.',
+      'Implemented a smart routing system that escalates VIP leads directly to Slack while placing low-budget prospects into a segmented Google Sheets nurture queue.',
+      'Developed a custom React frontend with dynamic forms and behavioral tracking to capture high-value prospect data at the top of the funnel.',
     ],
     color: '#6f4e37',   // coffee
   },
