@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 /**
  * Returns the current breakpoint and boolean helpers.
@@ -9,6 +9,10 @@ import { useState, useEffect } from 'react'
  *
  * Also exports getIsMobile() / getIsTablet() for synchronous reads
  * inside useFrame callbacks where React state is unavailable.
+ *
+ * isPhoneDevice — true when the device is a phone (touch + small screen).
+ * Captured once on mount so orientation changes never swap MobilePortfolio
+ * to DesktopCafe mid-session.
  */
 
 function compute(w) {
@@ -17,8 +21,16 @@ function compute(w) {
   return 'desktop'
 }
 
+/** Detect phone hardware once — survives orientation changes. */
+function detectPhone() {
+  const hasTouch = navigator.maxTouchPoints > 0
+  const smallSide = Math.min(screen.width, screen.height)
+  return hasTouch && smallSide < 768
+}
+
 export function useBreakpoint() {
   const [bp, setBp] = useState(() => compute(window.innerWidth))
+  const isPhone = useRef(detectPhone()).current
 
   useEffect(() => {
     const handler = () => setBp(compute(window.innerWidth))
@@ -28,14 +40,16 @@ export function useBreakpoint() {
 
   return {
     breakpoint: bp,
-    isMobile:  bp === 'mobile',
-    isTablet:  bp === 'tablet',
-    isDesktop: bp === 'desktop',
+    isMobile:  bp === 'mobile' || isPhone,
+    isTablet:  bp === 'tablet' && !isPhone,
+    isDesktop: bp === 'desktop' && !isPhone,
+    isPhoneDevice: isPhone,
   }
 }
 
 // Synchronous helpers — safe to call inside useFrame or outside React
-export const getIsMobile        = () => window.innerWidth < 768
+const _isPhone = detectPhone()
+export const getIsMobile        = () => window.innerWidth < 768 || _isPhone
 export const getIsTablet        = () => window.innerWidth < 1024
 // Mobile landscape: phone rotated sideways (short height, wider than tall).
 // Matches CSS: (max-height: 500px) and (orientation: landscape)
