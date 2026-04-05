@@ -10,8 +10,10 @@ import { triggerMachineTransition } from '../../utils/triggerMachineTransition'
  * Idle:  CSS floatBob keyframe (smooth 3.5 s bob).
  * Exit:  triggerMachineTransition fades the DOM node, then advances the scene.
  *
- * Stays mounted during MACHINE_TRANSITION so the GSAP fade-out has time to finish
- * before React unmounts the element.
+ * DOM teardown is deferred 500 ms after the scene leaves LANDING so React's
+ * reconciliation + DOM removal never lands on the same frame as the camera
+ * animation start. The GSAP fade-out (350 ms) completes while the element is
+ * still mounted, then the invisible DOM is removed on a calm frame.
  *
  * In mobile landscape (viewport height < 500px) the card compacts and drops
  * to the bottom edge so the barista's upper body stays visible above it.
@@ -22,6 +24,23 @@ export default function SpeechBubble() {
   const isSceneReady = useSceneStore((s) => s.isSceneReady)
   const containerRef = useRef(null)
   const hasEntered   = useRef(false)
+
+  // ── Deferred unmount ────────────────────────────────────────────────────────
+  // When the scene leaves LANDING, keep the DOM alive for 500 ms so the GSAP
+  // fade-out finishes and the DOM teardown (backdrop-filter removal, node
+  // deletion) doesn't block the main thread on the same frame the camera
+  // animation starts. After 500 ms the element is already at opacity:0 so
+  // the removal is invisible.
+  const [shouldRender, setShouldRender] = useState(false)
+
+  useEffect(() => {
+    if (scene === 'LANDING') {
+      setShouldRender(true)
+    } else {
+      const t = setTimeout(() => setShouldRender(false), 500)
+      return () => clearTimeout(t)
+    }
+  }, [scene])
 
   // Detect mobile landscape via media query so it reacts to orientation changes.
   const [isLandscape, setIsLandscape] = useState(() =>
@@ -59,8 +78,9 @@ export default function SpeechBubble() {
     }
   }, [scene, isSceneReady])
 
-  // Unmount once scene leaves LANDING — GSAP fade-out runs first (300 ms delay)
-  if (scene !== 'LANDING') return null
+  // Deferred unmount: DOM stays alive for 500 ms after scene leaves LANDING
+  // so the teardown doesn't block the camera animation frame.
+  if (!shouldRender) return null
 
   return (
     <div
@@ -68,7 +88,9 @@ export default function SpeechBubble() {
       data-speech-bubble
       className="absolute left-1/2 -translate-x-1/2 z-40 opacity-0 text-center"
       style={{
-        pointerEvents: 'auto',
+        // Disable pointer events once the scene has left LANDING so the
+        // fading-out button can't be clicked again during the deferred window.
+        pointerEvents: scene === 'LANDING' ? 'auto' : 'none',
         bottom: isLandscape ? '2%' : isMobilePortrait ? '10%' : '18%',
       }}
     >
