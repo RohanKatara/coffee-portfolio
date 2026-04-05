@@ -27,7 +27,7 @@ const projects = [
     name: 'Automate Pro',
     title: 'Automate Pro: AI Lead Gatekeeper',
     description: [
-      'Built an automated pipeline using n8n and Google Gemini 1.5 Pro to instantly score, qualify, and route agency leads — saving 20+ hours a week of manual filtering.',
+      'Built an automated pipeline using n8n and Google Gemini 2.5 Flash to instantly score, qualify, and route agency leads — saving 20+ hours a week of manual filtering.',
       'Engineered an LLM scoring engine that analyzes project scope, budget signals, and urgency to assign each lead a quality score out of 10 in real-time.',
       'Implemented a smart routing system that escalates VIP leads directly to Slack while placing low-budget prospects into a segmented Google Sheets nurture queue.',
       'Developed a custom React frontend with dynamic forms and behavioral tracking to capture high-value prospect data at the top of the funnel.',

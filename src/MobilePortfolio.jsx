@@ -34,7 +34,7 @@ const PROJECTS = [
     tagColor: '#4cd7f6',
     tagBg: 'rgba(76,215,246,0.1)',
     tagBorder: 'rgba(76,215,246,0.2)',
-    desc: 'An automated pipeline using n8n and Gemini 1.5 Pro to instantly score, qualify, and route agency leads — saving 20+ hours a week.',
+    desc: 'An automated pipeline using n8n and Gemini 2.5 Flash to instantly score, qualify, and route agency leads — saving 20+ hours a week.',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuADVHaWwUd22eXt1ILGfRr7yulfkwlwOVQr5gDHPQtfPkW6WobdIVbJclm58A0S0aFgwLW4ZgefKoGZCQIJmll5yW9-KylyjCALWNohItL-JIxlmCKK3MfB8Z4x3sngmV_7VXDtOfWhkPLr7ollvLp4SJyjxjlvaJuZ9s02x8SWa3BCTk43wLYuMOg7qVEeCnkxvF0nmazfzIEr3ccitfubhCiGIoBWvwKX2PDZMwOpsyquewOlsy0ftkMfW-E43vy6SBBOuluNzx8',
     alt: 'Automate Pro AI Lead Gatekeeper — automated lead scoring and routing pipeline by Rohan Katara',
   },
@@ -616,7 +616,7 @@ export default function MobilePortfolio() {
         {/* ── Contact ──────────────────────────────────────────────────────── */}
         <section
           className="relative flex flex-col items-center justify-center text-center overflow-hidden"
-          style={{ paddingLeft: '24px', paddingRight: '24px', contain: 'content' }}
+          style={{ paddingTop: '64px', paddingBottom: '64px', paddingLeft: '24px', paddingRight: '24px', contain: 'content' }}
           id="contact"
         >
           {/* Contact background */}
@@ -646,19 +646,20 @@ export default function MobilePortfolio() {
             color: 'rgba(76,215,246,0.25)', pointerEvents: 'none',
           }}>03 // CONTACT</div>
 
-          <div className="relative flex flex-col items-center gap-8 mt-10">
-            <h2 className="font-headline text-4xl font-bold tracking-tighter leading-tight">
+          <div className="relative flex flex-col items-center gap-6" style={{ marginTop: '0' }}>
+            <h2 className="font-headline text-4xl font-bold tracking-tighter leading-tight" style={{ marginBottom: '8px' }}>
               Let&apos;s build something.
             </h2>
             <a
-              className="while-tap-spring border border-white/20 text-white px-8 py-4 rounded-full hover:bg-white/10 transition-colors font-headline font-bold text-lg inline-block"
+              className="while-tap-spring border border-white/20 text-white rounded-full hover:bg-white/10 transition-colors font-headline font-bold text-lg inline-block"
+              style={{ padding: '14px 32px' }}
               href="https://mail.google.com/mail/?view=cm&to=rohankatara3@gmail.com"
               target="_blank"
               rel="noopener noreferrer"
             >
               Initialize Contact
             </a>
-            <div className="flex gap-8">
+            <div className="flex gap-6" style={{ marginTop: '8px' }}>
               {[
                 { label: 'GitHub',   href: 'https://github.com/RohanKatara' },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/in/rohan-katara-5895952b6' },
@@ -683,13 +684,13 @@ export default function MobilePortfolio() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer style={{ position: 'relative', overflow: 'hidden', paddingTop: '40px', paddingBottom: '32px', paddingLeft: '24px', paddingRight: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <footer style={{ position: 'relative', overflow: 'hidden', paddingTop: '32px', paddingBottom: '40px', paddingLeft: '24px', paddingRight: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         {/* Background glow */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 100% 120% at 50% 100%, rgba(6,182,212,0.06) 0%, rgba(124,58,237,0.04) 60%, transparent 100%)' }} />
         {/* Scan line */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(76,215,246,0.15) 30%, rgba(76,215,246,0.15) 70%, transparent)' }} />
 
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           {/* Terminal signature */}
           <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'rgba(76,215,246,0.4)', letterSpacing: '0.15em' }}>
             <span style={{ color: 'rgba(76,215,246,0.25)' }}>{'>'}</span> rohan.katara<span style={{ color: '#4cd7f6' }}>.exe</span> —— all rights reserved
