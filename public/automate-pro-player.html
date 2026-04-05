@@ -7,11 +7,53 @@
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* bg-black — eliminates ALL voids at every breakpoint */
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #000;
+    }
+
+    /* Theater mode wrapper — bg-black, full viewport, centres the aspect box */
+    .theater-section {
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /*
+     * Aspect-ratio container
+     * Equivalent Tailwind: relative w-full pb-[56.25%] overflow-hidden rounded-xl shadow-2xl
+     *
+     * max-width: calc(100vh * 16/9) ensures the 56.25% padding-bottom never
+     * produces a height taller than 100vh — critical for landscape on mobile
+     * where viewport height is the scarce dimension.
+     *
+     * Math: when width = 100vh*(16/9), padding-bottom = 56.25% of that = 100vh exactly.
+     * So in landscape the player fills the screen edge-to-edge with zero overflow.
+     */
+    .aspect-container {
+      position: relative;                        /* relative       */
+      width: 100%;                               /* w-full         */
+      max-width: calc(100vh * 16 / 9);           /* landscape lock */
+      padding-bottom: 56.25%;                    /* pb-[56.25%]    */
+      overflow: hidden;                          /* overflow-hidden */
+      border-radius: 0.75rem;                    /* rounded-xl     */
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* shadow-2xl */
+    }
+
+    /* Iframe — absolute inset-0 w-full h-full border-0 */
+    .aspect-container iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
     }
 
     /* ── Close button ─────────────────────────────────────────────── */
@@ -25,78 +67,37 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.55);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.05rem;
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .close-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
-    .close-btn:active { transform: scale(0.93); }
-
-    /* ── Player wrapper ───────────────────────────────────────────── */
-    .player-wrap {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      background: #0f172a;
-      overflow: hidden;
-    }
-
-    .player-wrap iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    /* ── Desktop / landscape: 16:9 letterboxed ──────────────────── */
-    @media (orientation: landscape), (min-width: 769px) {
-      .player-wrap {
-        width: min(100vw, calc(100vh * 16 / 9));
-        height: min(100vh, calc(100vw * 9 / 16));
-        transform: translate(-50%, -50%);
-      }
-    }
-
-    /* ── Mobile portrait: rotate 90° so animation appears landscape */
-    @media (orientation: portrait) and (max-width: 768px) {
-      .player-wrap {
-        /* swap axes: width = viewport height, height = viewport width */
-        width: 100vh;
-        height: 100vw;
-        transform: translate(-50%, -50%) rotate(90deg);
-        transform-origin: center center;
-      }
-
-      /* push close btn into the rotated frame's top-right corner */
-      .close-btn {
-        top: auto;
-        right: auto;
-        bottom: 16px;
-        left: 14px;
-        /* counter-rotate so it reads upright to the user */
-        transform: rotate(-90deg);
-      }
-    }
+    .close-btn:hover  { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .close-btn:active { transform: scale(0.92); }
   </style>
 </head>
 <body>
-  <button
-    class="close-btn"
-    onclick="window.parent.postMessage('closeDemoPlayer', '*')"
-    aria-label="Close demo"
-  >&#10005;</button>
+  <div class="theater-section">
 
-  <div class="player-wrap">
-    <iframe
-      src="/automate-pro-demo/index.html"
-      allow="autoplay"
-      title="Automate Pro: AI Lead Gatekeeper — Interactive Demo"
-    ></iframe>
+    <button
+      class="close-btn"
+      onclick="window.parent.postMessage('closeDemoPlayer', '*')"
+      aria-label="Close demo"
+    >&#10005;</button>
+
+    <!-- Aspect-ratio container: pb-[56.25%] + max-width cap for landscape -->
+    <div class="aspect-container">
+      <iframe
+        src="/automate-pro-demo/index.html"
+        allow="autoplay"
+        title="Automate Pro: AI Lead Gatekeeper — Interactive Demo"
+      ></iframe>
+    </div>
+
   </div>
 </body>
 </html>
