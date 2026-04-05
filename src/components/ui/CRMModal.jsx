@@ -79,8 +79,6 @@ export default function CRMModal({ onClose }) {
       </div>
 
       {/* ── Demo player overlay — portalled above everything ── */}
-      {/* Embeds the animation app directly (no intermediary player.html iframe)
-          to avoid the double-iframe nesting that caused mobile viewport miscalculations. */}
       {demoOpen && createPortal(
         <div
           style={{
@@ -90,19 +88,37 @@ export default function CRMModal({ onClose }) {
             background: '#000',
           }}
         >
-          <iframe
-            src="/automate-pro-demo/index.html"
-            allow="autoplay"
-            title="Automate Pro Demo Player"
-            style={{
-              position: 'fixed',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              display: 'block',
-            }}
-          />
+          {window.innerWidth < 768 ? (
+            <video
+              src="/automate-pro-demo/automate%20pro%20demo.mp4"
+              controls
+              autoPlay
+              playsInline
+              title="Automate Pro Demo"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                background: '#000',
+              }}
+            />
+          ) : (
+            <iframe
+              src="/automate-pro-demo/index.html"
+              allow="autoplay"
+              title="Automate Pro Demo Player"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                display: 'block',
+              }}
+            />
+          )}
           {/* Close button — sits above the iframe */}
           <button
             onClick={() => setDemoOpen(false)}
