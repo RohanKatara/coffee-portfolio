@@ -13,8 +13,8 @@ function CoffeeGrinderModel({ position }) {
   const grinderModel = useGLTF('/models/coffee_grinder.glb')
   useEffect(() => {
     grinderModel.scene.traverse((child) => {
-      // Disable frustum culling on every node — Draco bounding boxes can be
-      // stale/zero until first GPU draw, causing Three.js to cull the mesh.
+      // Disable frustum culling initially — Draco bounding boxes can be
+      // stale/zero until first GPU draw.
       child.frustumCulled = false
       if (child.isMesh) {
         child.castShadow    = true
@@ -25,6 +25,19 @@ function CoffeeGrinderModel({ position }) {
         }
       }
     })
+
+    // After one rendered frame Draco bounding boxes are valid — recompute
+    // and re-enable frustum culling so off-screen meshes are skipped.
+    const raf = requestAnimationFrame(() => {
+      grinderModel.scene.traverse((node) => {
+        if (node.isMesh && node.geometry) {
+          node.geometry.computeBoundingBox()
+          node.geometry.computeBoundingSphere()
+          node.frustumCulled = true
+        }
+      })
+    })
+    return () => cancelAnimationFrame(raf)
   }, [grinderModel.scene])
   return (
     <primitive
@@ -36,7 +49,6 @@ function CoffeeGrinderModel({ position }) {
       ]}
       scale={GRINDER_SCALE}
       rotation={GRINDER_ROTATION}
-      frustumCulled={false}
     />
   )
 }

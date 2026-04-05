@@ -43,7 +43,7 @@ import CupScene from './scenes/CupScene'
 
 import ProjectButtons3D from './components/canvas/ProjectButtons3D'
 import TreePot from './components/canvas/TreePot'
-import Draggable from './components/canvas/Draggable'
+// Draggable import removed — component not used in JSX
 
 import LoadingScreen from './components/ui/LoadingScreen'
 import SpeechBubble from './components/ui/SpeechBubble'
@@ -455,13 +455,14 @@ function AnimatedEffects() {
       <SMAA ref={smaaRef} />
 
       {/* Bloom — high threshold so only neon sign and pendant emissives glow.
-          levels={4} → 4 downsample + 4 upsample passes; disabled during pan. */}
+          levels={2} → 2 downsample + 2 upsample = 4 passes (halved from 8);
+          disabled entirely during camera pans. */}
       <Bloom
         ref={bloomRef}
         luminanceThreshold={0.85}
         luminanceSmoothing={0.1}
         intensity={1.2}
-        levels={4}
+        levels={2}
       />
 
       {/* Vignette + BrightnessContrast — controlled imperatively via refs above;
@@ -553,12 +554,9 @@ export default function DesktopCafe() {
         <SceneCamera />
         <PerformanceManager />
 
-        {/* ── IBL in its own Suspense: HDR download can never block the scene */}
-        {!isMobile && (
-          <Suspense fallback={null}>
-            <Environment preset="city" environmentIntensity={0.5} />
-          </Suspense>
-        )}
+        {/* IBL is provided by the <Environment> inside CafeEnvironment.jsx
+            (preset="city", environmentIntensity=1.5). A duplicate was here
+            previously — removed to save ~2-4 MB VRAM and a PMREM pass. */}
 
         <SceneOffsetGroup>
           {/* ── Core scene: walls/floor/counter + character + machines ───────

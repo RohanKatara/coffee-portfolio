@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react'
 import EspressoMachine from '../components/canvas/EspressoMachine'
 import CoffeeGrinder from '../components/canvas/CoffeeGrinder'
-import ZoneBRightDecor from '../components/canvas/ZoneBRightDecor'
 // Aimed spotlight — SpotLight.target must be added to the scene manually,
 // so we set it imperatively via useEffect after mount.
 function MachineSpotlight() {
@@ -47,8 +46,6 @@ export default function MachineScene() {
       />
 
       <CoffeeGrinder position={[10.5, -0.53, -0.3]} />
-
-      <ZoneBRightDecor />
     </group>
   )
 }

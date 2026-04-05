@@ -38,6 +38,7 @@ function CoffeeCupModel({ position }) {
   const [clone, liftY] = useMemo(() => {
     const c = scene.clone(true)
     c.traverse(node => {
+      // Disable frustum culling initially — Draco bounding boxes can be stale.
       node.frustumCulled = false
       if (!node.isMesh) return
       node.castShadow    = true
@@ -49,12 +50,25 @@ function CoffeeCupModel({ position }) {
     })
     c.updateMatrixWorld(true)
     const box = new Box3().setFromObject(c)
+
+    // After one rendered frame Draco bounding boxes are valid — recompute
+    // and re-enable frustum culling so off-screen meshes are skipped.
+    requestAnimationFrame(() => {
+      c.traverse(node => {
+        if (node.isMesh && node.geometry) {
+          node.geometry.computeBoundingBox()
+          node.geometry.computeBoundingSphere()
+          node.frustumCulled = true
+        }
+      })
+    })
+
     return [c, -box.min.y]
   }, [scene])
 
   return (
     <group position={[position[0], position[1] + liftY, position[2]]}>
-      <primitive object={clone} frustumCulled={false} />
+      <primitive object={clone} />
     </group>
   )
 }

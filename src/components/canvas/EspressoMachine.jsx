@@ -12,8 +12,8 @@ function EspressoMachineModel() {
   const { scene } = useGLTF('/models/espresso_machine.glb')
   useEffect(() => {
     scene.traverse((child) => {
-      // Disable frustum culling on every node — Draco bounding boxes can be
-      // stale/zero until first GPU draw, causing Three.js to cull the mesh.
+      // Disable frustum culling initially — Draco bounding boxes can be
+      // stale/zero until first GPU draw.
       child.frustumCulled = false
       if (child.isMesh) {
         child.castShadow    = true
@@ -24,6 +24,19 @@ function EspressoMachineModel() {
         }
       }
     })
+
+    // After one rendered frame Draco bounding boxes are valid — recompute
+    // and re-enable frustum culling so off-screen meshes are skipped.
+    const raf = requestAnimationFrame(() => {
+      scene.traverse((node) => {
+        if (node.isMesh && node.geometry) {
+          node.geometry.computeBoundingBox()
+          node.geometry.computeBoundingSphere()
+          node.frustumCulled = true
+        }
+      })
+    })
+    return () => cancelAnimationFrame(raf)
   }, [scene])
   return (
     <primitive
@@ -31,7 +44,6 @@ function EspressoMachineModel() {
       position={[0, -12 * MACHINE_SCALE, 0]}
       scale={MACHINE_SCALE}
       rotation={MACHINE_ROTATION}
-      frustumCulled={false}
     />
   )
 }

@@ -167,6 +167,13 @@ function EspressoDialButton({ label, size = 72 }) {
 export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCrmClick, onContentClick }) {
   const startPour = useSceneStore((s) => s.startPour)
 
+  // Gate <Html> portals: completely unmount DOM nodes when not in MACHINE scene.
+  // Without this, 4 CSS3D-projected DOM portals + their pb-bob keyframe animations
+  // are composited by the browser every frame even when invisible (scale=0).
+  const shouldRenderHtml = useSceneStore(
+    (s) => s.scene === 'MACHINE' && !s.isPouring && !s.isTransitioning
+  )
+
   const buttonScaleRefs = useRef(BUTTON_PROJECTS.map(() => null))
 
   // DOM refs for .pb-hover-root divs — hover toggled via dataset, no React state.
@@ -268,6 +275,7 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
               events; the pb-hover-root div restores pointer-events:auto
               so only the visible disc itself is interactive.
             */}
+            {shouldRenderHtml && (
             <Html
               center
               distanceFactor={8}
@@ -295,14 +303,11 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
                   onTouchEnd={(e) => {
                     if (!touchIsActive.current) return
                     touchIsActive.current = false
-                    // Suppress the 300ms synthetic click so we control timing.
                     e.preventDefault()
                     if (focusedIndex.current === i) {
-                      // Second tap on the focused button — fire the action.
                       clearFocus(i)
                       clickHandlers[i]()
                     } else {
-                      // First tap — reveal hover state so the user can see the label.
                       setFocus(i)
                     }
                   }}
@@ -311,6 +316,7 @@ export default function ProjectButtons3D({ onMocktalkClick, onKrishnaClick, onCr
                 </div>
               </div>
             </Html>
+            )}
           </group>
         </group>
       ))}
