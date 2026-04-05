@@ -17,10 +17,12 @@ export default function LandingScene() {
   const groupRef = useRef(null)
   const fadedRef = useRef(false)
 
-  const isVisible = scene === 'LOADING' || scene === 'LANDING'
+  // Keep the character visible during the cinematic pan so the WalkAway
+  // animation plays while the camera sweeps past Zone A.
+  const isVisible = scene === 'LOADING' || scene === 'LANDING' || scene === 'MACHINE_TRANSITION'
 
   useEffect(() => {
-    // Trigger WalkAway as soon as the camera starts moving to Zone B
+    // Hide the character group once the camera has arrived at Zone B
     if (scene === 'MACHINE' && !fadedRef.current) {
       fadedRef.current = true
       const id = setTimeout(() => {

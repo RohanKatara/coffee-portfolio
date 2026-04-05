@@ -5,6 +5,7 @@ import { damp3 } from 'maath/easing'
 import { CAMERA_POSITIONS } from '../utils/cameraPositions'
 import useSceneStore from '../store/useSceneStore'
 import { getIsMobile, getIsTablet, getIsMobileLandscape } from './useBreakpoint'
+import { cameraProxy, maybeBuildTimeline } from '../utils/cameraTransition'
 
 // Distance threshold below which the camera is considered converged.
 // Below this, AdaptiveDpr is allowed to recover DPR and isTransitioning clears.
@@ -132,6 +133,19 @@ export function useSceneTransition() {
 
   useFrame((_, delta) => {
     if (cameraLock.active) return
+
+    // ── GSAP timeline override ──────────────────────────────────────────────
+    // If a cinematic transition was requested, build the timeline on this
+    // tick (gives it access to the live camera position). While the timeline
+    // is active, GSAP drives the camera directly — skip damp3 entirely.
+    maybeBuildTimeline(camera, _lookAt)
+    if (cameraProxy.active) {
+      camera.position.set(cameraProxy.px, cameraProxy.py, cameraProxy.pz)
+      _lookAt.set(cameraProxy.tx, cameraProxy.ty, cameraProxy.tz)
+      camera.lookAt(_lookAt)
+      return
+    }
+
     const scene = useSceneStore.getState().scene
 
     // While the loading screen is still up, keep the camera pinned at
@@ -140,6 +154,9 @@ export function useSceneTransition() {
     // starts fresh — from the full LANDING_INTRO distance — the moment
     // setScene('LANDING') fires after the loading screen fades.
     if (scene === 'LOADING') return
+    // MACHINE_TRANSITION is handled by the GSAP timeline above; if we
+    // reach here the timeline hasn't started yet — just hold position.
+    if (scene === 'MACHINE_TRANSITION') return
 
     const isZoneB = scene === 'MACHINE' || scene === 'POURING' || scene === 'CUP'
     const { landing, machine } = getLandingPositions()

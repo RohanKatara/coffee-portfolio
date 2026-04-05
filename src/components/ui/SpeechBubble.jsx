@@ -19,8 +19,10 @@ import { triggerMachineTransition } from '../../utils/triggerMachineTransition'
  * to the bottom edge so the barista's upper body stays visible above it.
  */
 export default function SpeechBubble() {
-  const scene        = useSceneStore((s) => s.scene)
-  const setScene     = useSceneStore((s) => s.setScene)
+  // Subscribe to a derived boolean — not the raw scene string — so this
+  // component only re-renders on the LANDING ↔ non-LANDING edge, not on
+  // every scene change (MACHINE_TRANSITION → MACHINE etc.).
+  const isLanding    = useSceneStore((s) => s.scene === 'LANDING')
   const isSceneReady = useSceneStore((s) => s.isSceneReady)
   const containerRef = useRef(null)
   const hasEntered   = useRef(false)
@@ -34,13 +36,13 @@ export default function SpeechBubble() {
   const [shouldRender, setShouldRender] = useState(false)
 
   useEffect(() => {
-    if (scene === 'LANDING') {
+    if (isLanding) {
       setShouldRender(true)
     } else {
       const t = setTimeout(() => setShouldRender(false), 500)
       return () => clearTimeout(t)
     }
-  }, [scene])
+  }, [isLanding])
 
   // Detect mobile landscape via media query so it reacts to orientation changes.
   const [isLandscape, setIsLandscape] = useState(() =>
@@ -68,7 +70,7 @@ export default function SpeechBubble() {
   // Only animate in once the loading screen has fully faded and isSceneReady
   // is true — guarantees the 3D canvas is visible before the text appears.
   useEffect(() => {
-    if (scene === 'LANDING' && isSceneReady && containerRef.current && !hasEntered.current) {
+    if (isLanding && isSceneReady && containerRef.current && !hasEntered.current) {
       hasEntered.current = true
       gsap.fromTo(
         containerRef.current,
@@ -76,7 +78,7 @@ export default function SpeechBubble() {
         { opacity: 1, y: 0, duration: 0.8, delay: 0.4, ease: 'power3.out' },
       )
     }
-  }, [scene, isSceneReady])
+  }, [isLanding, isSceneReady])
 
   // Deferred unmount: DOM stays alive for 500 ms after scene leaves LANDING
   // so the teardown doesn't block the camera animation frame.
@@ -90,7 +92,7 @@ export default function SpeechBubble() {
       style={{
         // Disable pointer events once the scene has left LANDING so the
         // fading-out button can't be clicked again during the deferred window.
-        pointerEvents: scene === 'LANDING' ? 'auto' : 'none',
+        pointerEvents: isLanding ? 'auto' : 'none',
         bottom: isLandscape ? '2%' : isMobilePortrait ? '10%' : '18%',
       }}
     >
@@ -128,7 +130,7 @@ export default function SpeechBubble() {
 
         <button
           className="cta-button"
-          onClick={() => triggerMachineTransition(setScene)}
+          onClick={() => triggerMachineTransition()}
         >
           Yes, please! ✨
         </button>
