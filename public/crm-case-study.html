@@ -97,6 +97,16 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
+        .demo-aspect-box {
+            position: relative;
+            padding-top: 56.25%;
+        }
+        @media (max-width: 640px) {
+            .demo-aspect-box {
+                padding-top: 0;
+                height: 75vh;
+            }
+        }
     </style>
 </head>
 <body class="text-on-background bg-surface selection:bg-primary/30">
@@ -211,7 +221,7 @@
     Watch the full pipeline walkthrough with voiceover — press <span class="text-primary font-semibold">START DEMO</span> inside the player to begin.
 </p>
 </div>
-<div class="relative rounded-3xl overflow-hidden border-2 border-primary/20 luminous-shadow-primary" style="padding-top: 56.25%;">
+<div class="demo-aspect-box rounded-3xl overflow-hidden border-2 border-primary/20 luminous-shadow-primary">
 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary opacity-30"></div>
 <iframe
     src="/automate-pro-demo/index.html"
