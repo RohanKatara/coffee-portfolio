@@ -97,15 +97,62 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
-        .demo-aspect-box {
+        .demo-thumbnail {
             position: relative;
-            padding-top: 56.25%;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 1rem;
+            overflow: hidden;
+            cursor: pointer;
         }
-        @media (max-width: 640px) {
-            .demo-aspect-box {
-                padding-top: 0;
-                height: 75vh;
-            }
+        .demo-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.45);
+            transition: filter 0.3s;
+        }
+        .demo-thumbnail:hover img { filter: brightness(0.6); }
+        .demo-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+        .demo-play-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(221, 183, 255, 0.18);
+            border: 2px solid rgba(221, 183, 255, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+            backdrop-filter: blur(6px);
+        }
+        .demo-thumbnail:hover .demo-play-btn {
+            background: rgba(221, 183, 255, 0.32);
+            transform: scale(1.08);
+        }
+        .demo-play-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 14px 0 14px 26px;
+            border-color: transparent transparent transparent #ddb7ff;
+            margin-left: 5px;
+        }
+        .demo-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(221, 183, 255, 0.9);
         }
     </style>
 </head>
@@ -213,24 +260,34 @@
 </div>
 </section>
 <!-- 4. Demo Area -->
-<section class="py-24 px-8 max-w-7xl mx-auto">
+<section class="py-24 px-8 max-w-5xl mx-auto">
 <div class="text-center mb-10">
 <h2 class="text-3xl md:text-4xl font-bold text-on-surface mb-4">Live Interactive Demo</h2>
 <div class="h-1 w-20 bg-primary mx-auto rounded-full mb-4"></div>
 <p class="text-on-surface-variant max-w-xl mx-auto text-lg">
-    Watch the full pipeline walkthrough with voiceover — press <span class="text-primary font-semibold">START DEMO</span> inside the player to begin.
+    Watch the full pipeline walkthrough with voiceover. Press <span class="text-primary font-semibold">START DEMO</span> inside the player to begin.
 </p>
 </div>
-<div class="demo-aspect-box rounded-3xl overflow-hidden border-2 border-primary/20 luminous-shadow-primary">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary opacity-30"></div>
-<iframe
-    src="/automate-pro-demo/index.html"
-    title="Automate Pro: AI Lead Gatekeeper — Interactive Demo"
-    allow="autoplay"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:1.5rem;"
-></iframe>
+<div
+  class="demo-thumbnail border-2 border-primary/20 luminous-shadow-primary"
+  onclick="window.parent.postMessage('openDemoPlayer', '*')"
+  role="button"
+  tabindex="0"
+  aria-label="Open demo player"
+  onkeydown="if(event.key==='Enter'||event.key===' ')window.parent.postMessage('openDemoPlayer','*')"
+>
+  <img
+    src="https://lh3.googleusercontent.com/aida-public/AB6AXuADVHaWwUd22eXt1ILGfRr7yulfkwlwOVQr5gDHPQtfPkW6WobdIVbJclm58A0S0aFgwLW4ZgefKoGZCQIJmll5yW9-KylyjCALWNohItL-JIxlmCKK3MfB8Z4x3sngmV_7VXDtOfWhkPLr7ollvLp4SJyjxjlvaJuZ9s02x8SWa3BCTk43wLYuMOg7qVEeCnkxvF0nmazfzIEr3ccitfubhCiGIoBWvwKX2PDZMwOpsyquewOlsy0ftkMfW-E43vy6SBBOuluNzx8"
+    alt="Automate Pro demo preview"
+  />
+  <div class="demo-overlay">
+    <div class="demo-play-btn">
+      <div class="demo-play-icon"></div>
+    </div>
+    <span class="demo-label">See Demo</span>
+  </div>
 </div>
-<p class="text-center text-xs text-outline mt-4 tracking-wide uppercase">Click inside the demo, then press START DEMO — audio autoplay requires a user gesture</p>
+<p class="text-center text-xs text-outline mt-4 tracking-wide uppercase">Click to open the interactive walkthrough — audio included</p>
 </section>
 </main>
 <!-- Footer -->
