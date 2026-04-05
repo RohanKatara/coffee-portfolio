@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { getIsMobile } from '../../hooks/useBreakpoint'
 
 export default function CRMModal({ onClose }) {
   const [demoOpen, setDemoOpen] = useState(false)
@@ -88,7 +89,7 @@ export default function CRMModal({ onClose }) {
             background: '#000',
           }}
         >
-          {window.innerWidth < 768 ? (
+          {getIsMobile() ? (
             <video
               src="/automate-pro-demo/automate%20pro%20demo.mp4"
               controls
