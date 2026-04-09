@@ -1,5 +1,12 @@
 # ☕ Coffee Portfolio
 
+<p align="center">
+  <a href="https://coffee-portfolio-eosin.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo"></a>
+</p>
+
+<!-- TODO: replace the commented line below with an actual demo GIF or screenshot -->
+<!-- <p align="center"><img src="docs/demo.gif" alt="Coffee Portfolio demo" width="800"></p> -->
+
 > An immersive **3D coffee-themed portfolio site** built with React Three Fiber, Three.js, and GSAP — blending WebGL visuals with smooth scroll storytelling.
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
